@@ -1,0 +1,16 @@
+﻿@* @page "/sectionTitle"
+
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider /> *@
+
+<MudItem Style="display:flex; justify-content:flex-start; align-items:center;">
+    <MudIcon Icon="@($"{Icon}")" Size="Size.Large" Class="mb-3" />
+    <MudText Typo="Typo.h4" GutterBottom="true">@Title</MudText>
+</MudItem>
+
+@code {
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Title { get; set; }
+
+}

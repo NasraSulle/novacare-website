@@ -1,0 +1,46 @@
+﻿@page "/LabTestIndex"
+
+@using Microsoft.AspNetCore.Authorization
+
+@rendermode InteractiveServer
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@attribute [Authorize]
+<PageTitle>LabTests - NovaCare</PageTitle>
+
+<MudGrid Class="pa-3" Justify="Justify.FlexStart">
+    <SectionTitle Icon="@icon" Title="@title" />
+</MudGrid>
+<MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
+        <MudItem Class="pa-0" md="12">
+            <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                <MudTabPanel Text="All Lab Test" Style="text-transform: none;">
+                    <LabTests CurrentUser="currentUser" />
+                </MudTabPanel>
+                <MudTabPanel Text="New Lab Tests" Style="text-transform: none;">
+                    <LabTests CurrentUser="currentUser" FilterBy="New" />
+                </MudTabPanel>
+                <MudTabPanel Text="Updated Lab Tests" Style="text-transform: none;">
+                    <LabTests CurrentUser="currentUser" FilterBy="Updated" />
+                </MudTabPanel>
+            </MudTabs>
+        </MudItem>
+
+</MudGrid>
+
+@code {
+    bool IsNewLabTest;
+    StaffDto currentUser = new();
+    public string icon = Icons.Material.Filled.Biotech;
+    public string title = "LabTests Section";
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await userService.GetLoggedInUserAsync();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

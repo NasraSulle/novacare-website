@@ -1,0 +1,40 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using MudBlazor
+@using MudBlazor.Services
+@using MudBlazor.StaticInput
+@using NovaCare
+@using NovaCare.Components
+@using NovaCare.Components.Layout
+@using NovaCare.Interfaces
+@using NovaCare.Modals.StaffModals
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+
+@using NovaCare.Shared.DTOs.DoctorDTOs
+@using NovaCare.Shared.Enums
+@using NovaCare.Shared.DTOs.StaffDTOs
+@using NovaCare.Shared.DTOs.LabTestDTOs
+@using NovaCare.Shared.DTOs.PatientDTOs
+@using NovaCare.Shared.DTOs.MedicineDTOs
+@using NovaCare.Shared.DTOs.ReportDTOs
+@using NovaCare.Components.Pages.ReportPages
+
+@inject IStaffService staffService
+@inject IDoctorService doctorService
+@inject IUserService userService
+@inject IMedicineService medicineService
+@inject IPatientService patientService
+@inject ILabTestService labTestService
+@inject IPaymentService paymentService
+@inject IPdfExportService pdfExportService
+@inject IRoomService roomService
+@inject IDiseaseService diseaseService
+
+@inject NavigationManager NavigationManager
+

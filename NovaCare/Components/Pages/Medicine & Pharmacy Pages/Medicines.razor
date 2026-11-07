@@ -1,0 +1,219 @@
+﻿@using NovaCare.Shared.DTOs.MedicineDTOs
+@using NovaCare.Shared.DTOs.StaffDTOs
+@inject IDialogService Dialog
+
+<MudGrid>
+    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!isLoading && !FilteredMedicines!.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <NoDataNotice NoDataMessage="@messageMedicine" />
+        }
+        else if (FilteredMedicines != null)
+        {
+            <MudDataGrid Loading="@isSearchLoading" Hover="true" T="MedicineDto" Items="@FilteredMedicines" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+                         Bordered="false" Dense="true" RowClick="@((args) => PreviewMedicineProfile(args.Item))">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                    <MudSpacer />
+                    <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+
+                    <MudItem>
+                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                      Margin="Margin.Dense" Variant="Variant.Outlined"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+                    </MudItem>
+                    @if (CurrentUser.IsCreateNewMedicine && !isReport)
+                    {
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+                    }
+                    @if (isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
+                    }
+                </ToolBarContent>
+
+                <Columns>
+                    <PropertyColumn Property="x => x.MedicineName" Title="Medicine Name" />
+                    <PropertyColumn Property="x => x.MedicineQty" Title="Quantity" />
+                    @if (CurrentUser.IsCreateNewMedicine)
+                    {
+                        <PropertyColumn Property="x => x.BuyingPrice" Title="Buying Price" />
+                    }
+                    <PropertyColumn Property="x => x.SellingPrice" Title="Price" />
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudItem Style="text-align: center;">
+                                <MudChip Color="@(context.Item.MedicineStatusName == "InStock" ? Color.Success : Color.Error)" Size="Size.Small">
+                                    @(context.Item.MedicineStatusName)
+                                </MudChip>
+                            </MudItem>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="MedicineDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private bool _readOnly;
+
+
+
+    [Parameter] public List<MedicineDto> AllMedicines { get; set; } = new();
+    List<MedicineDto> FilteredMedicines = new();
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+    [Parameter] public bool isReport { get; set; }
+    [Parameter] public DateTime? fromDate { get; set; } = DateTime.Now.AddMonths(-3);
+    [Parameter] public DateTime? toDate { get; set; } = DateTime.Now;
+
+    MedicineDto? CurrentMedicine;
+
+    string messageMedicine = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+    string? pdfBase64;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(500);
+
+        if (!isReport)
+        {
+            AllMedicines = await medicineService.GetAllMedicinesAsync();
+
+            if (string.IsNullOrWhiteSpace(FilterBy))
+            {
+                FilteredMedicines = AllMedicines.Where(x => x.MedicineGenre.Trim().ToLower() == Genre.Trim().ToLower()).ToList(); ;
+                messageMedicine = $"{Genre} Medicines are not avalible!";
+                firstPart = "Medicine";
+            }
+            else
+            {
+
+                firstPart = FilterBy;
+                messageMedicine = $"{Genre} {firstPart}s are not avalible!";
+
+                if (FilterBy != null && Genre != null)
+                {
+                    FilteredMedicines = AllMedicines?.Where(x => x.MedicineType == FilterBy && x.MedicineGenre == Genre).ToList();
+                }
+                else
+                {
+                    FilteredMedicines = new();
+                }
+            }
+        }
+        else
+        {
+            firstPart = "Medicine";
+            FilteredMedicines = AllMedicines;
+        }
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task Back()
+    {
+        CurrentMedicine = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        await Task.Delay(500);
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredMedicines = AllMedicines?.Where(x => x.MedicineName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            messageMedicine = "Staffs are not avalible!";
+            firstPart = "Staff";
+        }
+        else
+        {
+            var prop = typeof(StaffDto).GetProperty(FilterBy);
+
+            firstPart = FilterBy.Substring(2);
+            messageMedicine = $"{firstPart}s are not avalible!";
+
+            if (prop != null)
+            {
+                FilteredMedicines = AllMedicines?.Where(x => (bool?)prop.GetValue(x, null) == true && x.MedicineName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else
+            {
+                FilteredMedicines = null;
+            }
+        }
+        isSearchLoading = false;
+    }
+
+    public async Task OpenRegisterModal()
+    {
+        var dialog = await Dialog.ShowAsync<NewMedicine>("Register New Medicine", _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task PreviewMedicineProfile(MedicineDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentMedicine" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditMedicine>("Medicine Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    public async Task GeneratePdf()
+    {
+        var reportDto = new ReportPreviewDto<MedicineDto>
+        {
+            ReportType = "Medicines",
+            FromDate = fromDate,
+            ToDate = toDate,
+            Data = FilteredMedicines
+        };
+
+        pdfBase64 = pdfExportService.GenerateStaffPreview<MedicineDto>(reportDto, CurrentUser);
+
+        var Parameters = new DialogParameters
+        {
+            {"pdfBase64" , pdfBase64}
+        };
+
+        await Dialog.ShowAsync<PdfPreview>($"Report Pdf", Parameters, _maxWidth);
+    }
+}

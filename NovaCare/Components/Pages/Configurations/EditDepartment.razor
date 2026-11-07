@@ -1,0 +1,117 @@
+﻿@using NovaCare.Shared.DTOs.DiseaseDTOs
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentStaffType" method="post" OnValidSubmit="SaveDiseaseAsync" FormName="editstafftype">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;">Enter Department Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudStaticTextField For="@(() => CurrentStaffType.StaffTypeName)" @bind-Value="CurrentStaffType.StaffTypeName" Margin="Margin.Dense"
+                                                        Label="Department name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Department name"
+                                                        UserAttributes="@(new() { { "autocomplete", "diseasename" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudStaticTextField For="@(() => CurrentStaffType.StaffTypeCode)" @bind-Value="CurrentStaffType.StaffTypeCode" Margin="Margin.Dense"
+                                                        Label="Department code" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Department code"
+                                                        UserAttributes="@(new() { { "autocomplete", "diseasename" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="display:flex; justify-content:end; align-items:center;">
+                    <MudItem Class="mt-3 me-3">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Medicine Updated Successfully!</MudAlert>
+                        }
+                    </MudItem>
+                    <MudItem Style="display:flex; justify-content:end; ">
+                        <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3 me-1">
+                            @if (isSaving)
+                            {
+                                <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                <MudText Class="ps-3"> Updating Disease...</MudText>
+                            }
+                            else
+                            {
+                                <MudText> Update Disease Details</MudText>
+                            }
+                        </MudStaticButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToDiseasesPage" Class="mt-3">Back</MudButton>
+                    </MudItem>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<StaffTypeDto>? StaffTypes;
+    List<DiseaseTypeDto> AllDiseaseTypes = new();
+    [Parameter, EditorRequired] public StaffTypeDto CurrentStaffType { get; set; } = new();
+
+    string saveMessage = string.Empty;
+    string? addedSuccessfully = "Added:";
+    string? notaddedSuccessfully = "Not Added:";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        StaffTypes = await staffService.GetStaffTypesAsync();
+    }
+
+    public async Task SaveDiseaseAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            var isSucess = await staffService.UpdateStaffDepartmentAsync(CurrentStaffType, CurrentStaffType.Id);
+
+            if (isSucess)
+            {
+                saveMessage = $"{CurrentStaffType.StaffTypeName} updated sucessfully";
+                Console.WriteLine(saveMessage);
+                addedSuccessfully = addedSuccessfully + $" {CurrentStaffType.StaffTypeName},";
+            }
+            else
+            {
+                saveMessage = $"Error: {CurrentStaffType.StaffTypeName} not updated sucessfully!";
+                Console.WriteLine(saveMessage);
+                notaddedSuccessfully = notaddedSuccessfully + $" {CurrentStaffType.StaffTypeName},";
+            }
+
+            isCreatedSuccessfully = true;
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public void ReturnToDiseasesPage()
+    {
+        MudDialog.Cancel();
+    }
+}

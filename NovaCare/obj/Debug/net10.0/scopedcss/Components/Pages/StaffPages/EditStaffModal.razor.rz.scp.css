@@ -1,0 +1,24 @@
+/* Sets the context for absolute child positioning and caps size to the image dimensions */
+.profile-image-container[b-pbh3bacv0j] {
+    position: relative;
+    display: inline-block;
+    width: 250px;
+    height: 250px;
+}
+
+/* Centers the button perfectly using CSS transforms and hides it initially */
+.camera-overlay-btn[b-pbh3bacv0j] {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Reveals the button when the mouse hovers over the parent container */
+.profile-image-container:hover .camera-overlay-btn[b-pbh3bacv0j] {
+    opacity: 1;
+    pointer-events: auto;
+}

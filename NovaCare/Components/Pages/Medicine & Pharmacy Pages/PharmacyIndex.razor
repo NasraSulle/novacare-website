@@ -1,0 +1,228 @@
+﻿@page "/MedicineIndex"
+
+@using Microsoft.AspNetCore.Authorization
+@using NovaCare.Components.Account.Pages
+@inject IDialogService Dialog
+
+@rendermode InteractiveServer
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@attribute [Authorize]
+<PageTitle>Medicines - NovaCare</PageTitle>
+
+<MudGrid Class="pa-3" Justify="Justify.FlexStart">
+    <SectionTitle Icon="@icon" Title="@title" />
+</MudGrid>
+<MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
+    @if (!IsNewMedicine)
+    {
+        <MudItem Class="pa-0" md="12">
+
+            <MudTabs Outlined="true" Position="Position.Start" Rounded="false" Border="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-1">
+                <MudTabPanel Style="text-transform: none;" Text="Painkillers" OnClick="@(() => { genre = "Painkillers"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Text="All Medicine" Style="text-transform: none;">
+                                <Medicines CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Tabs & Caps" Style="text-transform: none;">
+                                <Medicines CurrentUser="currentUser" FilterBy="Tablets" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Injections" Style="text-transform: none;">
+                                <Medicines CurrentUser="currentUser" FilterBy="Injection" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Syrup" Style="text-transform: none;">
+                                <Medicines CurrentUser="currentUser" FilterBy="Syrup" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Cream" Style="text-transform: none;">
+                                <Medicines CurrentUser="currentUser" FilterBy="Cream" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Drip" Style="text-transform: none;">
+                                <Medicines CurrentUser="currentUser" FilterBy="Drip" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+                <MudTabPanel Style="text-transform: none;" Text="Antimalarials" OnClick="@(() => { genre = "Antimalarials"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Style="text-transform: none;" Text="All Medicine">
+                                <Medicines CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Tabs & Caps">
+                                <Medicines CurrentUser="currentUser" FilterBy="Tablets" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Injections">
+                                <Medicines CurrentUser="currentUser" FilterBy="Injection" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Syrup">
+                                <Medicines CurrentUser="currentUser" FilterBy="Syrup" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Cream">
+                                <Medicines CurrentUser="currentUser" FilterBy="Cream" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Drip">
+                                <Medicines CurrentUser="currentUser" FilterBy="Drip" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+                <MudTabPanel Style="text-transform: none;" Text="Antibiotics" OnClick="@(() => { genre = "Antibiotics"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Style="text-transform: none;" Text="All Medicine">
+                                <Medicines CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Tabs & Caps">
+                                <Medicines CurrentUser="currentUser" FilterBy="Tablets" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Injections">
+                                <Medicines CurrentUser="currentUser" FilterBy="Injection" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Syrup">
+                                <Medicines CurrentUser="currentUser" FilterBy="Syrup" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Cream">
+                                <Medicines CurrentUser="currentUser" FilterBy="Cream" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Drip">
+                                <Medicines CurrentUser="currentUser" FilterBy="Drip" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+                <MudTabPanel Style="text-transform: none;" Text="Antifungals" OnClick="@(() => { genre = "Antifungals"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Style="text-transform: none;" Text="All Medicine">
+                                <Medicines CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Tabs & Caps">
+                                <Medicines CurrentUser="currentUser" FilterBy="Tablets" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Injections">
+                                <Medicines CurrentUser="currentUser" FilterBy="Injection" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Syrup">
+                                <Medicines CurrentUser="currentUser" FilterBy="Syrup" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Cream">
+                                <Medicines CurrentUser="currentUser" FilterBy="Cream" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Drip">
+                                <Medicines CurrentUser="currentUser" FilterBy="Drip" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+                <MudTabPanel Style="text-transform: none;" Text="Antivirals" OnClick="@(() => { genre = "Antivirals"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Style="text-transform: none;" Text="All Medicine">
+                                <Medicines CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Tabs & Caps">
+                                <Medicines CurrentUser="currentUser" FilterBy="Tablets" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Injections">
+                                <Medicines CurrentUser="currentUser" FilterBy="Injection" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Syrup">
+                                <Medicines CurrentUser="currentUser" FilterBy="Syrup" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Cream">
+                                <Medicines CurrentUser="currentUser" FilterBy="Cream" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Drip">
+                                <Medicines CurrentUser="currentUser" FilterBy="Drip" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+                <MudTabPanel Style="text-transform: none;" Text="Vaccines" OnClick="@(() => { genre = "Vaccines"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Style="text-transform: none;" Text="All Medicine">
+                                <Medicines CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Tabs & Caps">
+                                <Medicines CurrentUser="currentUser" FilterBy="Tablets" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Injections">
+                                <Medicines CurrentUser="currentUser" FilterBy="Injection" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Syrup">
+                                <Medicines CurrentUser="currentUser" FilterBy="Syrup" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Cream">
+                                <Medicines CurrentUser="currentUser" FilterBy="Cream" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Drip">
+                                <Medicines CurrentUser="currentUser" FilterBy="Drip" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+                <MudTabPanel Style="text-transform: none;" Text="Anthelmintics  " OnClick="@(() => { genre = "Anthelmintics"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Style="text-transform: none;" Text="All Medicine">
+                                <Medicines CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Tabs & Caps">
+                                <Medicines CurrentUser="currentUser" FilterBy="Tablets" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Injections">
+                                <Medicines CurrentUser="currentUser" FilterBy="Injection" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Syrup">
+                                <Medicines CurrentUser="currentUser" FilterBy="Syrup" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Cream">
+                                <Medicines CurrentUser="currentUser" FilterBy="Cream" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Drip">
+                                <Medicines CurrentUser="currentUser" FilterBy="Drip" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+            </MudTabs>
+        </MudItem>
+
+    }
+    else
+    {
+        <MudItem Class="pa-0" md="12">
+            <NewMedicine OnBack="ResetIsNewMedicine" />
+        </MudItem>
+    }
+</MudGrid>
+
+    @code {
+
+    StaffDto currentUser = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+
+    string genre = string.Empty;
+    bool IsNewMedicine;
+    public string icon = Icons.Material.Filled.LocalPharmacy;
+    public string title = "Medicines Section";
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await userService.GetLoggedInUserAsync();
+
+        genre = "Painkillers";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task ResetIsNewMedicine()
+    {
+        IsNewMedicine = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+}

@@ -1,0 +1,96 @@
+﻿@using NovaCare.Shared.DTOs.StaffDTOs
+@implements IDisposable
+
+@inject NavigationManager NavigationManager
+
+
+
+<MudNavMenu Bordered="true" Color="Color.Info" Class="mud-height-full" Style="display: flex; flex-direction:column; justify-content: space-between; background-color:rgba(63,81,181,0.9);">
+    <AuthorizeView>
+        <Authorized>
+            <MudItem>
+                <MudImage Src="Images/logo2.png" Height="100" />
+
+                <!-- text-decoration: none !important; added to the styles -->
+                <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Home</MudNavLink>
+
+                @if (CurrentUser?.IsGetStaffModules ?? false)
+                {
+                    <MudNavLink Href="StaffIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Staffs</MudNavLink>
+                }
+                @if (CurrentUser?.IsViewAllPatients ?? false)
+                {
+                    <MudNavLink Href="PatientIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssistWalker" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Patients</MudNavLink>
+                }
+                @if (CurrentUser?.IsViewAllLabTests ?? false)
+                {
+                    <MudNavLink Href="LabTestIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Biotech" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Laboratory</MudNavLink>
+                }
+                @if (CurrentUser?.IsViewAllMedicines ?? false)
+                {
+                    <MudNavLink Href="MedicineIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.LocalPharmacy" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Medics & Pharmacy</MudNavLink>
+                }
+                @if (CurrentUser?.AccessConfigurations ?? false)
+                {
+                    <MudNavLink Href="ConfigurationIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SettingsApplications" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Configurations</MudNavLink>
+                }
+                <MudNavLink Href="ReportsIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AutoStories" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Reports</MudNavLink>
+
+            </MudItem>
+            <MudItem>
+                <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix" Style="margin:0px !important; color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">
+                    <MudItem Style="display: flex; align-items: center;">
+                        <MudAvatar Size="Size.Small">
+                            @if (CurrentUser?.StaffPhoto == null)
+                            {
+                                <MudImage Src="Images/dp.png"></MudImage>
+                            }
+                            else
+                            {
+                                <MudImage ObjectFit="ObjectFit.Cover" Height="50" Width="50" Src="@( $"data:image/jpeg;base64,{Convert.ToBase64String(CurrentUser?.StaffPhoto)}" )" Alt="Profile Photo" Class="rounded-circle" />
+                            }
+                        </MudAvatar>
+                        <MudText Typo="Typo.body2" Class="ps-1">
+                            @($"{CurrentUser?.FisrtName} .{(string.IsNullOrEmpty(CurrentUser?.MiddleName) ? "" : $"{CurrentUser.MiddleName.ToUpper()[0]}")}. {CurrentUser?.LastName}".Trim())
+                        </MudText>
+                    </MudItem>
+                </MudNavLink>
+
+
+                <form action="Account/Logout" method="post">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                    <!-- Underline fix applied to the manual logout button as well -->
+                    <button type="submit" class="mud-nav-link mud-ripple" style="color: white !important; text-decoration: none !important;">
+                        <MudIcon Icon="@Icons.Material.Filled.Logout" Color="Color.Error" Class="mr-3"></MudIcon> Logout
+                    </button>
+                </form>
+            </MudItem>
+        </Authorized>
+    </AuthorizeView>
+</MudNavMenu>
+
+
+
+@code {
+    [Parameter] public StaffDto? CurrentUser { get; set; } = new();
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+

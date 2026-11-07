@@ -1,0 +1,15 @@
+﻿@* @page "/noData" *@
+
+    <MudPaper Class="pa-3" Style="background-color: #E0E0E0; text-align:center;">
+            <MudText>
+                 @NoDataMessage <br />
+
+                 @if(!NoDataMessage.Contains("batch", StringComparison.OrdinalIgnoreCase))
+                 {
+                     <MudText>Try refresh page.</MudText>
+                 }
+            </MudText>
+    </MudPaper>
+@code {
+    [Parameter] public string NoDataMessage { get; set; } = "NoDataNotice";
+}

@@ -1,0 +1,353 @@
+﻿@using NovaCare.Components.Pages.ReportPages
+@using NovaCare.Shared.DTOs.DiseaseDTOs
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentLabTest" method="post" OnValidSubmit="SaveLabTestAsync" FormName="newlabTest">
+            <MudGrid Spacing="5" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="12" Class="ps-6 pe-0 pt-0 mb-3">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Lab Test Details & Results</MudText>
+                           
+                             <MudGrid Class="pa-7" Spacing="1">
+                                <MudItem md="12">
+                                    <MudGrid>
+                                        <MudItem md="7">
+                                            <MudText Typo="Typo.h6">@CurrentLabTest.PatientFullName</MudText>
+                                            <MudText Typo="Typo.body2">@($"Age/ Sex :{CurrentPatient.Age} YRS/{CurrentPatient.Gender.ToString().Substring(0,1).ToUpper()}")</MudText>
+                                            <MudText Typo="Typo.body2">@($"Reg no. :{CurrentPatient.PatientCode}")</MudText>
+                                        </MudItem>
+                                        <MudItem md="3" Class="border-1 border-end-0 border-top-0 border-bottom-0">
+                                            <MudItem Class="">
+                                                <MudText Typo="Typo.body2"></MudText>
+                                                <MudText Typo="Typo.body2"></MudText>
+                                                <MudText Typo="Typo.body2">@($"Registered on :{CurrentLabTest.CreatedDate}")</MudText>
+                                                <MudText Typo="Typo.body2">@($"Reg no. :{CurrentLabTest.Id}")</MudText>
+                                            </MudItem>
+                                        </MudItem>
+                                        <MudItem md="2" Class="text-center align-content-center ps-0 pt-0">
+                                            <MudImage Style="background-color:rgba(63,81,181,0.05);" Src="Images/logo2.png" Height="70" />
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                                <MudItem md="12" Class="text-center border-1 border-end-0 border-start-0 pa-1">
+                                    <MudText Typo="Typo.h6">@CurrentLabTest.DiseaseName</MudText>
+                                    <MudText Typo="Typo.h6">@CurrentLabTest.DiseaseTypeName</MudText>
+                                </MudItem>
+                                <MudItem md="7" sm="12">
+                                    <MudSimpleTable Hover="true" Dense="true" FixedHeader="true" Style="height:450px;">
+                                        <thead class="sticky-top bg-white" tabindex="1">
+                                            <tr class="bg-white">
+                                                @foreach (var h in headings)
+                                                {
+                                                    <th style="background-color: rgba(63,81,181,0.05);">@h</th>
+                                                }
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var row in LabTestCompositionBatch)
+                                            {
+                                                <tr>
+                                                    <td>@row.TestComposiiton</td> <td>@row.Value</td> <td>@row.Unit</td>
+                                                    @if (CurrentUser.IsUpdateOrEditLabTest)
+                                                    {
+                                                        <td>
+                                                            <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveLabTestCompFromBatch(row))" />
+                                                        </td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td></td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        @if (CurrentUser.IsUpdateOrEditLabTest)
+                                        {
+                                            <tfoot class="sticky-bottom bg-white" tabindex="1">
+                                                <tr style="background-color: rgba(63,81,181,0.05);">
+                                                    <td>
+                                                        <MudTextField @bind-Value="AdHocComposition.TestComposiiton" Margin="Margin.Dense" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Test" />
+                                                    </td>
+                                                    <td>
+                                                        <MudTextField @bind-Value="AdHocComposition.Value" Margin="Margin.Dense" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Value" />
+                                                    </td>
+                                                    <td>
+                                                        <MudTextField @bind-Value="AdHocComposition.Unit" Margin="Margin.Dense" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Unit" />
+                                                    </td>
+                                                    <td>
+                                                        <MudIconButton Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Outlined.Add"
+                                                                       Disabled="@(string.IsNullOrWhiteSpace(AdHocComposition.TestComposiiton) || string.IsNullOrWhiteSpace(AdHocComposition.Value) || string.IsNullOrWhiteSpace(AdHocComposition.Unit))"
+                                                                       OnClick="@(() => AddLabTestCompToBatch(AdHocComposition))" />
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        }
+                                    </MudSimpleTable>
+                                </MudItem>
+                                <MudItem md="5" sm="12" Class="ps-3">
+                                    <MudItem md="12">
+                                        <MudGrid Spacing="1">
+                                            <MudItem md="@(CurrentUser.IsUpdateOrEditLabTest ? 6 : 12)" sm="12">
+                                                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Preview" Style="text-transform:none !important; width:100%;" Color="@(CurrentUser.IsUpdateOrEditLabTest ? Color.Info : Color.Primary)" OnClick="ViewAttachment" Class="">View Result Attachment</MudButton>
+                                            </MudItem>
+                                            @if (CurrentUser.IsUpdateOrEditLabTest)
+                                            {
+                                                <MudItem md="6" sm="12">
+                                                    @* <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Upload" Style="text-transform:none !important; width:100%;" Color="Color.Primary" OnClick="UploadResultAttachment" Class="">Upload Result Attachment</MudButton> *@
+                                                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadResultAttachment" Context="AttResContext" Class="p-0">
+                                                        <CustomContent >
+                                                            <MudFab Color="Color.Primary"
+                                                                    StartIcon="@Icons.Material.Filled.Upload" Size="Size.Small"
+                                                                    OnClick="@AttResContext.OpenFilePickerAsync"
+                                                                    Class="rounded-1 p-0 mt-0" Style="text-transform:none !important;"
+                                                                    Label="Upload Result Attachment" />
+                                                        </CustomContent>
+                                                        <SelectedTemplate />
+                                                    </MudFileUpload>
+                                                </MudItem>
+                                            }
+                                        </MudGrid>
+                                    </MudItem>
+                                    <MudItem md="12">
+                                        <MudTextField T="string"
+                                                      @bind-Value="CurrentLabTest.TestResult"
+                                                      Label="Test Result Conclusion"
+                                                      ReadOnly="!CurrentUser.IsUpdateOrEditLabTest"
+                                                      Variant="Variant.Outlined"
+                                                      Lines="17"
+                                                      MaxLines="17"
+                                                      Sizing="InputSizing.Auto"
+                                                      Placeholder="Type to see it grow..." />
+                                    </MudItem>
+                                    <MudItem md="12">
+                                        <MudItem Class="border-1 border-end-0 border-top-0 border-bottom-0 ps-3">
+                                            <MudText Typo="Typo.body2">@($"Updated By :{CurrentLabTest.UpdaterLabTechnician}")</MudText>
+                                            <MudText Typo="Typo.body2">@($"Title. :{updaterTitle}")</MudText>
+                                        </MudItem>
+                                    </MudItem>
+                                </MudItem>
+                                @if (!string.IsNullOrWhiteSpace(pdfBase64))
+                                {
+                                    <MudItem md="12">
+                                        <PdfPreview PdfBase64="@pdfBase64" />
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+
+                </MudGrid>
+
+                <MudItem md="12" Style="display:flex; justify-content:end; align-items:center;">
+                    <MudItem Class="mt-3 me-3">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">LabTest Updated Successfully!</MudAlert>
+                        }
+                    </MudItem>
+
+                    <MudItem Style="display:flex; justify-content:end; ">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PictureAsPdf" OnClick="ReturnToLabTestsPage" Class="mt-3 me-1">Generate Pdf</MudButton>
+                        @if (CurrentUser.IsUpdateOrEditLabTest)
+                        {
+                            <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3">
+                                @if (isSaving)
+                                {
+                                    <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                    <MudText Class="ps-3"> Updating LabTest...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText> Update Lab Test</MudText>
+                                }
+                            </MudStaticButton>
+                        }
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToLabTestsPage" Class="mt-3 ms-1">Back</MudButton>
+                    </MudItem>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+
+    string[] headings = { "TEST", "VALUE", "UNIT", "" };
+
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<DiseaseDto> AllDiseases = new();
+    List<PatientDto> AllPatients = new();
+    LabTestResultCompositionDto AdHocComposition = new();
+    List<LabTestResultCompositionDto> LabTestCompositionBatch = new();
+    [Parameter, EditorRequired] public int TestId { get; set; }
+    LabTestDto CurrentLabTest { get; set; } = new();
+    PatientDto CurrentPatient { get; set; } = new();
+    StaffDto updater { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+
+    string updaterTitle = string.Empty;
+    string saveMessage = string.Empty;
+    string? pdfBase64;
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllPatients = await patientService.GetAllPatientsAsync();
+        AllDiseases = await diseaseService.GetAllDiseasesAsync();
+        CurrentPatient = await patientService.GetPatientByIdAsync(CurrentLabTest.PatientId);
+        CurrentLabTest = await labTestService.GetLabTestByIdAsync(TestId);
+        LabTestCompositionBatch = CurrentLabTest.LabTestResultCompositions ?? new();
+        updater = await staffService.GetStaffById(CurrentLabTest.UpdaterId);
+        updaterTitle = $"{updater.AdministrativeTitleName} / {updater.ClinicalTitleName}";
+    }
+
+    public async Task AddLabTestCompToBatch(LabTestResultCompositionDto labTestCompDto)
+    {
+        var newLabTest = new LabTestResultCompositionDto
+        {
+            TestComposiiton = labTestCompDto.TestComposiiton,
+            Value = labTestCompDto.Value,
+            Unit = labTestCompDto.Unit,
+            LabTestId = CurrentLabTest.Id
+        };
+
+        if (newLabTest != null)
+            LabTestCompositionBatch!.Add(newLabTest);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task RemoveLabTestCompFromBatch(LabTestResultCompositionDto labTestCompDto)
+    {
+        if (LabTestCompositionBatch != null)
+            LabTestCompositionBatch.Remove(labTestCompDto);
+    }
+
+    public async Task AddCompositions()
+    {
+        foreach (var labTestComp in LabTestCompositionBatch)
+        {
+            var isSucess = await labTestService.AddLabTestResultCompositionAsync(labTestComp);
+
+            if (isSucess)
+            {
+                saveMessage = $"Results updated sucessfully";
+                Console.WriteLine(saveMessage);
+            }
+            else
+            {
+                saveMessage = $"Error: Composition {labTestComp.TestComposiiton} not added!";
+                Console.WriteLine(saveMessage);
+            }
+        }
+    }
+
+    public async Task SaveLabTestAsync()
+    {
+        isSaving = true;
+
+        if (string.IsNullOrWhiteSpace(CurrentLabTest.DiseaseName) || string.IsNullOrWhiteSpace(CurrentLabTest.PatientFullName))
+        {
+            isSaving = false;
+            return;
+        }
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            await AddCompositions();
+
+            CurrentLabTest.LabTestResultCompositions = LabTestCompositionBatch;
+            var isSucess = await labTestService.UpdateLabTestAsync(CurrentLabTest, CurrentLabTest.Id);
+
+            if (isSucess)
+            {
+                isCreatedSuccessfully = true;
+
+                saveMessage = $"Results updated sucessfully";
+                Console.WriteLine(saveMessage);
+            }
+            else
+            {
+                saveMessage = $"Error: Results not updated!";
+                Console.WriteLine(saveMessage);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public async Task ResetPage()
+    {
+        isCreatedSuccessfully = false;
+        CurrentLabTest = new();
+    }
+
+    public void ReturnToLabTestsPage()
+    {
+        isCreatedSuccessfully = false;
+        MudDialog.Cancel();
+    }
+
+    public async Task UploadResultAttachment(IBrowserFile file)
+    {
+        if (file != null)
+        {
+            long maxFileSize = 1024 * 1024 * 3;
+
+            // using var memoryStream = new MemoryStream();
+            // await file.OpenReadStream(maxFileSize).CopyToAsync(memoryStream);
+            // byte[] fileBytes = memoryStream.ToArray();
+            // var base64String = Convert.ToBase64String(fileBytes);
+            // CurrentLabTest.ResultAttachment = fileBytes;
+            // pdfBase64 = $"data:{file.ContentType};base64,{base64String}";
+
+            //=====================================
+            using var stream = file.OpenReadStream(maxFileSize);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            byte[] fileBytes = memoryStream.ToArray();
+            CurrentLabTest.ResultAttachment = fileBytes;
+            pdfBase64 = Convert.ToBase64String(fileBytes);
+
+            //pdfBase64 = $"data:application/pdf;base64,{Convert.ToBase64String(fileBytes)}";
+
+            StateHasChanged();
+        }
+    }
+
+    public async Task ViewAttachment()
+    {
+        if (CurrentLabTest.ResultAttachment != null)
+            pdfBase64 = Convert.ToBase64String(CurrentLabTest.ResultAttachment);
+            //await InvokeAsync(StateHasChanged);
+
+        var Parameters = new DialogParameters
+        {
+            {"pdfBase64" , pdfBase64}
+        };
+
+        await DialogService.ShowAsync<PdfPreview>("Result Attachment", Parameters, _maxWidth);
+    }
+
+    public async Task GenerateResultPdf()
+    {
+        //pdfBase64 = pdfExportService.GenerateStaffPreview(allStaffs, currentUser);
+    }
+}

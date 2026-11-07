@@ -1,0 +1,60 @@
+﻿@using NovaCare.Components.Account.Pages
+@using NovaCare.Shared.DTOs.StaffDTOs
+@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="darkMode" />
+
+<AuthorizeView>
+    <Authorized>
+        <MudLayout>
+            <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Never" ariant="@DrawerVariant.Responsive" Elevation="2">
+                <NavMenu CurrentUser="currentUser" />
+            </MudDrawer>
+
+            <MudAppBar Elevation="1" Color="@(darkMode ? Color.Default : Color.Transparent)">
+                <MudStaticNavDrawerToggle DrawerId="nav-drawer" @bind-Open="_drawerOpen" Icon="@Icons.Material.Filled.Menu" Color="Color.Default" Edge="Edge.Start" />
+                <MudText Typo="Typo.h5" Class="ml-3">NovaCare</MudText>
+                <MudSpacer />
+                @* <MudIconButton Icon="@(darkMode ? Icons.Material.Filled.WbSunny : Icons.Material.Filled.DarkMode)" OnClick="ChangeTheme" /> *@
+                @* <Themer /> *@
+            </MudAppBar>
+
+            <MudMainContent Class="pt-16" Style="background-color:rgba(63,81,181,0.02); min-height: 100vh;">
+            @* <MudMainContent Class="pt-16"> *@
+                @Body
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+    <NotAuthorized>
+        <MudMainContent Class="pt-6">
+            @Body
+        </MudMainContent>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    StaffDto? currentUser;
+
+    private bool _drawerOpen = true;
+    bool darkMode = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await userService.GetLoggedInUserAsync();
+    }
+
+    private void ChangeTheme()
+    {
+        darkMode = !darkMode;
+        StateHasChanged();
+    }
+}
+
+

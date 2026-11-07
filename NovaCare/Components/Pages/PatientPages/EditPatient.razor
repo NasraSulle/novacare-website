@@ -1,0 +1,452 @@
+﻿@page "/NewPatient"
+
+@rendermode InteractiveServer
+
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+@* <MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider /> *@
+
+@using NovaCare.Shared.DTOs.PatientDTOs
+@using NovaCare.Shared.DTOs.PaymentDTOs
+
+<PageTitle>New Patient</PageTitle>
+
+
+<MudDialog>
+    <DialogContent>
+        <MudGrid Class="" Justify="Justify.SpaceBetween">
+            <MudItem>
+                <SectionTitle Icon="@icon" Title="@title" />
+            </MudItem>
+            <MudItem Class="pe-3">
+                <MudText Typo="Typo.h6" Class="text-center pa-1" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">ID : @(string.IsNullOrWhiteSpace(CurrentPatient.PatientCode) ? "######" : $"{CurrentPatient.PatientCode}")</MudText>
+            </MudItem>
+        </MudGrid>
+        <MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
+            <MudItem Class="pa-0" md="12">
+                <EditForm Model="CurrentPatient" method="post" OnValidSubmit="RegisterPatient" FormName="newpatient">
+                    <MudGrid Spacing="3" Class="pa-3" Justify="Justify.Center">
+                        <MudStepper Class="w-100" NonLinear ShowResetButton OnPreviewInteraction="OnPreviewInteraction">
+                            <MudStep Title="Step 1" SecondaryText="Register the patient" HasError="@(string.IsNullOrWhiteSpace(CurrentPatient.PatientCode))">
+                                <MudGrid>
+                                    <MudItem md="3">
+                                        <MudCheckBox @bind-Value="_step1Complete" ReadOnly="true" Dense="true" Color="Color.Success">Registration Completed</MudCheckBox>
+                                    </MudItem>
+                                    <MudItem md="9">
+                                        @if (isCreatedSuccessfully)
+                                        {
+                                            <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">@saveMessage</MudAlert>
+                                        }
+                                    </MudItem>
+                                </MudGrid>
+                                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Personal Information</MudText>
+                                            <MudGrid Class="pa-3">
+                                                <MudItem md="4">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.FisrtName)" @bind-Value="CurrentPatient.FisrtName" Margin="Margin.Dense"
+                                                                        Label="Fisrtname" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Fisrtname"
+                                                                        UserAttributes="@(new() { { "autocomplete", "fisrtName" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                                <MudItem md="4">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.MiddleName)" @bind-Value="CurrentPatient.MiddleName" Margin="Margin.Dense"
+                                                                        Label="Middlename" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Middlename"
+                                                                        UserAttributes="@(new() { { "autocomplete", "middleName" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                                <MudItem md="4">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.LastName)" @bind-Value="CurrentPatient.LastName" Margin="Margin.Dense"
+                                                                        Label="Lastname" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Lastname"
+                                                                        UserAttributes="@(new() { { "autocomplete", "lastname" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                                <MudItem md="2">
+                                                    <MudNumericField @bind-Value="CurrentPatient.Age" Margin="Margin.Dense"
+                                                                     Label="Age" Variant="Variant.Outlined" Placeholder="Age" />
+                                                </MudItem>
+                                                <MudItem md="2">
+                                                    <MudSelect T="Gender"
+                                                               For="@(() => CurrentPatient.Gender)"
+                                                               @bind-Value="CurrentPatient.Gender"
+                                                               Label="Gender" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                        @foreach (Gender item in Enum.GetValues(typeof(Gender)))
+                                                        {
+                                                            <MudSelectItem T="Gender" Value="@item">@item.ToString()</MudSelectItem>
+                                                        }
+                                                    </MudSelect>
+                                                </MudItem>
+                                                <MudItem md="8">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.HomeAddress)" @bind-Value="CurrentPatient.HomeAddress" Margin="Margin.Dense"
+                                                                        Label="Home address" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Home address"
+                                                                        UserAttributes="@(new() { { "autocomplete", "employeeid" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                                <MudItem md="2">
+                                                    <MudSelect For="@(() => CurrentPatient.PatientTypeId)"
+                                                               @bind-Value="CurrentPatient.PatientTypeId"
+                                                               Label="Patient Type" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient Type"
+                                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                        <MudSelectItem Value="0" Disabled>Patient Type</MudSelectItem>
+
+                                                        @foreach (var item in PatientTypes)
+                                                        {
+                                                            <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
+                                                        }
+                                                    </MudSelect>
+                                                </MudItem>
+                                                <MudItem md="2">
+                                                    <MudSelect For="@(() => CurrentPatient.PatientStatusId)"
+                                                               @bind-Value="CurrentPatient.PatientStatusId"
+                                                               Label="Patient State" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient State"
+                                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                        <MudSelectItem Value="0" Disabled>Patient State</MudSelectItem>
+
+                                                        @foreach (var item in PatientStatus)
+                                                        {
+                                                            <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
+                                                        }
+                                                    </MudSelect>
+                                                </MudItem>
+                                                <MudItem md="2">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.PhoneNumber)" @bind-Value="CurrentPatient.PhoneNumber" Margin="Margin.Dense"
+                                                                        Label="Phonenumber" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Phonenumber"
+                                                                        UserAttributes="@(new() { { "autocomplete", "Phonenumber" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                                <MudItem md="6">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.EmailAddress)" @bind-Value="CurrentPatient.EmailAddress" Margin="Margin.Dense"
+                                                                        Label="Email address" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Email address"
+                                                                        UserAttributes="@(new() { { "autocomplete", "Emailaddress" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudItem>
+                                    </MudItem>
+                                    <MudItem md="12" Class="ps-6 pe-0 pt-0 mt-3">
+                                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Next of Kin</MudText>
+                                            <MudGrid Class="pa-3">
+                                                <MudItem md="6">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.KinFullName)" @bind-Value="CurrentPatient.KinFullName" Margin="Margin.Dense"
+                                                                        Label="Kin Fullname" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Kin Fullname"
+                                                                        UserAttributes="@(new() { { "autocomplete", "kinfullname" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                                <MudItem md="2">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.KinPhoneNumber)" @bind-Value="CurrentPatient.KinPhoneNumber" Margin="Margin.Dense"
+                                                                        Label="Kin Phonenumber" Variant="Variant.Outlined" InputType="InputType.Number" Placeholder="Kin Phonenumber"
+                                                                        UserAttributes="@(new() { { "autocomplete", "kinphonenumber" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                                <MudItem md="4">
+                                                    <MudStaticTextField For="@(() => CurrentPatient.KinHomeAddress)" @bind-Value="CurrentPatient.KinHomeAddress" Margin="Margin.Dense"
+                                                                        Label="Kin Home address" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Kin Home address"
+                                                                        UserAttributes="@(new() { { "autocomplete", "kinhomeaddress" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudItem>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudStep>
+                            <MudStep Title="Step 2" SecondaryText="Register new visit" HasError="@(CurrentVisit.Id == 0)">
+                                <MudGrid>
+                                    <MudItem md="3">
+                                        <MudCheckBox @bind-Value="_step2TextInput" ReadOnly="true" Dense="true" Color="Color.Success">Visit Added</MudCheckBox>
+                                    </MudItem>
+                                    <MudItem md="9">
+                                        @if (isCreatedSuccessfully)
+                                        {
+                                            <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">@saveMessage</MudAlert>
+                                        }
+                                    </MudItem>
+                                </MudGrid>
+                                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                                    <MudItem md="12" Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0 mb-3">
+                                        <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Visit Information</MudText>
+                                        <MudGrid Class="pa-3">
+                                            <MudItem md="6">
+                                                <MudSelect For="@(() => CurrentVisit.Id)"
+                                                           @bind-Value="CurrentVisit.Id"
+                                                           Label="Visit Type" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Select visit type"
+                                                           UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                    <MudSelectItem Value="0" Disabled>Select visit type</MudSelectItem>
+
+                                                    @foreach (var item in allVisitTypes)
+                                                    {
+                                                        <MudSelectItem Value="@item.Id">@item.TypeNme</MudSelectItem>
+                                                    }
+                                                </MudSelect>
+                                            </MudItem>
+                                            <MudItem md="6">
+                                                <MudSelect For="@(() => CurrentPaymentMode.Id)"
+                                                           @bind-Value="CurrentPaymentMode.Id"
+                                                           @bind-Value:after="OnPaymentModeChange"
+                                                           Immediate="true"
+                                                           Label="Patient Payment Option" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                           UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                    <MudSelectItem Value="0" Disabled>Payment Option</MudSelectItem>
+
+                                                    @foreach (var item in PaymentModes)
+                                                    {
+                                                        <MudSelectItem Value="@item.Id">@item.PaymentModeName</MudSelectItem>
+                                                    }
+                                                </MudSelect>
+                                            </MudItem>
+                                            @if (CurrentPaymentMode.PaymentModeName.ToLower() == "insurance")
+                                            {
+                                                <MudItem md="6">
+                                                    <MudSelect For="@(() => CurrentInsuaranceCompany.Id)"
+                                                               @bind-Value="CurrentInsuaranceCompany.Id"
+                                                               Label="Insuarance Company" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                        <MudSelectItem Value="0" Disabled>Insuarance Company</MudSelectItem>
+
+                                                        @foreach (var item in InsuaranceCompanies)
+                                                        {
+                                                            <MudSelectItem Value="@item.Id">@item.InsuaranceName</MudSelectItem>
+                                                        }
+                                                    </MudSelect>
+                                                </MudItem>
+                                                <MudItem md="6">
+                                                    <MudStaticTextField For="@(() => CurrentInsuaranceCompany.InsuranceNumber)" @bind-Value="CurrentInsuaranceCompany.InsuranceNumber" Margin="Margin.Dense"
+                                                                        Label="Insurance Number" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Insurance Number"
+                                                                        UserAttributes="@(new() { { "autocomplete", "fisrtName" }, { "aria-required", "true" } } )" />
+                                                </MudItem>
+                                            }
+                                        </MudGrid>
+                                    </MudItem>
+                                    <MudItem md="12" Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                                        <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Preliminary Tests</MudText>
+                                        <MudGrid Class="pa-3">
+                                            <MudItem md="4">
+                                                <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryPressure)" @bind-Value="CurrentPreliminaryTest.PreliminaryPressure" Margin="Margin.Dense"
+                                                                 Label="Pressure" Variant="Variant.Outlined" Placeholder="Pressure"
+                                                                 UserAttributes="@(new() { { "autocomplete", "preliminarypressure" }, { "aria-required", "true" } } )" />
+                                            </MudItem>
+                                            <MudItem md="4">
+                                                <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryWeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryWeight" Margin="Margin.Dense"
+                                                                 Label="Weight" Variant="Variant.Outlined" Placeholder="Weight"
+                                                                 UserAttributes="@(new() { { "autocomplete", "preliminaryweight" }, { "aria-required", "true" } } )" />
+                                            </MudItem>
+                                            <MudItem md="4">
+                                                <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryHeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryHeight" Margin="Margin.Dense"
+                                                                 Label="Height" Variant="Variant.Outlined" Placeholder="Height"
+                                                                 UserAttributes="@(new() { { "autocomplete", "preliminaryheight" }, { "aria-required", "true" } } )" />
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudStep>
+                            <MudStep Title="Step 3">This step can only be visited if the other steps are completed.</MudStep>
+                        </MudStepper>
+
+                        <MudItem md="12" Style="text-align:end">
+
+                            <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit"
+                                             Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentPatient.PatientStatusId == 0 || CurrentPatient.PatientTypeId == 0)">Save  Patient Details</MudStaticButton>
+                            <MudButton Disabled="string.IsNullOrWhiteSpace(CurrentPatient.PatientCode)" Variant="Variant.Filled" Color="Color.Primary" OnClick="ResetPage" Class="">Reset Page</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToPatientsPage" Class="">Back</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </EditForm>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<PatientTypeDto> PatientTypes = new();
+    List<PatientStatusDto> PatientStatus = new();
+    List<PaymentModeDto> PaymentModes = new();
+    List<InsuaranceDto> InsuaranceCompanies = new();
+    List<VisitTypeDto> allVisitTypes = new();
+
+    PaymentModeDto CurrentPaymentMode = new();
+    PatientDto CurrentPatient = new();
+    VisitDto CurrentVisit = new();
+    PreliminaryTestDto CurrentPreliminaryTest = new();
+    ConsultationDto CurrentConsultation = new();
+    InsuaranceDto CurrentInsuaranceCompany = new();
+
+    string saveMessage = string.Empty;
+    public string icon = Icons.Material.Filled.AssistWalker;
+    public string title = "New Patient Form";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+    private bool? _step1Complete;
+    private bool? _step2TextInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        PatientStatus = await patientService.GetAllPatientTypesAsync();
+        PatientTypes = await patientService.GetAllPatientStatusesAsync();
+        PaymentModes = await paymentService.GetAllPaymentModesAsync();
+        InsuaranceCompanies = await paymentService.GetAllInsuranceCompaniesAsync();
+        allVisitTypes = await patientService.GetAllVisitTypesAsync();
+    }
+
+    public async Task OnPaymentModeChange()
+    {
+        CurrentPaymentMode.PaymentModeName = PaymentModes.Where(x => x.Id == CurrentPaymentMode.Id).Select(s => s.PaymentModeName).FirstOrDefault() ?? string.Empty;
+    }
+
+    public async Task RegisterPatient()
+    {
+        isCreatedSuccessfully = false;
+
+        isSaving = true;
+
+        if (string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentPatient.PatientStatusId == 0 || CurrentPatient.PatientTypeId == 0)
+        {
+            saveMessage = "Please fill patient details";
+            isSaving = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(CurrentPatient.PatientCode))
+        {
+            try
+            {
+                saveMessage = string.Empty;
+                CurrentPatient.RegisteredDate = DateTime.Now;
+                var patientCode = await patientService.AddPatientAsync(CurrentPatient);
+
+                if (!string.IsNullOrWhiteSpace(patientCode))
+                {
+                    var code = Convert.ToInt32(patientCode.Substring(3));
+                    var savedpatient = await patientService.GetPatientByCodeAsync(patientCode);
+
+                    await patientService.UpdatePatientCodeAsync(savedpatient.Id, code);
+                    saveMessage = $"{CurrentPatient.FisrtName} registered sucessfully";
+                    Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Success }
+                    });
+                    Console.WriteLine(saveMessage);
+                    //isCreatedSuccessfully = true;
+                    CurrentPatient.PatientCode = patientCode;
+                    _step1Complete = true;
+                    StateHasChanged();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                saveMessage = "Save failed: " + ex.Message;
+            }
+            finally
+            {
+                isSaving = false;
+            }
+        }
+        else
+        {
+            try
+            {
+                saveMessage = string.Empty;
+                var savedpatient = await patientService.GetPatientByCodeAsync(CurrentPatient.PatientCode);
+                var success = await patientService.UpdatePatientAsync(CurrentPatient, savedpatient.Id);
+                if (success)
+                {
+                    saveMessage = $"{CurrentPatient.FisrtName} updated sucessfully";
+                    Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Success }
+                    });
+                    Console.WriteLine(saveMessage);
+                    //isCreatedSuccessfully = true;
+                    var visitAddResponse = patientService.AddVisitAsync(CurrentVisit);
+                    var premTestAddResponse = patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
+                    var visitUpdateResponse = patientService.UpdateVisitAsync(CurrentVisit, visitAddResponse.Id);
+
+                    _step2TextInput = true;
+                    StateHasChanged();
+                }
+
+               
+            }
+            catch (Exception ex)
+            {
+                saveMessage = "Save failed: " + ex.Message;
+            }
+            finally
+            {
+                isSaving = false;
+            }
+        }
+
+    }
+
+    public async Task ResetPage()
+    {
+        isCreatedSuccessfully = false;
+        CurrentPatient = new();
+    }
+
+    public void ReturnToPatientsPage()
+    {
+        // await OnBack.InvokeAsync(false);
+        //NavigationManager.NavigateTo("/PatientIndex", true);
+        MudDialog.Cancel();
+    }
+
+    private async Task OnPreviewInteraction(StepperInteractionEventArgs arg)
+    {
+        if (arg.Action == StepAction.Complete)
+        {
+            // occurrs when clicking next
+            await ControlStepCompletion(arg);
+        }
+        else if (arg.Action == StepAction.Activate)
+        {
+            // occurrs when clicking a step header with the mouse
+            await ControlStepNavigation(arg);
+        }
+    }
+
+    private async Task ControlStepCompletion(StepperInteractionEventArgs arg)
+    {
+        switch (arg.StepIndex)
+        {
+            case 0:
+                if (_step1Complete != true)
+                {
+                    await DialogService.ShowMessageBoxAsync("Error", "You have not completed patient registration in step 1!");
+                    arg.Cancel = true;
+                }
+                break;
+            case 1:
+                if (_step2TextInput != true)
+                {
+                    await DialogService.ShowMessageBoxAsync("Error", "You have not added visit in step 2");
+                    arg.Cancel = true;
+                }
+                break;
+        }
+    }
+
+    private async Task ControlStepNavigation(StepperInteractionEventArgs arg)
+    {
+        switch (arg.StepIndex)
+        {
+            case 1:
+                if (_step1Complete != true)
+                {
+                    await DialogService.ShowMessageBoxAsync("Error", "Finish patient registration on step 1 first");
+                    arg.Cancel = true;
+                }
+                break;
+            case 2:
+                if (_step1Complete != true || _step2TextInput != true)
+                {
+                    await DialogService.ShowMessageBoxAsync("Error", "Finish step 1 and 2 first");
+                    arg.Cancel = true;
+                }
+                break;
+        }
+    }
+}

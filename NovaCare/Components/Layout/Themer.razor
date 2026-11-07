@@ -1,0 +1,17 @@
+﻿@rendermode InteractiveServer
+@* <MudPopoverProvider /> *@
+@* <MudDialogProvider />
+<MudSnackbarProvider /> *@
+
+<MudIconButton Icon="@(DarkMode ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.WbSunny)" OnClick="ChangeTheme" />
+
+
+@code {
+    [Parameter] public bool DarkMode { get; set; }
+    [Parameter] public EventCallback<bool> OnChange { get; set; }
+
+    public async Task ChangeTheme()
+    {
+        await OnChange.InvokeAsync(!DarkMode);
+    }
+}

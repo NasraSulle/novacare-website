@@ -1,0 +1,178 @@
+﻿@page "/ReportsIndex"
+
+@using Microsoft.AspNetCore.Authorization
+@using NovaCare.Components.Pages.LabPages
+@using NovaCare.Components.Pages.Medicine___Pharmacy_Pages
+@using NovaCare.Components.Pages.PatientPages
+@using NovaCare.Components.Pages.StaffPages
+@using static MudBlazor.CategoryTypes
+@inject IDialogService Dialog
+
+@rendermode InteractiveServer
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@attribute [Authorize]
+<PageTitle>Reports - NovaCare</PageTitle>
+
+<MudGrid Class="pa-3" Justify="Justify.FlexStart">
+    <SectionTitle Icon="@icon" Title="@title" />
+</MudGrid>
+<MudGrid Justify="Justify.Center" Class="ps-3 pt-3 pe-1">
+    <MudItem md="4">
+        <MudSelect For="@(() => reportType)"
+                   @bind-Value="reportType"
+                   Immediate="true"
+                   Label="Choose Report Type" Variant="Variant.Outlined" Margin="Margin.Dense"
+                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+            <MudSelectItem Value="0" Disabled>Choose Report Type</MudSelectItem>
+            @foreach (var reportType in ReportTypes)
+            {
+                <MudSelectItem Value="@reportType">@reportType</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem md="3">
+        <MudDatePicker @bind-Date="fromDate" Margin="Margin.Dense" Label="Start Date" Variant="Variant.Outlined" Placeholder="Select Date" />
+    </MudItem>
+    <MudItem md="3">
+        <MudDatePicker @bind-Date="toDate" Margin="Margin.Dense" Label="Start Date" Variant="Variant.Outlined" Placeholder="Select Date" />
+    </MudItem>
+    <MudItem md="2" Style="text-align:end; text-align:center; align-content:center;">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnReportTypeChange" Style="width:100%; text-transform:none">Preview Data</MudButton>
+    </MudItem>
+
+    @if (IsEmpty)
+    {
+        <MudItem md="12">
+            <NoDataNotice NoDataMessage="No Filtered Report Data" />
+        </MudItem>
+    }
+    else
+    {
+        <MudItem md="12">
+            @if (allStaffs.Data != null && allStaffs.Data.Any())
+            {
+                <Staffs fromDate="fromDate" toDate="toDate" isReport="true" CurrentUser="currentUser" allStaffs="allStaffs.Data" />
+            }
+            else if (allPatients.Data != null && allPatients.Data.Any())
+            {
+                <Patients allPatients="allPatients.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
+            }
+            else if (allLabTests.Data != null && allLabTests.Data.Any())
+            {
+                <LabTests allLabTests="allLabTests.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
+            }
+            else if (allMedicines.Data != null && allMedicines.Data.Any())
+            {
+                <Medicines allMedicines="allMedicines.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
+            }
+        </MudItem>
+
+        @if (!string.IsNullOrWhiteSpace(pdfBase64))
+        {
+            <PdfPreview PdfBase64="@pdfBase64" />
+        }
+    }
+</MudGrid>
+
+    @code {
+
+    List<string> ReportTypes = new() { "Staff Report", "Patient Report", "Medicine Report", "LabTests Report" };
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+    ReportPreviewDto<StaffDto> allStaffs = new();
+    ReportPreviewDto<PatientDto> allPatients = new();
+    ReportPreviewDto<LabTestDto> allLabTests = new();
+    ReportPreviewDto<MedicineDto> allMedicines = new();
+
+
+    StaffDto? currentUser;
+
+    public string icon = Icons.Material.Filled.AutoStories;
+    public string title = "Reports Section";
+    string? pdfBase64;
+
+    DateTime? fromDate = DateTime.Now.AddMonths(-3);
+    DateTime? toDate = DateTime.Now;
+
+    string reportType = string.Empty;
+
+    bool IsEmpty = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await userService.GetLoggedInUserAsync();
+    }
+
+    public async Task OnReportTypeChange()
+    {
+        allStaffs = new();
+        allPatients = new();
+        allLabTests = new();
+        allMedicines = new();
+
+        if (reportType == "Staff Report")
+        {
+            allStaffs = await staffService.GetAllStaffsAsync(fromDate, toDate);
+            if (allStaffs.Data != null)
+            {
+                IsEmpty = false;
+                pdfBase64 = pdfExportService.GenerateStaffPreview(allStaffs, currentUser);
+                //await Dialog.ShowAsync<PdfModal>("Custom Options Dialog", _maxWidth);
+
+                StateHasChanged();
+            }
+            else
+            {
+                IsEmpty = true;
+            }
+        }
+        else if (reportType == "Patient Report")
+        {
+            allPatients = await patientService.GetAllPatientsAsync(fromDate, toDate);
+            if (allPatients.Data != null)
+            {
+                IsEmpty = false;
+            }
+            else
+            {
+                IsEmpty = true;
+            }
+        }
+        else if (reportType == "LabTests Report")
+        {
+            allLabTests = await labTestService.GetAllLabTestsAsync(fromDate, toDate);
+            if (allLabTests.Data != null)
+            {
+                IsEmpty = false;
+            }
+            else
+            {
+                IsEmpty = true;
+            }
+        }
+        else if (reportType == "Medicine Report")
+        {
+            allMedicines = await medicineService.GetAllMedicinesAsync(fromDate, toDate);
+            if (allMedicines.Data != null)
+            {
+                IsEmpty = false;
+            }
+            else
+            {
+                IsEmpty = true;
+            }
+        }
+        else
+        {
+            allStaffs = new();
+            allPatients = new();
+            allLabTests = new();
+            allMedicines = new();
+            IsEmpty = true;
+        }
+    }
+
+}

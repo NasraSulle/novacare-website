@@ -1,0 +1,235 @@
+﻿@using NovaCare.Shared.DTOs.PatientDTOs
+@inject IDialogService Dialog
+
+<MudGrid>
+    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!isLoading && !FilteredPatients!.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudItem Class="pa-6">
+                <MudGrid>
+                    <MudItem md="12">
+                        <MudGrid Justify="Justify.SpaceBetween">
+                            <MudItem>
+                                <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
+                            </MudItem>
+                            <MudItem >
+                                    @if (CurrentUser != null && CurrentUser.IsCreateNewPatient)
+                                    {
+                                        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="GoToNewPatientPage" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium">Add</MudButton>
+                                    }
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+
+                    <MudItem md="12">
+                        <NoDataNotice NoDataMessage="@messagePatient" />
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+            
+        }
+        else if (FilteredPatients != null)
+        {
+            <MudDataGrid Loading="@isSearchLoading" Hover="true" RowClick="@((args) => PreviewPatientProfile(args.Item.Id))" T="PatientDto" Items="@FilteredPatients" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+                         Bordered="false" Dense="true">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
+                    <MudSpacer />
+                    <MudItem>
+                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                      Margin="Margin.Dense" Variant="Variant.Outlined"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+                    </MudItem>
+                    @if (CurrentUser != null && CurrentUser.IsCreateNewPatient && !isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="GoToNewPatientPage" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium">Add</MudButton>
+                    }
+                    @if (isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
+                    }
+                </ToolBarContent>
+
+                <Columns>
+                    <TemplateColumn Title="Full Name">
+                        <CellTemplate>
+                            <MudItem Style="display: flex; align-items: center;">
+                                <MudAvatar Size="Size.Small">
+                                    <MudImage Src="Images/dp.png"></MudImage>
+                                </MudAvatar>
+                                <MudText Typo="Typo.body2" Class="ps-1">
+                                    @($"{context.Item.FisrtName} {context.Item.MiddleName} {context.Item.LastName}".Trim())
+                                </MudText>
+                            </MudItem>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.PatientTypeName" Title="Patient Type" />
+                    <PropertyColumn Property="x => x.PhoneNumber" Title="Phone Number" />
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudItem Style="text-align: center;">
+                                <MudChip Color="@(context.Item.PatientStatusName != "Emergency" ? Color.Success : Color.Error)" Size="Size.Small">
+                                    @(context.Item.PatientStatusName)
+                                </MudChip>
+                            </MudItem>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="PatientDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    string? searchString;
+    string messageStaff = string.Empty;
+    string? pdfBase64;
+
+    bool isSearchLoading;
+    private bool _readOnly;
+    private bool _isCellEditMode;
+
+    private void PreviewPatientProfile(int patientId)
+    {
+        //GetPatientById with aaaall Details
+    }
+    //=====================HERE===============================
+
+    [Parameter] public List<PatientDto>? AllPatients { get; set; } = new();
+    List<PatientDto> FilteredPatients = new();
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public bool isReport { get; set; }
+    [Parameter] public DateTime? fromDate { get; set; } = DateTime.Now.AddMonths(-3);
+    [Parameter] public DateTime? toDate { get; set; } = DateTime.Now;
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+
+    PatientDto? CurrentPatient;
+
+    string messagePatient = string.Empty;
+    string firstPart = string.Empty;
+    string? searchWord;
+
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = await userService.GetLoggedInUserAsync();
+        isLoading = true;
+        StateHasChanged();
+
+        await Task.Delay(500);
+
+        if (!isReport)
+            AllPatients = await patientService.GetAllPatientsAsync();
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredPatients = AllPatients;
+            messagePatient = "Patients are not avalible!";
+        }
+        else
+        {
+
+            firstPart = FilterBy;
+            messagePatient = $"{firstPart} Patients are not avalible!";
+
+            if (FilterBy != null)
+            {
+                FilteredPatients = AllPatients?.Where(x => x.PatientTypeName == FilterBy).ToList();
+            }
+            else
+            {
+                FilteredPatients = new();
+            }
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task Back()
+    {
+        CurrentPatient = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        await Task.Delay(500);
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredPatients = AllPatients?.Where(x => x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            messageStaff = "Staffs are not avalible!";
+            firstPart = "Staff";
+        }
+        else
+        {
+            var prop = typeof(StaffDto).GetProperty(FilterBy);
+
+            firstPart = FilterBy.Substring(2);
+            messageStaff = $"{firstPart}s are not avalible!";
+
+            if (prop != null)
+            {
+                FilteredPatients = AllPatients?.Where(x => (bool?)prop.GetValue(x, null) == true && x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else
+            {
+                FilteredPatients = null;
+            }
+        }
+        isSearchLoading = false;
+    }
+
+    public async Task GoToNewPatientPage()
+    {
+        await InvokeAsync(StateHasChanged);
+
+        var Parameters = new DialogParameters
+        {
+            {"CurrentUser" , CurrentUser}
+        };
+
+        var dialog = await Dialog.ShowAsync<NewPatient>("Register New Patient", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (result != null)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    public async Task GeneratePdf()
+    {
+        var reportDto = new ReportPreviewDto<PatientDto>
+        {
+            ReportType = "Patients",
+            FromDate = fromDate,
+            ToDate = toDate,
+            Data = FilteredPatients
+        };
+
+        pdfBase64 = pdfExportService.GenerateStaffPreview<PatientDto>(reportDto, CurrentUser);
+
+        var Parameters = new DialogParameters
+        {
+            {"pdfBase64" , pdfBase64}
+        };
+
+        await Dialog.ShowAsync<PdfPreview>($"Report Pdf", Parameters, _maxWidth);
+    }
+}

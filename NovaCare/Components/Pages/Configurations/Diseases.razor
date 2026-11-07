@@ -1,0 +1,193 @@
+﻿@using NovaCare.Shared.DTOs.DiseaseDTOs
+@using NovaCare.Shared.DTOs.StaffDTOs
+@inject IDialogService Dialog
+
+<MudGrid>
+    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!isLoading && !FilteredDiseases!.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudGrid Class="pa-6">
+                <MudItem md="12" Class="d-flex align-center">
+                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                    <MudSpacer />
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+                </MudItem>
+                <MudItem md="12">
+                    <NoDataNotice NoDataMessage="@messageDisease" />
+                </MudItem>
+            </MudGrid>
+        }
+        else if (FilteredDiseases != null)
+        {
+            <MudGrid Class="ps-6 pt-6" Justify="Justify.Center">
+                <MudItem md="12">
+                    <MudDataGrid Loading="@isSearchLoading" Hover="true" T="DiseaseDto" Items="@FilteredDiseases" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+                                 Bordered="false" Dense="true" RowClick="@((args) => PreviewDiseaseProfile(args.Item))">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                            <MudSpacer />
+                            <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+
+                            <MudItem>
+                                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                              Margin="Margin.Dense" Variant="Variant.Outlined"
+                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+                            </MudItem>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+
+                        </ToolBarContent>
+
+                        <Columns>
+                            <PropertyColumn Property="x => x.DiseaseName" Title="Disease Name" />
+                            <PropertyColumn Property="x => x.DiseaseCode" Title="Disease Code" />
+                            <PropertyColumn Property="x => x.DiseaseTypeName" Title="Disease Type" />
+                            <PropertyColumn Property="x => x.LabTestCost" Title="Lab Test Cost" />
+                        </Columns>
+
+                        <PagerContent>
+                            <MudDataGridPager T="DiseaseDto" />
+                        </PagerContent>
+                    </MudDataGrid>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private bool _readOnly;
+
+    private bool _isCellEditMode;
+    private bool _editTriggerRowClick; //!!?
+
+    private void StartedEditingItem(DiseaseDto item)
+    {
+        isEdit = true;
+    }
+
+    private void CanceledEditingItem(DiseaseDto item)
+    {
+        isEdit = false;
+    }
+
+    private async Task PreviewDiseaseProfile(DiseaseDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentDisease" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditDisease>("Disease Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    //=====================HERE===============================
+
+    List<DiseaseDto>? AllDiseases;
+    List<DiseaseDto>? FilteredDiseases;
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+
+    DiseaseDto? CurrentDisease;
+
+    string messageDisease = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(500);
+
+        AllDiseases = await diseaseService.GetAllDiseasesAsync();
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredDiseases = AllDiseases ;
+            messageDisease = $"{Genre} Diseases are not avalible!";
+            firstPart = "Disease";
+        }
+        else
+        {
+
+            firstPart = FilterBy;
+            messageDisease = $"{Genre} {firstPart}s are not avalible!";
+
+            if (FilterBy != null && Genre != null)
+            {
+                FilteredDiseases = AllDiseases?.Where(x => x.DiseaseTypeName == FilterBy).ToList();
+            }
+            else
+            {
+                FilteredDiseases = null;
+            }
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task Back()
+    {
+        CurrentDisease = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        await Task.Delay(500);
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredDiseases = AllDiseases?.Where(x => x.DiseaseName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.DiseaseCode.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            messageDisease = "Staffs are not avalible!";
+            firstPart = "Staff";
+        }
+        else
+        {
+            firstPart = FilterBy.Substring(2);
+            messageDisease = $"{firstPart}s are not avalible!";
+
+            if (searchString != null)
+            {
+                FilteredDiseases = AllDiseases?.Where(x => x.DiseaseName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.DiseaseCode.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else
+            {
+                FilteredDiseases = null;
+            }
+        }
+        isSearchLoading = false;
+    }
+
+    public async Task OpenRegisterModal()
+    {
+        var dialog = await Dialog.ShowAsync<NewDisease>("Register New Disease", _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+}

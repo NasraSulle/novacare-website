@@ -1,0 +1,19 @@
+﻿<MudDialog>
+    <DialogContent>
+        <iframe src="data:application/pdf;base64,@PdfBase64" style="width:100%; height:100vh;"></iframe>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" Style="text-transform:none;" OnClick="ReturnToLabTestsPage" Class="mt-3 ms-1">Back to results</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public string? PdfBase64 { get; set; } 
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    
+    public void ReturnToLabTestsPage()
+    {
+        MudDialog.Cancel();
+    }
+}

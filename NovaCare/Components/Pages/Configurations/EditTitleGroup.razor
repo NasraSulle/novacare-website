@@ -1,0 +1,106 @@
+﻿@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentGroup" method="post" OnValidSubmit="SaveGroupAsync" FormName="editgroup">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;">Enter Group Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudStaticTextField For="@(() => CurrentGroup.GroupName)" @bind-Value="CurrentGroup.GroupName" Margin="Margin.Dense"
+                                                        Label="Group name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Group name"
+                                                        UserAttributes="@(new() { { "autocomplete", "groupname" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="display:flex; justify-content:end; align-items:center;">
+                    <MudItem Class="mt-3 me-3">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Group Updated Successfully!</MudAlert>
+                        }
+                    </MudItem>
+                    <MudItem Style="display:flex; justify-content:end; ">
+                        <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3 me-1">
+                            @if (isSaving)
+                            {
+                                <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                <MudText Class="ps-3"> Updating Group...</MudText>
+                            }
+                            else
+                            {
+                                <MudText> Update Group Details</MudText>
+                            }
+                        </MudStaticButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToGroupsPage" Class="mt-3">Back</MudButton>
+                    </MudItem>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<StaffTypeDto> AllGroupTypes = new();
+    [Parameter, EditorRequired] public StaffTitleGroupDto CurrentGroup { get; set; } = new();
+
+    string saveMessage = string.Empty;
+    string? addedSuccessfully = "Added:";
+    string? notaddedSuccessfully = "Not Added:";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+
+    public async Task SaveGroupAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            var isSucess = await staffService.UpdateTitleGroupAsync(CurrentGroup, CurrentGroup.Id);
+
+            if (isSucess)
+            {
+                saveMessage = $"{CurrentGroup.GroupName} updated sucessfully";
+                Console.WriteLine(saveMessage);
+                addedSuccessfully = addedSuccessfully + $" {CurrentGroup.GroupName},";
+            }
+            else
+            {
+                saveMessage = $"Error: {CurrentGroup.GroupName} not updated sucessfully!";
+                Console.WriteLine(saveMessage);
+                notaddedSuccessfully = notaddedSuccessfully + $" {CurrentGroup.GroupName},";
+            }
+
+            isCreatedSuccessfully = true;
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public void ReturnToGroupsPage()
+    {
+        MudDialog.Cancel();
+    }
+}

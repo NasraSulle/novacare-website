@@ -1,0 +1,192 @@
+﻿@using NovaCare.Shared.DTOs.StaffDTOs
+@inject IDialogService Dialog
+
+<MudGrid>
+    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!isLoading && !FilteredTitles!.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudGrid Class="pa-6">
+                <MudItem md="12" Class="d-flex align-center">
+                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                    <MudSpacer />
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+                </MudItem>
+                <MudItem md="12">
+                    <NoDataNotice NoDataMessage="@messageTitle" />
+                </MudItem>
+            </MudGrid>
+        }
+        else if (FilteredTitles != null)
+        {
+            <MudGrid Class="ps-6 pt-6" Justify="Justify.Center">
+                <MudItem md="12">
+                    <MudDataGrid Loading="@isSearchLoading" Hover="true" T="StaffTitleDto" Items="@FilteredTitles" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+                                 Bordered="false" Dense="true" RowClick="@((args) => PreviewTitleProfile(args.Item))">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                            <MudSpacer />
+                            <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+
+                            <MudItem>
+                                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                              Margin="Margin.Dense" Variant="Variant.Outlined"
+                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+                            </MudItem>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+
+                        </ToolBarContent>
+
+                        <Columns>
+                            <PropertyColumn Property="x => x.StaffTitleName" Title="Title Name" />
+                            <PropertyColumn Property="x => x.StaffTypeName" Title="Department" />
+                            <PropertyColumn Property="x => x.TitleGroupName" Title="Group Name" />
+                            <PropertyColumn Property="x => x.StaffsCount" Title="Total Staffs" />
+                        </Columns>
+
+                        <PagerContent>
+                            <MudDataGridPager T="StaffTitleDto" />
+                        </PagerContent>
+                    </MudDataGrid>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private bool _readOnly;
+
+    private bool _isCellEditMode;
+    private bool _editTriggerRowClick; //!!?
+
+    private void StartedEditingItem(StaffTitleDto item)
+    {
+        isEdit = true;
+    }
+
+    private void CanceledEditingItem(StaffTitleDto item)
+    {
+        isEdit = false;
+    }
+
+    private async Task PreviewTitleProfile(StaffTitleDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentTitle" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditStaffTitle>("Title Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    //=====================HERE===============================
+
+    List<StaffTitleDto>? AllTitles;
+    List<StaffTitleDto>? FilteredTitles;
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+
+    StaffTitleDto? CurrentTitle;
+
+    string messageTitle = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(500);
+
+        AllTitles = await staffService.GetStaffTitlesAsync();
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredTitles = AllTitles;
+            messageTitle = $"{Genre} Titles are not avalible!";
+            firstPart = "Title";
+        }
+        else
+        {
+
+            firstPart = FilterBy;
+            messageTitle = $"{Genre} {firstPart}s are not avalible!";
+
+            if (FilterBy != null && Genre != null)
+            {
+                FilteredTitles = AllTitles?.Where(x => x.StaffTypeName == FilterBy).ToList();
+            }
+            else
+            {
+                FilteredTitles = null;
+            }
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task Back()
+    {
+        CurrentTitle = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        await Task.Delay(500);
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredTitles = AllTitles?.Where(x => x.StaffTitleName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            messageTitle = "Staffs are not avalible!";
+            firstPart = "Staff";
+        }
+        else
+        {
+            firstPart = FilterBy.Substring(2);
+            messageTitle = $"{firstPart}s are not avalible!";
+
+            if (searchString != null)
+            {
+                FilteredTitles = AllTitles?.Where(x => x.StaffTitleName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else
+            {
+                FilteredTitles = null;
+            }
+        }
+        isSearchLoading = false;
+    }
+
+    public async Task OpenRegisterModal()
+    {
+        var dialog = await Dialog.ShowAsync<NewTitle>("Register New Title", _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+}

@@ -1,0 +1,190 @@
+﻿@using NovaCare.Shared.DTOs.StaffDTOs
+@inject IDialogService Dialog
+
+<MudGrid>
+    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!isLoading && !FilteredStaffTitleGroups!.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudGrid Class="pa-6">
+                <MudItem md="12" Class="d-flex align-center">
+                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                    <MudSpacer />
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+                </MudItem>
+                <MudItem md="12">
+                    <NoDataNotice NoDataMessage="@messageStaffTitleGroup" />
+                </MudItem>
+            </MudGrid>
+        }
+        else if (FilteredStaffTitleGroups != null)
+        {
+            <MudGrid Class="ps-6 pt-6" Justify="Justify.Center">
+                <MudItem md="12">
+                    <MudDataGrid Loading="@isSearchLoading" Hover="true" T="StaffTitleGroupDto" Items="@FilteredStaffTitleGroups" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+                                 Bordered="false" Dense="true" RowClick="@((args) => PreviewStaffTitleGroupProfile(args.Item))">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                            <MudSpacer />
+                            <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+
+                            <MudItem>
+                                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                              Margin="Margin.Dense" Variant="Variant.Outlined"
+                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+                            </MudItem>
+                            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+
+                        </ToolBarContent>
+
+                        <Columns>
+                            <PropertyColumn Property="x => x.GroupName" Title="Staff Title Group" />
+                            <PropertyColumn Property="x => x.GroupsCount" Title="Total Tiles" />
+                        </Columns>
+
+                        <PagerContent>
+                            <MudDataGridPager T="StaffTitleGroupDto" />
+                        </PagerContent>
+                    </MudDataGrid>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private bool _readOnly;
+
+    private bool _isCellEditMode;
+    private bool _editTriggerRowClick; //!!?
+
+    private void StartedEditingItem(StaffTitleGroupDto item)
+    {
+        isEdit = true;
+    }
+
+    private void CanceledEditingItem(StaffTitleGroupDto item)
+    {
+        isEdit = false;
+    }
+
+    private async Task PreviewStaffTitleGroupProfile(StaffTitleGroupDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentGroup" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditTitleGroup>("Title Group Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    //=====================HERE===============================
+
+    List<StaffTitleGroupDto>? AllStaffTitleGroups;
+    List<StaffTitleGroupDto>? FilteredStaffTitleGroups;
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+
+    StaffTitleGroupDto? CurrentGroup;
+
+    string messageStaffTitleGroup = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(500);
+
+        AllStaffTitleGroups = await staffService.GetAllStaffTitleGroupssAsync();
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredStaffTitleGroups = AllStaffTitleGroups;
+            messageStaffTitleGroup = $"{Genre} Staff Title Groups are not avalible!";
+            firstPart = "Title Group";
+        }
+        else
+        {
+
+            firstPart = FilterBy;
+            messageStaffTitleGroup = $"{Genre} {firstPart}s are not avalible!";
+
+            if (FilterBy != null && Genre != null)
+            {
+                FilteredStaffTitleGroups = AllStaffTitleGroups?.Where(x => x.GroupName == FilterBy).ToList();
+            }
+            else
+            {
+                FilteredStaffTitleGroups = null;
+            }
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task Back()
+    {
+        CurrentGroup = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        await Task.Delay(500);
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredStaffTitleGroups = AllStaffTitleGroups?.Where(x => x.GroupName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            messageStaffTitleGroup = "Staffs are not avalible!";
+            firstPart = "Staff";
+        }
+        else
+        {
+            firstPart = FilterBy.Substring(2);
+            messageStaffTitleGroup = $"{firstPart}s are not avalible!";
+
+            if (searchString != null)
+            {
+                FilteredStaffTitleGroups = AllStaffTitleGroups?.Where(x => x.GroupName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else
+            {
+                FilteredStaffTitleGroups = null;
+            }
+        }
+        isSearchLoading = false;
+    }
+
+    public async Task OpenRegisterModal()
+    {
+        var dialog = await Dialog.ShowAsync<NewGroup>("Register New Staff Title Group", _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+}

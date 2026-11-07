@@ -1,0 +1,38 @@
+﻿@* @page "/pdfModal"
+
+<div class="modal  @(IsVisible ? "show d-block" : "")" tabindex="1">
+    <div class="modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header"></div>
+            <div class="modal-body"><h1>test sdadasdad</h1></div>
+            <div class="modal-footer">
+                <MudItem md="2" Style="text-align:end; text-align:center; align-content:center;">
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Close" Style="width:100%">Close</MudButton>
+                </MudItem>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+<MudDialog>
+    <DialogContent>
+        Dialog Content
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">OK</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+
+    private void Close() => IsVisible = false;
+
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
+}

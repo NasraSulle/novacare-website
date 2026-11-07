@@ -1,0 +1,32 @@
+﻿@rendermode InteractiveServer
+
+@* <MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider /> *@
+
+<MudCarousel Class="mud-width-full" Style="height:100%;" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="object">
+    <MudCarouselItem Transition="transition" Color="@Color.Secondary">
+        <MudPaper Class="d-flex" Style="height:100%">
+            <MudImage Src="Images/carousel5.jpg" Height="1000" />
+        </MudPaper>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="transition" Color="@Color.Secondary">
+        <MudPaper Class="d-flex" Style="height:100%">
+            <MudImage Src="Images/carousel3.jpg" Height="1000" />
+        </MudPaper>
+    </MudCarouselItem>
+    <MudCarouselItem Transition="transition" Color="@Color.Secondary">
+        <MudPaper Class="d-flex" Style="height:100%">
+            <MudImage Src="Images/carousel6.webp" Height="1000" />
+        </MudPaper>
+    </MudCarouselItem>
+</MudCarousel>
+
+@code {
+
+    private bool arrows = false;
+    private bool bullets = false;
+    private bool enableSwipeGesture = true;
+    private bool autocycle = true;
+    private Transition transition = Transition.Slide;
+}

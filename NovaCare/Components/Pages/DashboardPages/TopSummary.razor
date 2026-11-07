@@ -1,0 +1,43 @@
+﻿@page "/topSummary"
+
+
+@* <MudPaper Elevation="4">
+    <MudItem Style="display:flex;" Class="pa-3">
+        <MudItem md="8">
+            <MudText Typo="Typo.h4" GutterBottom="true">@(DataCount)</MudText>
+            <MudText Typo="Typo.h6" GutterBottom="true">@Title</MudText>
+        </MudItem>
+        <MudItem md="4" Style="text-align:center; align-content:center;">
+            <MudPaper Style="background-color: rgba(92, 107, 192,0.9); text-align:center; align-content:center; color:white;">
+                <MudIcon Icon="@($"{Icon}")" Size="Size.Large" Class="my-3" Style="font-size:50px;" />
+            </MudPaper>
+        </MudItem>
+    </MudItem>
+</MudPaper> *@
+
+<MudPaper Elevation="4" Class="pa-4">
+    <MudGrid Spacing="2" Justify="Justify.Center">
+        <!-- Left Side: Texts -->
+        <MudItem xs="8" Class="d-flex flex-column justify-center">
+            <MudText Typo="Typo.h4" Color="Color.Dark">@DataCount</MudText>
+            <MudText Typo="Typo.subtitle1" Color="Color.Primary">@Title</MudText>
+        </MudItem>
+
+        <!-- Right Side: Icon Container -->
+        <MudItem xs="4" Class="d-flex align-center justify-center">
+            <MudPaper Class="pa-3 d-flex align-center justify-center rounded-lg"
+                      Style="background-color: rgba(92, 107, 192, 0.9); color: white; width: 70px; height: 70px;">
+                <MudIcon Icon="@Icon" Style="font-size: 2.5rem;" />
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+
+@code {
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public double DataCount { get; set; } = 0;
+
+    // justify-content:flex-start; align-items:center;
+}

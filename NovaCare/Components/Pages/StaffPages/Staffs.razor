@@ -1,0 +1,270 @@
+﻿@using NovaCare.Components.Account.Pages
+@using NovaCare.Shared.DTOs.StaffDTOs
+@inject IDialogService Dialog
+
+<MudGrid>
+    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!isLoading && !FilteredStaffs!.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudItem Class="pa-6">
+                <MudGrid>
+                    <MudItem md="12">
+                        <MudGrid Justify="Justify.SpaceBetween">
+                            <MudItem>
+                                <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
+                            </MudItem>
+                            <MudItem>
+                                @if (CurrentUser != null && CurrentUser.IsCreateNewPatient)
+                                {
+                                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="OpenRegisterModal" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium">Add</MudButton>
+                                }
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+
+                    <MudItem md="12">
+                        <NoDataNotice NoDataMessage="@messageStaff" />
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        }
+        else if (FilteredStaffs != null)
+        {
+            <MudDataGrid Loading="@isSearchLoading" Hover="true" RowClick="@((args) => OpenEditStaffModal(args.Item.Id))" T="StaffDto" Items="@FilteredStaffs" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+                         Bordered="false" Dense="true">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">@($"All {firstPart}")</MudText>
+                    <MudSpacer />
+                    <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+
+                    <MudItem>
+                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                      Margin="Margin.Dense" Variant="Variant.Outlined"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+
+                    </MudItem>
+                    @if (CurrentUser != null && CurrentUser.IsCreateNewStaff && !isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+                    }
+                    @if (isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
+                    }
+                </ToolBarContent>
+
+                <Columns>
+                    <TemplateColumn Title="Full Name">
+                        <CellTemplate>
+                            <MudItem Style="display: flex; align-items: center;">
+                                <MudAvatar Size="Size.Small">
+                                    @if (context.Item.StaffPhoto == null)
+                                    {
+                                        <MudImage Src="Images/dp.png"></MudImage>
+                                    }
+                                    else
+                                    {
+                                        <MudImage ObjectFit="ObjectFit.Cover" Height="50" Width="50" Src="@( $"data:image/jpeg;base64,{Convert.ToBase64String(context.Item.StaffPhoto)}" )" Alt="Profile Photo" Class="rounded-circle" />
+                                    }
+                                </MudAvatar>
+                                <MudText Typo="Typo.body2" Class="ps-1">
+                                    @($"{context.Item.FisrtName} {context.Item.MiddleName} {context.Item.LastName}".Trim())
+                                </MudText>
+                            </MudItem>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <PropertyColumn Property="x => x.Email">
+                        <EditTemplate>
+                            <MudSelect @bind-Value="context.Item.FisrtName" Required RequiredError="You must select a Position!!!" Margin="@Margin.Dense">
+                                <MudSelectItem Value="0">zero</MudSelectItem>
+                                <MudSelectItem Value="1">one</MudSelectItem>
+                                <MudSelectItem Value="17">seventeen</MudSelectItem>
+                            </MudSelect>
+                        </EditTemplate>
+                    </PropertyColumn>
+                    @* <PropertyColumn Property="x => x.StaffTitleName" Title="Title/ Position" /> *@
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudItem Style="text-align: center;">
+                                <MudChip Color="@(context.Item.StaffStatusName == "Available" ? Color.Success : Color.Error)" Size="Size.Small">
+                                    @(context.Item.StaffStatusName)
+                                </MudChip>
+                            </MudItem>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="StaffDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public EventCallback<string> OnEditStaff { get; set; }
+    private bool _readOnly;
+
+    private void PreviewStaffProfile(StaffDto item)
+    {
+        //GetStaffById with aaaall Details
+    }
+    //=====================HERE===============================
+
+    [Parameter] public List<StaffDto>? AllStaffs { get; set; } = new();
+    List<StaffDto> FilteredStaffs = new();
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public StaffDto? CurrentUser { get; set; }
+    [Parameter] public DateTime? fromDate { get; set; } = DateTime.Now.AddMonths(-3);
+    [Parameter] public DateTime? toDate { get; set; } = DateTime.Now;
+    [Parameter] public bool isReport { get; set; }
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    StaffDto? CurrentStaff;
+
+    string messageStaff = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+    string? pdfBase64;
+
+    bool isLoading;
+    bool isSearchLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(500);
+
+        if (!isReport)
+            AllStaffs = await staffService.GetAllStaffsAsync();
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredStaffs = AllStaffs;
+            messageStaff = "Staffs are not avalible!";
+            firstPart = "Staff";
+        }
+        else
+        {
+            // Use Reflection to look up the property by its string name
+            var prop = typeof(StaffDto).GetProperty(FilterBy);
+
+            firstPart = FilterBy;
+            messageStaff = $"{firstPart} are not avalible!";
+
+            if (FilterBy != null)
+            {
+                FilteredStaffs = AllStaffs?.Where(x => x.AdministrativeTitleGroupName.Trim().ToLower() == FilterBy.Trim().ToLower() || x.ClinicalTitleGroupName.Trim().ToLower() == FilterBy.Trim().ToLower()).ToList();
+            }
+            else
+            {
+                FilteredStaffs = new();
+            }
+        }
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task EditStaff(string staffId)
+    {
+        await OnEditStaff.InvokeAsync(staffId);
+    }
+
+    public async Task Back()
+    {
+        CurrentStaff = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task OpenEditStaffModal(string staffId)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"StaffId" , staffId},
+            {"CurrentUser" , CurrentUser}
+        };
+
+        var dialog = await Dialog.ShowAsync<EditStaffModal>("Edit Staff Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        await Task.Delay(500);
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredStaffs = AllStaffs?.Where(x => x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.StaffStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            messageStaff = "Staffs are not avalible!";
+            firstPart = "Staff";
+        }
+        else
+        {
+            var prop = typeof(StaffDto).GetProperty(FilterBy);
+
+            firstPart = FilterBy.Substring(2);
+            messageStaff = $"{firstPart}s are not avalible!";
+
+            if (prop != null)
+            {
+                FilteredStaffs = AllStaffs?.Where(x => (x.AdministrativeTitleGroupName.ToLower() == FilterBy.ToLower() || x.ClinicalTitleGroupName.ToLower() == FilterBy.ToLower()) && x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.StaffStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else
+            {
+                FilteredStaffs = null;
+            }
+        }
+        isSearchLoading = false;
+    }
+
+    public async Task OpenRegisterModal()
+    {
+        var dialog = await Dialog.ShowAsync<Register>("Register New Staff", _maxWidth);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    public async Task GeneratePdf()
+    {
+        var reportDto = new ReportPreviewDto<StaffDto>
+        {
+            ReportType = "Staffs",
+            FromDate = fromDate,
+            ToDate = toDate,
+            Data = FilteredStaffs
+        };
+
+        pdfBase64 = pdfExportService.GenerateStaffPreview<StaffDto>(reportDto, CurrentUser);
+
+        var Parameters = new DialogParameters
+        {
+            {"pdfBase64" , pdfBase64}
+        };
+
+        var dialog = await Dialog.ShowAsync<PdfPreview>($"Report Pdf", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+}            

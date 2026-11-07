@@ -1,0 +1,38 @@
+﻿@page "/ConfigurationIndex"
+
+@rendermode InteractiveServer
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<PageTitle>Configurations - NovaCare</PageTitle>
+
+<MudGrid Class="pa-3">
+    <SectionTitle Icon="@icon" Title="@title" />
+</MudGrid>
+<MudGrid Class="ps-8 pt-3 pe-1">
+    <MudItem md="12" Class="pa-0" Style="">
+        <MudTabs Class="mt-0" Outlined="true" Position="Position.Start" Rounded="false" Border="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-1">
+            <MudTabPanel Text="Rooms" Style="text-transform: none;">
+                <Rooms />
+            </MudTabPanel>
+            <MudTabPanel Text="Staff Titles" Style="text-transform: none;">
+                <StaffTitles />
+            </MudTabPanel>
+            <MudTabPanel Text="Staff Title Groups" Style="text-transform: none;">
+                <StaffTitleGroups />
+            </MudTabPanel>
+            <MudTabPanel Text="Staff Departments" Style="text-transform: none;">
+                <StaffDepartments />
+            </MudTabPanel>
+            <MudTabPanel Text="Lab Test Diseases" Style="text-transform: none;">
+                <Diseases />
+        </MudTabPanel>
+        </MudTabs>
+    </MudItem>
+</MudGrid>
+
+@code {
+    public string icon = Icons.Material.Filled.SettingsApplications;
+    public string title = "Configurations Section";
+}

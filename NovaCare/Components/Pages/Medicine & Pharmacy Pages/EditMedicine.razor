@@ -1,0 +1,155 @@
+﻿@using NovaCare.Shared.DTOs.MedicineDTOs
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentMedicine" method="post" OnValidSubmit="SaveMedicineAsync" FormName="newmedicine">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;">Medicine Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="6">
+                                    <MudStaticTextField For="@(() => CurrentMedicine.MedicineName)" @bind-Value="CurrentMedicine.MedicineName" Margin="Margin.Dense"
+                                                        Label="Medicine name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Medicine name"
+                                                        UserAttributes="@(new() { { "autocomplete", "medicinename" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudSelect For="@(() => CurrentMedicine.MedicineGenre)"
+                                               @bind-Value="CurrentMedicine.MedicineGenre"
+                                               Label="Medicine Genre" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                        <MudSelectItem Value="0" Disabled>Medicine Genre</MudSelectItem>
+
+                                        @foreach (var item in AllMedicineGenres)
+                                        {
+                                            <MudSelectItem Value="@item.MedicineGenreName">@item.MedicineGenreName</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudSelect For="@(() => CurrentMedicine.MedicineType)"
+                                               @bind-Value="CurrentMedicine.MedicineType"
+                                               Label="Medicine Type" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                        <MudSelectItem Value="0" Disabled>Medicine Type</MudSelectItem>
+
+                                        @foreach (var item in AllMedicineTypes)
+                                        {
+                                            <MudSelectItem Value="@item.MedicineTypeName">@item.MedicineTypeName</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudNumericField @bind-Value="CurrentMedicine.MedicineQty" Margin="Margin.Dense"
+                                                     Label="Quantity" Variant="Variant.Outlined" Placeholder="Quantity" />
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudNumericField @bind-Value="CurrentMedicine.BuyingPrice" Margin="Margin.Dense"
+                                                     Label="Buying Price Per Dosage" Variant="Variant.Outlined" Placeholder="Buying Price" />
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudNumericField @bind-Value="CurrentMedicine.SellingPrice" Margin="Margin.Dense"
+                                                     Label="Selling Price Per Dosage" Variant="Variant.Outlined" Placeholder="Selling Price" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="display:flex; justify-content:end; align-items:center;">
+                    <MudItem Class="mt-3 me-3">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Medicine Updated Successfully!</MudAlert>
+                        }
+                    </MudItem>
+                    <MudItem Style="display:flex; justify-content:end; ">
+                        <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3 me-1">
+                            @if (isSaving)
+                            {
+                                <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                <MudText Class="ps-3"> Updating Medicines...</MudText>
+                            }
+                            else
+                            {
+                                <MudText> Update Medicines</MudText>
+                            }
+                        </MudStaticButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToMedicinesPage" Class="mt-3">Back</MudButton>
+                    </MudItem>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<MedicineDto>? AllMedicines;
+    List<MedicineGenreDto> AllMedicineGenres = new();
+    List<MedicineTypeDto> AllMedicineTypes = new();
+    [Parameter, EditorRequired] public MedicineDto CurrentMedicine { get; set; } = new();
+
+    string saveMessage = string.Empty;
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllMedicines = await medicineService.GetAllMedicinesAsync();
+        AllMedicineGenres = await medicineService.GetAllMedicineGenresAsync();
+        AllMedicineTypes = await medicineService.GetAllMedicineTypesAsync();
+    }
+
+    public async Task SaveMedicineAsync()
+    {
+        isSaving = true;
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            var existingMed = await medicineService.GetMedicineIdByNameAsync(CurrentMedicine.MedicineName);
+
+            //CurrentMedicine.MedicineQty += existingMed.MedicineQty;
+
+            var isSucess = await medicineService.UpdateMedicineAsync(CurrentMedicine, existingMed.Id);
+
+            if (isSucess)
+            {
+                saveMessage = $"{CurrentMedicine.MedicineName} updated sucessfully";
+                Console.WriteLine(saveMessage);
+                isCreatedSuccessfully = true;
+            }
+            else
+            {
+                saveMessage = $"Error: {CurrentMedicine.MedicineName} not updated sucessfully!";
+                Console.WriteLine(saveMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public async Task ResetPage()
+    {
+        isCreatedSuccessfully = false;
+        CurrentMedicine = new();
+    }
+
+    public void ReturnToMedicinesPage()
+    {
+        MudDialog.Cancel();
+    }
+}

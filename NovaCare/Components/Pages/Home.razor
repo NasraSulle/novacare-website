@@ -1,0 +1,13 @@
+﻿@page "/"
+
+@using Microsoft.AspNetCore.Authorization
+@using NovaCare.Components.Pages.DashboardPages
+
+@attribute [Authorize]
+
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<Dashboards />
+

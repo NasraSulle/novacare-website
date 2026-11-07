@@ -1,0 +1,40 @@
+﻿@page "/PatientIndex"
+
+@using Microsoft.AspNetCore.Authorization
+@using NovaCare.Components.Account.Pages
+@using NovaCare.Shared.DTOs.PatientDTOs
+
+@rendermode InteractiveServer
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@attribute [Authorize]
+<PageTitle>Patients - NovaCare</PageTitle>
+
+<MudGrid Class="pa-3" Justify="Justify.FlexStart">
+    <SectionTitle Icon="@icon" Title="@title" />
+</MudGrid>
+<MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
+    <MudItem Class="pa-0" md="12">
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+            <MudTabPanel Text="All Patients" Style="text-transform: none;">
+                <Patients />
+            </MudTabPanel>
+            <MudTabPanel Text="Out Patients" Style="text-transform: none;">
+                <Patients FilterBy="OutSide" />
+            </MudTabPanel>
+            <MudTabPanel Text="Hospitalized Patients" Style="text-transform: none;">
+                <Patients FilterBy="Hospitalized" />
+            </MudTabPanel>
+            <MudTabPanel Text="Clinic Patients" Style="text-transform: none;">
+                <Patients FilterBy="Clinic" />
+            </MudTabPanel>
+        </MudTabs>
+    </MudItem>
+</MudGrid>
+
+@code {
+    public string icon = Icons.Material.Filled.AssistWalker;
+    public string title = "Patients Section";
+}

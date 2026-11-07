@@ -1,0 +1,71 @@
+﻿@page "/StaffIndex"
+
+@using Microsoft.AspNetCore.Authorization
+@using NovaCare.Shared.DTOs.StaffDTOs
+
+@rendermode InteractiveServer
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@attribute [Authorize]
+<PageTitle>Staffs - NovaCare</PageTitle>
+
+<MudGrid Class="pa-3" Justify="Justify.FlexStart">
+    <SectionTitle Icon="@icon" Title="@title" />
+</MudGrid>
+<MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
+    <MudItem Class="pa-0" md="12">
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+            @if (currentUser != null && currentUser.IsViewAllStaffs)
+            {
+                <MudTabPanel Text="All Staff" Style="text-transform: none;">
+                    <Staffs CurrentUser="currentUser" />
+                </MudTabPanel>
+            }
+            @if (currentUser != null && currentUser.IsViewAllLeaders)
+            {
+                <MudTabPanel Text="Executives" Style="text-transform: none;">
+                    <Staffs FilterBy="Leaders" CurrentUser="currentUser" />
+                </MudTabPanel>
+            }
+            @if (currentUser != null && currentUser.IsViewAllDoctors)
+            {
+                <MudTabPanel Text="Doctors" Style="text-transform: none;">
+                    <Staffs FilterBy="Doctors" CurrentUser="currentUser" />
+                </MudTabPanel>
+            }
+            @if (currentUser != null && currentUser.IsViewAllNurses)
+            {
+                <MudTabPanel Text="Nurses" Style="text-transform: none;">
+                    <Staffs FilterBy="Nurses" CurrentUser="currentUser" />
+                </MudTabPanel>
+            }
+            @if (currentUser != null && currentUser.IsViewAllHelps)
+            {
+                <MudTabPanel Text="Receptionists" Style="text-transform: none;">
+                    <Staffs FilterBy="Helpers" CurrentUser="currentUser" />
+                </MudTabPanel>
+            }
+            @if (currentUser != null && currentUser.IsViewAllAdmins)
+            {
+                <MudTabPanel Text="System Admin" Style="text-transform: none;">
+                    <Staffs FilterBy="Administrators" CurrentUser="currentUser" />
+                </MudTabPanel>
+            }
+        </MudTabs>
+    </MudItem>
+</MudGrid>
+
+    @code {
+    StaffDto? currentUser;
+    StaffDto? currentStaff;
+
+    public string icon = Icons.Material.Filled.People;
+    public string title = "Staffs Section";
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await userService.GetLoggedInUserAsync();
+    }
+}
