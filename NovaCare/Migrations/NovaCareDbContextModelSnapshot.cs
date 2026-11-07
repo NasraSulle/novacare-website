@@ -1027,12 +1027,17 @@ namespace NovaCare.Migrations
                     b.Property<int?>("DoctorId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ServiceId")
+                        .HasColumnType("int");
+
                     b.Property<int>("VisitId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DoctorId");
+
+                    b.HasIndex("ServiceId");
 
                     b.HasIndex("VisitId");
 
@@ -1276,7 +1281,7 @@ namespace NovaCare.Migrations
                     b.Property<int?>("MedicineGenreId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("MediicineTypeId")
+                    b.Property<int?>("MedicineTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("ServiceName")
@@ -1284,6 +1289,10 @@ namespace NovaCare.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("DoctorId");
 
                     b.ToTable("Services");
 
@@ -2612,6 +2621,10 @@ namespace NovaCare.Migrations
                         .WithMany("Consultations")
                         .HasForeignKey("DoctorId");
 
+                    b.HasOne("NovaCare.Modals.PatientModals.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId");
+
                     b.HasOne("NovaCare.Modals.PatientModals.Visit", "Visit")
                         .WithMany("Consultations")
                         .HasForeignKey("VisitId")
@@ -2619,6 +2632,8 @@ namespace NovaCare.Migrations
                         .IsRequired();
 
                     b.Navigation("Doctor");
+
+                    b.Navigation("Service");
 
                     b.Navigation("Visit");
                 });
@@ -2660,6 +2675,21 @@ namespace NovaCare.Migrations
                         .IsRequired();
 
                     b.Navigation("Visit");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.Service", b =>
+                {
+                    b.HasOne("NovaCare.Modals.DoctorModals.DoctorType", "DoctorType")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId");
+
+                    b.HasOne("NovaCare.Modals.DoctorModals.Doctor", "Doctor")
+                        .WithMany("Services")
+                        .HasForeignKey("DoctorId");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("DoctorType");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Visit", b =>
@@ -2813,6 +2843,8 @@ namespace NovaCare.Migrations
                     b.Navigation("Consultations");
 
                     b.Navigation("DoctorPatients");
+
+                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.DoctorModals.DoctorStatus", b =>

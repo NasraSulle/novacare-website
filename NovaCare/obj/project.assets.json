@@ -85,7 +85,7 @@
           }
         }
       },
-      "Microsoft.AspNetCore.App.Internal.Assets/10.0.9": {
+      "Microsoft.AspNetCore.App.Internal.Assets/10.0.14": {
         "type": "package",
         "build": {
           "build/Microsoft.AspNetCore.App.Internal.Assets.props": {},
@@ -1290,10 +1290,10 @@
         "logo.png"
       ]
     },
-    "Microsoft.AspNetCore.App.Internal.Assets/10.0.9": {
-      "sha512": "E9Wp/LPKAYkGOVBv4lt5U5TnUA/7pov7QZAwF3eI64kK8AAXqkPDwuadEOwpL1WXEfgecYm0fccluvABp32D8g==",
+    "Microsoft.AspNetCore.App.Internal.Assets/10.0.14": {
+      "sha512": "T1IOYbID1msKjQEh684HebnN+Xnq/pocMXDukOMZtzzPTf9c4/30+/JndM/1txrqwuSYqWvLiAQWzu4U93cshw==",
       "type": "package",
-      "path": "microsoft.aspnetcore.app.internal.assets/10.0.9",
+      "path": "microsoft.aspnetcore.app.internal.assets/10.0.14",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1309,7 +1309,7 @@
         "build/Microsoft.AspNetCore.App.Internal.Assets.targets",
         "buildMultiTargeting/Microsoft.AspNetCore.App.Internal.Assets.targets",
         "buildTransitive/Microsoft.AspNetCore.App.Internal.Assets.targets",
-        "microsoft.aspnetcore.app.internal.assets.10.0.9.nupkg.sha512",
+        "microsoft.aspnetcore.app.internal.assets.10.0.14.nupkg.sha512",
         "microsoft.aspnetcore.app.internal.assets.nuspec"
       ]
     },
@@ -3407,7 +3407,7 @@
     "net10.0": [
       "DinkToPdf >= 1.0.8",
       "Extensions.MudBlazor.StaticInput >= 4.*",
-      "Microsoft.AspNetCore.App.Internal.Assets >= 10.0.9",
+      "Microsoft.AspNetCore.App.Internal.Assets >= 10.0.14",
       "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore >= 10.*",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 10.*",
       "Microsoft.EntityFrameworkCore.Design >= 10.*",
@@ -3417,23 +3417,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\ENGO_DEV\\.nuget\\packages\\": {},
+    "C:\\Users\\8th Gen\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ENGO_DEV\\source\\repos\\NovaCare_RE\\NovaCare\\NovaCare\\NovaCare.csproj",
+      "projectUniqueName": "C:\\Users\\8th Gen\\source\\repos\\NasraSulle\\novacare-website\\NovaCare\\NovaCare.csproj",
       "projectName": "NovaCare",
-      "projectPath": "C:\\Users\\ENGO_DEV\\source\\repos\\NovaCare_RE\\NovaCare\\NovaCare\\NovaCare.csproj",
-      "packagesPath": "C:\\Users\\ENGO_DEV\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ENGO_DEV\\source\\repos\\NovaCare_RE\\NovaCare\\NovaCare\\obj\\",
+      "projectPath": "C:\\Users\\8th Gen\\source\\repos\\NasraSulle\\novacare-website\\NovaCare\\NovaCare.csproj",
+      "packagesPath": "C:\\Users\\8th Gen\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\8th Gen\\source\\repos\\NasraSulle\\novacare-website\\NovaCare\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\ENGO_DEV\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\8th Gen\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -3462,7 +3462,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.300"
+      "SdkAnalysisLevel": "10.0.400"
     },
     "frameworks": {
       "net10.0": {
@@ -3480,7 +3480,7 @@
           "Microsoft.AspNetCore.App.Internal.Assets": {
             "suppressParent": "All",
             "target": "Package",
-            "version": "[10.0.9, )",
+            "version": "[10.0.14, )",
             "autoReferenced": true
           },
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
@@ -3529,7 +3529,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.403/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
