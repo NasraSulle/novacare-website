@@ -13,6 +13,7 @@ namespace NovaCare.Shared.DTOs.DoctorDTOs
         public int Id { get; set; }
         public string DoctorCode { get; set; } = string.Empty;
         public string MedicalLicenseNumber { get; set; } = string.Empty;
+        public decimal DoctorConsultationFee { get; set; } = 0m;
 
         //foreign keys
         public int DoctorTypeId { get; set; }

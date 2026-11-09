@@ -15,6 +15,7 @@ namespace NovaCare.Modals.DoctorModals
         public int Id { get; set; }
         public string DoctorCode { get; set; } = string.Empty;
         public string MedicalLicenseNumber { get; set; } = string.Empty;
+        public decimal DoctorConsultationFee { get; set; } = 0m;
 
         // Foreign keys
         [ForeignKey(nameof(DoctorType))]
@@ -37,6 +38,5 @@ namespace NovaCare.Modals.DoctorModals
         public DoctorType? DoctorType { get; set; }
         public List<DoctorPatient>? DoctorPatients { get; set; }
         public List<Consultation>? Consultations { get; set; }
-        public List<Service>? Services { get; set; }
     }
 }

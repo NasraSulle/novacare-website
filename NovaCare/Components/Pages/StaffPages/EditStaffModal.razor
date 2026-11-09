@@ -200,6 +200,11 @@
                                         }
                                     </MudSelect>
                                 </MudItem>
+                                <MudItem md="12">
+                                    <MudNumericField For="@(() => CurrentDoctor.DoctorConsultationFee)" @bind-Value="CurrentDoctor.DoctorConsultationFee" Margin="Margin.Dense"
+                                                     ReadOnly="!isEditStaff" Label="Doctor Consultation Fee" Variant="Variant.Outlined" Placeholder="doctor consultation fee"
+                                                     UserAttributes="@(new() { { "autocomplete", "doctorconsultatioFee" }, { "aria-required", "true" } } )" />
+                                </MudItem>
                             }
                         </MudGrid>
                     </MudItem>

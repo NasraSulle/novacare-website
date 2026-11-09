@@ -1,4 +1,5 @@
 ﻿using NovaCare.Modals.DoctorModals;
+using NovaCare.Modals.PatientModals;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -24,6 +25,7 @@ namespace NovaCare.Modals.RoomModals
         public Doctor? Doctor { get; set; }
         public RoomStatus? RoomStatus { get; set; }
         public RoomType? RoomType { get; set; }
+        public List<Consultation>? Consultation { get; set; }
 
     }
 }

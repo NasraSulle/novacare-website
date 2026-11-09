@@ -12,8 +12,12 @@ namespace NovaCare.Modals.DoctorModals
         public int Id { get; set; }
         public string DoctorTypeCode { get; set; } = string.Empty;
         public string DoctorTypeName { get; set; } = string.Empty;
+        public decimal DeptConsultationFee { get; set; } = 0m;
+
+        public int MedicalDeptId { get; set; }
 
         //navigation properties
+        public MedicalDepartment? MedicalDepartment { get; set; }
         public List<Doctor>? Doctors {  get; set; }
     }
 }

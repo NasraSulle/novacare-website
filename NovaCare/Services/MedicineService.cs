@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NovaCare.Components.Pages.Medicine___Pharmacy_Pages;
 using NovaCare.Data;
 using NovaCare.Interfaces;
 using NovaCare.Modals.MedicineModals;
+using NovaCare.Modals.TreatmentModals;
 using NovaCare.Shared.DTOs.MedicineDTOs;
 using NovaCare.Shared.DTOs.PatientDTOs;
 using NovaCare.Shared.DTOs.ReportDTOs;
+using NovaCare.Shared.DTOs.TreatmentDTOs;
 
 namespace NovaCare.Services
 {
@@ -175,6 +178,79 @@ namespace NovaCare.Services
                 Data = medicines
             };
             return result;
+        }
+
+        public async Task<int> AddTreatmentAsync(TreatmentDto dto)
+        {
+
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var treatment = new Treatment
+                {
+                    StartDate = dto.StartDate,
+                    FinishDate = dto.FinishDate,
+                    TreatmentQty = dto.TreatmentQty,
+                    TreatmentCost = dto.TreatmentCost,
+                    MedicineId = dto.MedicineId,
+                    SurgeryId = dto.SurgeryId,
+                    TherapyId = dto.TherapyId,
+                    MedicalDeptId = dto.MedicalDeptId,
+                    WardId = dto.WardId,
+                    DoctorId = dto.DoctorId,
+                    RoomId = dto.RoomId,
+                    TreatmentStatusId = dto.TreatmentStatusId,
+                    TreatmentTypeId = dto.TreatmentTypeId,
+                };
+
+                var result = context.Treatments.Add(treatment);
+                await context.SaveChangesAsync();
+
+                return result.Entity.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return 0;
+            }
+        }
+
+        public async Task<bool> UpdateTreatmentAsync(TreatmentDto dto, int treatmentId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var existingTreatment = await context.Treatments.FirstOrDefaultAsync(x => x.Id == treatmentId);
+
+
+                if (existingTreatment != null)
+                {
+                    existingTreatment.StartDate = dto.StartDate;
+                    existingTreatment.FinishDate = dto.FinishDate;
+                    existingTreatment.TreatmentQty = dto.TreatmentQty;
+                    existingTreatment.TreatmentCost = dto.TreatmentCost;
+                    existingTreatment.MedicineId = dto.MedicineId;
+                    existingTreatment.SurgeryId = dto.SurgeryId;
+                    existingTreatment.TherapyId = dto.TherapyId;
+                    existingTreatment.MedicalDeptId = dto.MedicalDeptId;
+                    existingTreatment.WardId = dto.WardId;
+                    existingTreatment.DoctorId = dto.DoctorId;
+                    existingTreatment.RoomId = dto.RoomId;
+                    existingTreatment.TreatmentStatusId = dto.TreatmentStatusId;
+                    existingTreatment.TreatmentTypeId = dto.TreatmentTypeId;
+
+                    context.Treatments.Update(existingTreatment);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return false;
+            }
         }
     }
 }

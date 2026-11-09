@@ -19,7 +19,6 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         // Navigation properties 
         public VisitDto? Visit { get; set; }
         public List<PaymentDto>? Payments { get; set; } 
-        public List<BillServiceDto>? BillServices { get; set; } 
 
         // UI Helpers
         public string BillTypeName { get; set; } = string.Empty; 

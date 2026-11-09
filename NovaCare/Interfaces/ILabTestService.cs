@@ -9,7 +9,7 @@ namespace NovaCare.Interfaces
         Task<List<LabTestDto>> GetAllLabTestsAsync();
         Task<LabTestDto> GetLabTestByIdAsync(int testId);
         Task<bool> AddLabTestAsync(LabTestDto dto);
-        Task<bool> UpdateLabTestAsync(LabTestDto dto, int medicineId);
+        Task<bool> UpdateLabTestAsync(LabTestDto dto, int testId);
 
         Task<List<LabTestResultCompositionDto>> GetAllLabTestResultCompositionsAsync();
         Task<bool> AddLabTestResultCompositionAsync(LabTestResultCompositionDto dto);

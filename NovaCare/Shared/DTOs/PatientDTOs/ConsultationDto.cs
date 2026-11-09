@@ -1,4 +1,5 @@
-﻿using NovaCare.Shared.DTOs.DoctorDTOs;
+﻿using NovaCare.Modals.DoctorModals;
+using NovaCare.Shared.DTOs.DoctorDTOs;
 
 namespace NovaCare.Shared.DTOs.PatientDTOs
 {
@@ -6,17 +7,24 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
     {
         public int Id { get; set; }
         public string Diagnosis { get; set; } = string.Empty;
+        public DateTime? StartDate { get; set; }
+        public DateTime FinishDate { get; set; }
+        public decimal ConsultationCost { get; set; } = 0m;
 
         // Foreign
+        public int RoomId { get; set; }
         public int VisitId { get; set; }
         public int? DoctorId { get; set; }
-        public int? ServiceId { get; set; }
+        public int? MedicalDepartmentId { get; set; }
 
         // Navigation properties
         public DoctorDto? Doctor { get; set; }
         public VisitDto? Visit { get; set; }
-        public ServiceDto? Service { get; set; }
+        public MedicalDepartment? MedicalDepartment { get; set; }
 
-        public string ServiceName { get; set; } = string.Empty;
+        public string MedicalDepartmentName { get; set; } = string.Empty;
+        public string DoctorFullName { get; set; } = string.Empty;
+        public string VisitTypeName { get; set; } = string.Empty;
+        public string RoomName { get; set; } = string.Empty;
     }
 }

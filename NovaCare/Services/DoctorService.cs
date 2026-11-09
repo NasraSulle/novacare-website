@@ -29,6 +29,8 @@ namespace NovaCare.Services
                     DoctorCode = doctorDto.DoctorCode,
                     MedicalLicenseNumber = doctorDto.MedicalLicenseNumber,
                     DoctorTypeId = doctorDto.DoctorTypeId,
+                    LicenceExpDate = doctorDto.LicenceExpDate,
+                    DoctorConsultationFee = doctorDto.DoctorConsultationFee,
                     DoctorStatusId = 1,
                     StaffId = doctorDto.StaffId
                 };
@@ -79,6 +81,7 @@ namespace NovaCare.Services
                     StaffId = doc.StaffId,
                     DoctorFullName = doc.Staff != null ? $"{doc.Staff.FisrtName ?? string.Empty} {doc.Staff.MiddleName ?? string.Empty} {doc.Staff.LastName ?? string.Empty}" : string.Empty,
                     LicenceExpDate = doc.LicenceExpDate,
+                    DoctorConsultationFee = doc.DoctorConsultationFee,
 
                 })
                 .ToListAsync();
@@ -102,6 +105,7 @@ namespace NovaCare.Services
                     StaffId = doc.StaffId,
                     DoctorFullName = doc.Staff != null ? $"{doc.Staff.FisrtName ?? string.Empty} {doc.Staff.MiddleName ?? string.Empty} {doc.Staff.LastName ?? string.Empty}" : string.Empty,
                     LicenceExpDate = doc.LicenceExpDate,
+                    DoctorConsultationFee = doc.DoctorConsultationFee,
 
                 })
                 .FirstOrDefaultAsync(x => x.StaffId == staffId);
@@ -118,6 +122,7 @@ namespace NovaCare.Services
                 {
                     Id = title.Id,
                     DoctorTypeName = title.DoctorTypeName,
+                    DeptConsultationFee = title.DeptConsultationFee,
 
                 })
                 .ToListAsync();
@@ -142,6 +147,7 @@ namespace NovaCare.Services
                     existingDoctor.RoomId = doctor.RoomId;
                     existingDoctor.StaffId = doctor.StaffId;
                     existingDoctor.LicenceExpDate = doctor.LicenceExpDate;
+                    existingDoctor.DoctorConsultationFee = doctor.DoctorConsultationFee;
 
                     context.Doctors.Update(existingDoctor);
                     await context.SaveChangesAsync();

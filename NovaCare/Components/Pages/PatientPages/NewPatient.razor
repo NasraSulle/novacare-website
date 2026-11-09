@@ -9,9 +9,10 @@
 <MudDialogProvider />
 <MudSnackbarProvider /> *@
 
+@using NovaCare.Shared.DTOs.DiseaseDTOs
 @using NovaCare.Shared.DTOs.PatientDTOs
 @using NovaCare.Shared.DTOs.PaymentDTOs
-@using NovaCare.Shared.DTOs.DiseaseDTOs
+@using NovaCare.Shared.DTOs.TreatmentDTOs
 
 <PageTitle>New Patient</PageTitle>
 
@@ -214,7 +215,7 @@
                                             }
                                         </MudGrid>
                                     </MudItem>
-                                    @if (CurrentVisit.VisitTypeId == 7)
+                                    @if (CurrentVisit.VisitTypeId == 2)
                                     {
                                         <MudItem md="9">
                                             <MudGrid Spacing="1" Justify="Justify.Center" Class="pa-0" Style="border:none;">
@@ -280,7 +281,7 @@
                                             </MudGrid>
                                         </MudItem>
                                     }
-                                    else
+                                    else if (CurrentVisit.VisitTypeId == 3)
                                     {
                                         <MudItem md="9">
                                             <MudGrid Spacing="1" Justify="Justify.Center" Class="pa-0" Style="border:none;">
@@ -318,21 +319,21 @@
                                                                     </MudSelect>
                                                                 </MudItem>
                                                                 <MudItem md="3">
-                                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddDoctorToBatch(selectedDocStaffId))" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
+                                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddConsultationToBatch(selectedDocStaffId))" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
                                                                 </MudItem>
                                                                 <MudItem md="2">
                                                                     <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetTests" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
                                                                 </MudItem>
                                                             </MudGrid>
                                                             <MudItem md="12">
-                                                                @if (!DoctorsBatch!.Any())
+                                                                @if (!ConsultationsBatch!.Any())
                                                                 {
                                                                     <NoDataNotice NoDataMessage="No Doctor in Batch" />
                                                                 }
                                                                 else
                                                                 {
 
-                                                                    <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@DoctorsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
+                                                                    <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@ConsultationsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
                                                                         <HeaderContent>
                                                                             <MudTh>Name</MudTh>
                                                                             <MudTh>Cost</MudTh>
@@ -342,14 +343,101 @@
                                                                         </HeaderContent>
                                                                         <RowTemplate>
                                                                             <MudTd DataLabel="Name">@docContext.DoctorFullName</MudTd>
-                                                                            <MudTd DataLabel="Consultation Cost">@docContext.DoctorCode</MudTd>
+                                                                            <MudTd DataLabel="Consultation Cost">@docContext.ConsultationCost</MudTd>
                                                                             <MudTd DataLabel="" Class="text-end">
-                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveDoctorFromBatch(docContext))" />
+                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveConsultationFromBatch(docContext))" />
                                                                             </MudTd>
                                                                         </RowTemplate>
                                                                         <FooterContent>
                                                                             <MudTh>Total Cost</MudTh>
                                                                             <MudTh>@LabTestsBatch?.Sum(x => x.LabTestCost)</MudTh>
+                                                                            <MudTh></MudTh>
+                                                                        </FooterContent>
+                                                                    </MudTable>
+                                                                }
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudItem>
+                                    }
+                                    else
+                                    {
+                                        <MudItem md="9">
+                                            <MudGrid Spacing="1" Justify="Justify.Center" Class="pa-0" Style="border:none;">
+                                                <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                                                    <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                                                        <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Check-Ups Information</MudText>
+                                                        <MudGrid Class="pa-3">
+                                                            <MudGrid Spacing="1" Class="pa-3 ps-6 pe-0 pb-0">
+                                                                <MudItem md="3">
+                                                                    <MudSelect For="@(() => selectedDocTypeId)"
+                                                                               @bind-Value="selectedDocTypeId"
+                                                                               @bind-Value:after="OnDoctorTypeChange"
+                                                                               Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                               Label="Choose Specialist" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                                        <MudSelectItem Value="0" Disabled>Choose Specialist</MudSelectItem>
+
+                                                                        @foreach (var item in AllDoctorTypes)
+                                                                        {
+                                                                            <MudSelectItem Value="@item.Id">@($"{item.DoctorTypeName}")</MudSelectItem>
+                                                                        }
+                                                                    </MudSelect>
+                                                                </MudItem>
+                                                                <MudItem md="4">
+                                                                    <MudSelect For="@(() => selectedDocStaffId)"
+                                                                               @bind-Value="selectedDocStaffId"
+                                                                               @bind-Value:after="OnDoctorSelect"
+                                                                               Label="Choose Doctor" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                                        <MudSelectItem Value="0" Disabled>Choose Doctor</MudSelectItem>
+
+                                                                        @foreach (var item in FilteredDoctors)
+                                                                        {
+                                                                            <MudSelectItem Value="@item.StaffId">@($"{item.DoctorFullName}")</MudSelectItem>
+                                                                        }
+                                                                    </MudSelect>
+                                                                </MudItem>
+                                                                <MudItem md="4">
+                                                                    <MudDatePicker For="@(() => CurrentConsultation.StartDate)" @bind-Date="CurrentConsultation.StartDate" Margin="Margin.Dense"
+                                                                                   Label="Start On" Variant="Variant.Outlined" Placeholder="Start On"
+                                                                                   UserAttributes="@(new() { { "autocomplete", "licenceexpdate" }, { "aria-required", "true" } } )" />
+                                                                </MudItem>
+                                                                <MudItem md="3">
+                                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddConsultationToBatch(selectedDocStaffId))" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
+                                                                </MudItem>
+                                                                <MudItem md="2">
+                                                                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetConsultationss" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
+                                                                </MudItem>
+                                                            </MudGrid>
+                                                            <MudItem md="12">
+                                                                @if (!ConsultationsBatch!.Any())
+                                                                {
+                                                                    <NoDataNotice NoDataMessage="No Doctor in Batch" />
+                                                                }
+                                                                else
+                                                                {
+
+                                                                    <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@ConsultationsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
+                                                                        <HeaderContent>
+                                                                            <MudTh>Name</MudTh>
+                                                                            <MudTh>Cost</MudTh>
+                                                                            <MudTh Class="text-end">
+                                                                                @* <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.FolderDelete" OnClick="ResetTests" /> *@
+                                                                            </MudTh>
+                                                                        </HeaderContent>
+                                                                        <RowTemplate>
+                                                                            <MudTd DataLabel="Name">@docContext.DoctorFullName</MudTd>
+                                                                            <MudTd DataLabel="Consultation Cost">@docContext.ConsultationCost</MudTd>
+                                                                            <MudTd DataLabel="" Class="text-end">
+                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveConsultationFromBatch(docContext))" />
+                                                                            </MudTd>
+                                                                        </RowTemplate>
+                                                                        <FooterContent>
+                                                                            <MudTh>Total Cost</MudTh>
+                                                                            <MudTh>@ConsultationsBatch?.Sum(x => x.ConsultationCost)</MudTh>
                                                                             <MudTh></MudTh>
                                                                         </FooterContent>
                                                                     </MudTable>
@@ -429,8 +517,9 @@
     List<DoctorDto> AllDoctors = new();
     List<DoctorDto> FilteredDoctors = new();
     List<DoctorTypeDto> AllDoctorTypes = new();
-    List<DoctorDto>? DoctorsBatch = new();
+    List<ConsultationDto>? ConsultationsBatch = new();
     List<LabTestDto>? LabTestsBatch = new();
+    List<TreatmentDto>? TreatmentsBatch = new();
 
     PaymentModeDto CurrentPaymentMode = new();
     PatientDto CurrentPatient = new();
@@ -470,11 +559,17 @@
     public async Task OnDoctorTypeChange()
     {
         FilteredDoctors = AllDoctors.Where(doc => doc.DoctorTypeId == selectedDocTypeId).ToList();
+        CurrentConsultation.MedicalDepartmentId = AllDoctorTypes.FirstOrDefault(x => x.Id == selectedDocTypeId)?.MedicalDeptId;
     }
 
     public async Task OnDoctorSelect()
     {
-        FilteredDoctors = AllDoctors.Where(doc => doc.DoctorTypeId == selectedDocTypeId).ToList();
+        CurrentConsultation.DoctorId = AllDoctors.FirstOrDefault(doc => doc.Id == selectedDocTypeId)?.Id;
+        var deptConsultFee = AllDoctorTypes.FirstOrDefault(x => x.Id == selectedDocTypeId)?.DeptConsultationFee ?? 0m;
+        var currentDoc = await doctorService.GetDoctorByStaffId(selectedDocStaffId);
+        var docConsultFee = currentDoc?.DoctorConsultationFee ?? 0m;
+
+        CurrentConsultation.ConsultationCost = deptConsultFee + docConsultFee;
     }
 
     public async Task OnPaymentModeChange()
@@ -551,8 +646,29 @@
 
                     int addedVisitId = 0;
                     PreliminaryTestDto? result;
-                    if (CurrentVisit.Id == 0)
+                    if (CurrentVisit.Id == 0 && CurrentVisit.VisitTypeId > 0)
                         addedVisitId = await patientService.AddVisitAsync(CurrentVisit);
+
+                    CurrentVisit.Id = addedVisitId;
+
+                    if(CurrentVisit.Id > 0)
+                    {
+                        if (LabTestsBatch != null && LabTestsBatch.Any())
+                        {
+                            await SaveLabTestAsync();
+                        }
+                        
+                        if (ConsultationsBatch != null && ConsultationsBatch.Any())
+                        {
+                            await SaveConsultationsAsync();
+                        }
+
+                        if (TreatmentsBatch != null && TreatmentsBatch.Any())
+                        {
+                            await SaveTreatmentsAsync();
+                        }
+                    }
+
                     if (CurrentPreliminaryTest.Id == 0)
                     {
                         result = await patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
@@ -565,7 +681,7 @@
                     StateHasChanged();
                 }
 
-               
+
             }
             catch (Exception ex)
             {
@@ -576,7 +692,7 @@
                 isSaving = false;
             }
         }
-        
+
     }
 
     public async Task ResetPage()
@@ -648,30 +764,29 @@
         }
     }
 
-    public async Task AddDoctorToBatch(string docStaffId)
+    public async Task AddConsultationToBatch(string docStaffId)
     {
         var currentDoc = await doctorService.GetDoctorByStaffId(docStaffId);
-        var newDoctor = new DoctorDto
+        var newConsultation = new ConsultationDto
         {
-            DoctorCode = currentDoc.DoctorCode,
-            MedicalLicenseNumber = currentDoc.MedicalLicenseNumber,
-            DoctorTypeId = currentDoc.DoctorTypeId,
-            DoctorFullName = currentDoc.DoctorFullName,
-            DoctorStatusId = currentDoc.DoctorStatusId,
-            RoomId = currentDoc.RoomId,
-            LicenceExpDate = DateTime.Now
+            StartDate = CurrentConsultation.StartDate,
+            ConsultationCost = CurrentConsultation.ConsultationCost,
+            VisitId = CurrentVisit.Id,
+            DoctorId = currentDoc.Id,
+            MedicalDepartmentId = CurrentConsultation.MedicalDepartmentId,
+            DoctorFullName = currentDoc.DoctorFullName
         };
 
-        if (!string.IsNullOrWhiteSpace(newDoctor.DoctorFullName))
-            DoctorsBatch!.Add(newDoctor);
+        if (!string.IsNullOrWhiteSpace(newConsultation.DoctorFullName))
+            ConsultationsBatch!.Add(newConsultation);
 
         await InvokeAsync(StateHasChanged);
     }
 
-    public async Task RemoveDoctorFromBatch(DoctorDto doctorDto)
+    public async Task RemoveConsultationFromBatch(ConsultationDto doctorDto)
     {
-        if (DoctorsBatch != null)
-            DoctorsBatch?.Remove(doctorDto);
+        if (ConsultationsBatch != null)
+            ConsultationsBatch?.Remove(doctorDto);
     }
 
     public async Task AddLabTestToBatch(LabTestDto labTestDto)
@@ -721,23 +836,38 @@
         {
             foreach (var labTest in LabTestsBatch)
             {
-                var isSucess = await labTestService.AddLabTestAsync(labTest);
-
-                if (isSucess)
+                if (labTest.Id > 0)
                 {
-                    saveMessage = $"{labTest.DiseaseName} for {labTest.PatientId} added sucessfully";
-                    Console.WriteLine(saveMessage);
+                    var isSucess = await labTestService.UpdateLabTestAsync(labTest, labTest.Id);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"{labTest.DiseaseName} for {labTest.PatientId} updated sucessfully";
+                        Console.WriteLine(saveMessage);
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {labTest.DiseaseName} for {labTest.PatientId} not updated sucessfully!";
+                        Console.WriteLine(saveMessage);
+                    }
                 }
                 else
                 {
-                    saveMessage = $"Error: {labTest.DiseaseName} for {labTest.PatientId} not added sucessfully! Please read labTest to batch and save";
-                    Console.WriteLine(saveMessage);
+
+                    var isSucess = await labTestService.AddLabTestAsync(labTest);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"{labTest.DiseaseName} for {labTest.PatientId} added sucessfully";
+                        Console.WriteLine(saveMessage);
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {labTest.DiseaseName} for {labTest.PatientId} not added sucessfully! Please read labTest to batch and save";
+                        Console.WriteLine(saveMessage);
+                    }
                 }
             }
-            if (notaddedSuccessfully == "Not Added:")
-                isCreatedSuccessfully = true;
-            CurrentLabTest = new();
-            LabTestsBatch.Clear();
 
         }
         catch (Exception ex)
@@ -756,6 +886,137 @@
         notaddedSuccessfully = "Not Added:";
         isCreatedSuccessfully = false;
         LabTestsBatch?.Clear();
+
+    }
+
+    
+    public async Task SaveConsultationsAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        if (LabTestsBatch!.Count == 0)
+        {
+            isSaving = false;
+            return;
+        }
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            foreach (var consultation in ConsultationsBatch)
+            {
+                if (consultation.Id > 0)
+                {
+                    var isSucess = await patientService.UpdateConsultationAsync(consultation, consultation.Id);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"{consultation.VisitTypeName} for {consultation.VisitId} updated sucessfully";
+                        Console.WriteLine(saveMessage);
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {consultation.VisitTypeName} for {consultation.VisitId} not updated sucessfully!";
+                        Console.WriteLine(saveMessage);
+                    }
+                }
+                else
+                {
+
+                    var isSucess = await patientService.AddConsultationAsync(consultation);
+
+                    if (isSucess > 0)
+                    {
+                        saveMessage = $"{consultation.VisitTypeName} for {consultation.VisitId} added sucessfully";
+                        Console.WriteLine(saveMessage);
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {consultation.VisitTypeName} for {consultation.VisitId} not added sucessfully! Please read labTest to batch and save";
+                        Console.WriteLine(saveMessage);
+                    }
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public async Task SaveTreatmentsAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        if (LabTestsBatch!.Count == 0)
+        {
+            isSaving = false;
+            return;
+        }
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            foreach (var consultation in TreatmentsBatch)
+            {
+                if (consultation.Id > 0)
+                {
+                    var isSucess = await medicineService.UpdateTreatmentAsync(consultation, consultation.Id);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"Treatment updated sucessfully";
+                        Console.WriteLine(saveMessage);
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: Treatment not updated sucessfully!";
+                        Console.WriteLine(saveMessage);
+                    }
+                }
+                else
+                {
+
+                    var isSucess = await medicineService.AddTreatmentAsync(consultation);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"Treatment added sucessfully";
+                        Console.WriteLine(saveMessage);
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: Treatment not added sucessfully! Please read labTest to batch and save";
+                        Console.WriteLine(saveMessage);
+                    }
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public async Task ResetConsultationss()
+    {
+        ConsultationsBatch?.Clear();
 
     }
 }

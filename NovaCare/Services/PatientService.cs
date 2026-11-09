@@ -9,7 +9,6 @@ using NovaCare.Modals.PatientModals;
 using NovaCare.Modals.StaffModals;
 using NovaCare.Shared.DTOs.JoinDto;
 using NovaCare.Shared.DTOs.PatientDTOs;
-using NovaCare.Shared.DTOs.PatientDTOs;
 using NovaCare.Shared.DTOs.ReportDTOs;
 using NovaCare.Shared.DTOs.StaffDTOs;
 
@@ -478,6 +477,67 @@ namespace NovaCare.Services
             {
                 Console.WriteLine($"Error: {ex}");
                 return new();
+            }
+        }
+
+        public async Task<int> AddConsultationAsync(ConsultationDto dto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var visit = new Consultation
+                {
+                    Diagnosis = dto.Diagnosis,
+                    StartDate = dto.StartDate,
+                    FinishDate = dto.FinishDate,
+                    ConsultationCost = dto.ConsultationCost,
+                    VisitId = dto.VisitId,
+                    RoomId = dto.RoomId,
+                    DoctorId = dto.DoctorId,
+                    MedicalDepartmentId = dto.MedicalDepartmentId,
+                };
+
+                var result = context.Consultations.Add(visit);
+                await context.SaveChangesAsync();
+
+                return result.Entity.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return 0;
+            }
+        }
+
+        public async Task<bool> UpdateConsultationAsync(ConsultationDto dto, int conslId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var existingConsultation = await context.Consultations.FirstOrDefaultAsync(x => x.Id == conslId);
+
+                if (existingConsultation != null)
+                {
+                    existingConsultation.Diagnosis = dto.Diagnosis;
+                    existingConsultation.StartDate = dto.StartDate;
+                    existingConsultation.FinishDate = dto.FinishDate;
+                    existingConsultation.ConsultationCost = dto.ConsultationCost;
+                    existingConsultation.VisitId = dto.VisitId;
+                    existingConsultation.RoomId = dto.RoomId;
+                    existingConsultation.DoctorId = dto.DoctorId;
+                    existingConsultation.MedicalDepartmentId = dto.MedicalDepartmentId;
+
+                    context.Consultations.Update(existingConsultation);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }
