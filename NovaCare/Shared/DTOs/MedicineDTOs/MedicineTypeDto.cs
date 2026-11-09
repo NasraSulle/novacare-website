@@ -1,4 +1,5 @@
-﻿using NovaCare.Shared.DTOs.JoinDto;
+﻿using NovaCare.Modals.MedicineModals;
+using NovaCare.Shared.DTOs.JoinDto;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +13,11 @@ namespace NovaCare.Shared.DTOs.MedicineDTOs
         public int MedicineTypeCode { get; set; }
         public string MedicineTypeName { get; set; } = string.Empty;
 
+        public int? MedicineGenreId { get; set; }
+
         //navigation properties
-        public List<MedicineMedicineTypeDto>? MedicineMedicineTypes { get; set; }
+        public MedicineGenre? MedicineGenre { get; set; }
+        public List<Medicine>? Medicines { get; set; }
+        public string MedicineGenreName { get; set; } = string.Empty;
     }
 }

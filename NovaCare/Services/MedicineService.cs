@@ -4,6 +4,7 @@ using NovaCare.Data;
 using NovaCare.Interfaces;
 using NovaCare.Modals.MedicineModals;
 using NovaCare.Modals.TreatmentModals;
+using NovaCare.Shared.DTOs.DoctorDTOs;
 using NovaCare.Shared.DTOs.MedicineDTOs;
 using NovaCare.Shared.DTOs.PatientDTOs;
 using NovaCare.Shared.DTOs.ReportDTOs;
@@ -29,7 +30,7 @@ namespace NovaCare.Services
                     Picture = medicine.Picture,
                     MedicineName = medicine.MedicineName,
                     MedicineGenre = medicine.MedicineGenre,
-                    MedicineType = medicine.MedicineType,
+                    MedicineTypeName = medicine.MedicineType != null ? medicine.MedicineType.MedicineTypeName : string.Empty,
                     CreatedDate = medicine.CreatedDate,
                     MedicineQty = medicine.MedicineQty,
                     BuyingPrice = medicine.BuyingPrice,
@@ -78,12 +79,12 @@ namespace NovaCare.Services
             {
                 using var context = _contextFactory.CreateDbContext();
 
-                var medicine = new Medicine
+                var medicine = new Medicine  
                 {
                     Picture = dto.Picture,
                     MedicineName = dto.MedicineName,
                     MedicineGenre = dto.MedicineGenre,
-                    MedicineType = dto.MedicineType,
+                    MedicineTypeId = dto.MedicineTypeId,
                     CreatedDate = dto.CreatedDate,
                     MedicineQty = dto.MedicineQty,
                     BuyingPrice = dto.BuyingPrice,
@@ -161,7 +162,7 @@ namespace NovaCare.Services
                     Picture = medicine.Picture,
                     MedicineName = medicine.MedicineName,
                     MedicineGenre = medicine.MedicineGenre,
-                    MedicineType = medicine.MedicineType,
+                    MedicineTypeName = medicine.MedicineType != null ? medicine.MedicineType.MedicineTypeName : string.Empty,
                     CreatedDate = medicine.CreatedDate,
                     MedicineQty = medicine.MedicineQty,
                     BuyingPrice = medicine.BuyingPrice,
@@ -251,6 +252,84 @@ namespace NovaCare.Services
                 Console.WriteLine($"Error: {ex}");
                 return false;
             }
+        }
+
+        public async Task<List<TreatmentTypeDto>> GetAllTreatmentTypeAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var treatments = await context.TreatmentTypes
+                .AsNoTracking()
+                .Select(treatment => new TreatmentTypeDto
+                {
+                    Id = treatment.Id,
+                    TreatmentTypeName = treatment.TreatmentTypeName,
+                    TreatmentTypeCode = treatment.TreatmentTypeCode,
+
+                    HasMedicineId = treatment.HasMedicineId,
+                    HasSurgeryId = treatment.HasSurgeryId,
+                    HasTherapyId = treatment.HasTherapyId,
+                    HasMedicalDeptId = treatment.HasMedicalDeptId,
+                    HasWardId = treatment.HasWardId,
+                    HasDoctorId = treatment.HasDoctorId,
+                    HasRoomId = treatment.HasRoomId
+                })
+                .ToListAsync();
+
+            return treatments;
+        }
+
+        public async Task<List<SurgeryDto>> GetAllSurgeriesAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var surgeries = await context.Surgeries
+                .AsNoTracking()
+                .Select(surgery => new SurgeryDto
+                {
+                    Id = surgery.Id,
+                    SurgeryName = surgery.SurgeryName,
+                    SurgeryCost = surgery.SurgeryCost,
+                    MedicalDepartmentId = surgery.MedicalDepartmentId,
+                    MedicalDepartmentName = surgery.MedicalDepartment != null ? surgery.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    SurgeryCodeNumber = surgery.SurgeryCodeNumber
+                })
+                .ToListAsync();
+
+            return surgeries;
+        }
+
+        public async Task<List<TherapyDto>> GetAllTherapiesAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var therapies = await context.Therapies
+                .AsNoTracking()
+                .Select(therapy => new TherapyDto
+                {
+                    Id = therapy.Id,
+                    TherapyName = therapy.TherapyName,
+                    TherapyCodeNumber = therapy.TherapyCodeNumber,
+                    TherapyCost = therapy.TherapyCost,
+                    MedicalDepartmentumber = therapy.MedicalDepartment != null ? therapy.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    MedicalDepartmentId = therapy.MedicalDepartmentId
+                })
+                .ToListAsync();
+
+            return therapies;
+        }
+
+        public async Task<List<MedicalDepartmentDto>> GetAllMedicalDeptsAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var depts = await context.MedicalDepartments
+                .AsNoTracking()
+                .Select(dept => new MedicalDepartmentDto
+                {
+                    Id = dept.Id,
+                    MedicalDepartmentCode = dept.MedicalDepartmentCode,
+                    MedicalDepartmentName = dept.MedicalDepartmentName
+                })
+                .ToListAsync();
+
+            return depts;
         }
     }
 }

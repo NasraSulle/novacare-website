@@ -8,5 +8,6 @@ namespace NovaCare.Interfaces
         Task<bool> UpdateRoomAsync(RoomDto roomDto, int romId);
         Task<List<RoomDto>> GetAllRoomsAsync();
         Task<RoomDto> GetRoomByIdAsync(int roomId);
+        Task<List<WardDto>> GetAllWardsAsync();
     }
 }

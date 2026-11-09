@@ -318,6 +318,7 @@ namespace NovaCare.Services
                     VisitDate = dto.VisitDate,
                     VisitTypeId = dto.VisitTypeId,
                     PatientId = dto.PatientId,
+                    VisitStatusId = 1,
                 };
 
                 var result = context.Visits.Add(visit);
@@ -344,7 +345,8 @@ namespace NovaCare.Services
                 {
                     existingVisit.VisitTypeId = dto.VisitTypeId;
                     existingVisit.PatientId = dto.PatientId;
-                    existingVisit.PatientId = dto.PatientId;
+
+                    existingVisit.VisitStatusId = dto.VisitStatusId;
 
                     context.Visits.Update(existingVisit);
                     await context.SaveChangesAsync();

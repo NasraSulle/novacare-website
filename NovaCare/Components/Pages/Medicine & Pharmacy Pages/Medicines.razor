@@ -115,7 +115,7 @@
 
                 if (FilterBy != null && Genre != null)
                 {
-                    FilteredMedicines = AllMedicines?.Where(x => x.MedicineType == FilterBy && x.MedicineGenre == Genre).ToList();
+                    FilteredMedicines = AllMedicines?.Where(x => x.MedicineTypeName == FilterBy && x.MedicineGenre == Genre).ToList();
                 }
                 else
                 {

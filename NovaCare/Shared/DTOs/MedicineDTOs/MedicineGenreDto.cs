@@ -7,5 +7,6 @@ namespace NovaCare.Shared.DTOs.MedicineDTOs
         public int Id { get; set; }
         public int MedicineGenreCode { get; set; }
         public string MedicineGenreName { get; set; } = string.Empty;
+        public List<MedicineTypeDto>? MedicineTypes { get; set; }
     }
 }

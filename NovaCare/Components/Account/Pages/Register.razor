@@ -191,6 +191,10 @@
                                 <MudTabPanel Text="Staffs Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
                                     <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
                                         <MudItem md="4">
+                 @*                            <MudChipSet T="bool" SelectionMode="SelectionMode.MultiSelection" CheckMark="true">
+                                                <MudChip T="bool" Text="purple" Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Input.IsGetStaffModules = !Input.IsGetStaffModules)">Get Staff Module</MudChip>
+                                            </MudChipSet> *@
+
                                             <MudCheckBox Class="" @bind-Value="Input.IsGetStaffModules" Label="Get Staff Module" Color="Color.Dark"></MudCheckBox>
                                             <MudCheckBox Class="" @bind-Value="Input.IsViewAllStaffs" Label="View all staffs" Color="Color.Dark"></MudCheckBox>
                                             <MudCheckBox Class="" @bind-Value="Input.IsCreateNewStaff" Label="Create New Staff" Color="Color.Dark"></MudCheckBox>
@@ -294,6 +298,11 @@
     int emplIdCode = 0;
     bool isCreatedSuccessfully;
     bool isTrue;
+
+
+    //chips test========
+    private IReadOnlyCollection<bool> _selected;
+    //==============
 
     protected override async Task OnInitializedAsync()
     {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace NovaCare.Modals.MedicineModals
@@ -14,7 +15,11 @@ namespace NovaCare.Modals.MedicineModals
         public int MedicineTypeCode { get; set; }
         public string MedicineTypeName { get; set; } = string.Empty;
 
+        [ForeignKey(nameof(MedicineGenre))]
+        public int? MedicineGenreId { get; set; }
+
         //navigation properties
-        public List<MedicineMedicineType>? MedicineMedicineTypes { get; set; }
+        public MedicineGenre? MedicineGenre { get; set; }
+        public List<Medicine>? Medicines { get; set; }
     }
 }

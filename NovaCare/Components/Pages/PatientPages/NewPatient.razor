@@ -13,13 +13,14 @@
 @using NovaCare.Shared.DTOs.PatientDTOs
 @using NovaCare.Shared.DTOs.PaymentDTOs
 @using NovaCare.Shared.DTOs.TreatmentDTOs
+@using NovaCare.Shared.DTOs.RoomDTOs
 
 <PageTitle>New Patient</PageTitle>
 
 
 <MudDialog>
     <DialogContent>
-        <MudGrid Class="" Justify="Justify.SpaceBetween">
+        <MudGrid Class="" Spacing="1" Justify="Justify.SpaceBetween">
             <MudItem>
                 <SectionTitle Icon="@icon" Title="@title" />
             </MudItem>
@@ -27,7 +28,7 @@
                 <MudText Typo="Typo.h6" Class="text-center pa-1" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">ID : @(string.IsNullOrWhiteSpace(CurrentPatient.PatientCode) ? "######" : $"{CurrentPatient.PatientCode}")</MudText>
             </MudItem>
         </MudGrid>
-        <MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
+        <MudGrid Justify="Justify.Center" Spacing="1" Class="">
             <MudItem Class="pa-0" md="12">
                 <EditForm Model="CurrentPatient" method="post" OnValidSubmit="RegisterPatient" FormName="newpatient">
                     <MudGrid Spacing="3" Class="pa-3" Justify="Justify.Center">
@@ -44,11 +45,11 @@
                                         }
                                     </MudItem>
                                 </MudGrid>
-                                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
-                                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                                <MudGrid Spacing="1" Justify="Justify.Center" Class="" Style="border:none;">
+                                    <MudItem md="12" Class="">
                                         <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
                                             <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Personal Information</MudText>
-                                            <MudGrid Class="pa-3">
+                                            <MudGrid Class="pa-3" Spacing="2">
                                                 <MudItem md="4">
                                                     <MudStaticTextField For="@(() => CurrentPatient.FisrtName)" @bind-Value="CurrentPatient.FisrtName" Margin="Margin.Dense"
                                                                         Label="Fisrtname" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Fisrtname"
@@ -124,10 +125,10 @@
                                             </MudGrid>
                                         </MudItem>
                                     </MudItem>
-                                    <MudItem md="12" Class="ps-6 pe-0 pt-0 mt-3">
+                                    <MudItem md="12" Class="mt-3">
                                         <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
                                             <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Next of Kin</MudText>
-                                            <MudGrid Class="pa-3">
+                                            <MudGrid Class="pa-3" Spacing="2">
                                                 <MudItem md="6">
                                                     <MudStaticTextField For="@(() => CurrentPatient.KinFullName)" @bind-Value="CurrentPatient.KinFullName" Margin="Margin.Dense"
                                                                         Label="Kin Fullname" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Kin Fullname"
@@ -160,7 +161,7 @@
                                         }
                                     </MudItem>
                                 </MudGrid>
-                                <MudGrid Spacing="1" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                                <MudGrid Spacing="1" Justify="Justify.Center" Class="ps-3 pt-3 pe-0" Style="border:none;">
                                     <MudItem md="3" Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
                                         <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Visit Information</MudText>
                                         <MudGrid Class="pa-3">
@@ -290,50 +291,246 @@
                                                         <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Check-Ups Information</MudText>
                                                         <MudGrid Class="pa-3">
                                                             <MudGrid Spacing="1" Class="pa-3 ps-6 pe-0 pb-0">
-                                                                <MudItem md="3">
-                                                                    <MudSelect For="@(() => selectedDocTypeId)"
-                                                                               @bind-Value="selectedDocTypeId"
-                                                                               @bind-Value:after="OnDoctorTypeChange"
+                                                                <MudItem md="6">
+                                                                    <MudSelect For="@(() => CurrentTreatment.TreatmentTypeId)"
+                                                                               @bind-Value="CurrentTreatment.TreatmentTypeId"
+                                                                               @bind-Value:after="OnTreatmentTypeChosen"
                                                                                Disabled="@(CurrentVisit.VisitTypeId == 0)"
-                                                                               Label="Choose Specialist" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                               Label="Choose Treatment" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                                        <MudSelectItem Value="0" Disabled>Choose Specialist</MudSelectItem>
+                                                                        <MudSelectItem Value="0" Disabled>Choose Treatment</MudSelectItem>
 
-                                                                        @foreach (var item in AllDoctorTypes)
+                                                                        @foreach (var item in AllTreatmentTypes)
                                                                         {
-                                                                            <MudSelectItem Value="@item.Id">@($"{item.DoctorTypeName}")</MudSelectItem>
+                                                                            <MudSelectItem Value="@item.Id">@($"{item.TreatmentTypeName}")</MudSelectItem>
                                                                         }
                                                                     </MudSelect>
                                                                 </MudItem>
+
                                                                 <MudItem md="4">
-                                                                    <MudSelect For="@(() => selectedDocStaffId)"
-                                                                               @bind-Value="selectedDocStaffId"
-                                                                               Label="Choose Doctor" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                                        <MudSelectItem Value="0" Disabled>Choose Doctor</MudSelectItem>
+                                                                    <MudDatePicker For="@(() => CurrentTreatment.StartDate)" @bind-Date="CurrentTreatment.StartDate" Margin="Margin.Dense"
+                                                                                   Label="Start On" Variant="Variant.Outlined" Placeholder="Start On"
+                                                                                   UserAttributes="@(new() { { "autocomplete", "StartDate" }, { "aria-required", "true" } } )" />
+                                                                </MudItem>
 
-                                                                        @foreach (var item in FilteredDoctors)
-                                                                        {
-                                                                            <MudSelectItem Value="@item.StaffId">@($"{item.DoctorFullName}")</MudSelectItem>
-                                                                        }
-                                                                    </MudSelect>
-                                                                </MudItem>
-                                                                <MudItem md="3">
-                                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddConsultationToBatch(selectedDocStaffId))" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
-                                                                </MudItem>
                                                                 <MudItem md="2">
-                                                                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetTests" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
+                                                                    <MudNumericField For="@(() => CurrentTreatment.TreatmentQty)" @bind-Value="CurrentTreatment.TreatmentQty" Margin="Margin.Dense"
+                                                                                        Label="Quantity" Variant="Variant.Outlined" Placeholder="Quantity"
+                                                                                     UserAttributes="@(new() { { "autocomplete", "TreatmentQty" }, { "aria-required", "true" } } )" />
                                                                 </MudItem>
+
+                                                                <!--HasMedicalDept-->
+                                                                @if (HasMedicalDeptId)
+                                                                {
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => CurrentTreatment.MedicalDeptId)"
+                                                                                   @bind-Value="CurrentTreatment.MedicalDeptId"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Choose Department" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+
+                                                                            <!-- 1. Cast the placeholder '0' value to int? -->
+                                                                            <MudSelectItem Value="@((int?)0)" Disabled>Choose Department</MudSelectItem>
+
+                                                                            @foreach (var item in AllMedicalDepts)
+                                                                            {
+                                                                                <!-- 2. Explicitly cast item.Id to int? so it matches the parent MudSelect type -->
+                                                                                <MudSelectItem Value="@((int?)item.Id)">@($"{item.MedicalDepartmentName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+                                                                }
+                                                                <!--HasDoctor-->
+                                                                @if (HasDoctorId)
+                                                                {
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => CurrentTreatment.DoctorId)"
+                                                                                   @bind-Value="CurrentTreatment.DoctorId"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Choose Doctor" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+
+                                                                            <!-- 1. Cast the placeholder '0' value to int? -->
+                                                                            <MudSelectItem Value="@((int?)0)" Disabled>Choose Doctor</MudSelectItem>
+
+                                                                            @foreach (var item in AllDoctors)
+                                                                            {
+                                                                                <!-- 2. Explicitly cast item.Id to int? so it matches CurrentTreatment.DoctorId -->
+                                                                                <MudSelectItem Value="@((int?)item.Id)">@($"{item.DoctorFullName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+                                                                }
+
+
+                                                                <!--HasMedicine-->
+                                                                @if (HasMedicineId)
+                                                                {
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => selectedMedGenreId)"
+                                                                                   @bind-Value="selectedMedGenreId"
+                                                                                   @bind-Value:after="OnMedicineGenreChange"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Choose Genre" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                                            <MudSelectItem Value="0" Disabled>Choose Genre</MudSelectItem>
+
+                                                                            @foreach (var item in AllMedicineGenres)
+                                                                            {
+                                                                                <MudSelectItem Value="@item.Id">@($"{item.MedicineGenreName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+
+                                                                    
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => selectedMedTypeId)"
+                                                                                   @bind-Value="selectedMedTypeId"
+                                                                                   @bind-Value:after="OnMedicineTypeChange"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Select Type" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                                            <MudSelectItem Value="0" Disabled>Select Type</MudSelectItem>
+
+                                                                            @foreach (var item in FilteredMedicines)
+                                                                            {
+                                                                                <MudSelectItem Value="@item.Id">@($"{item.MedicineName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+
+                                                                    
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => CurrentTreatment.MedicineId)"
+                                                                                   @bind-Value="CurrentTreatment.MedicineId"
+                                                                                   @bind-Value:after="OnMedicineChoose"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Choose Genre" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                                            <MudSelectItem Value="0" Disabled>Choose Genre</MudSelectItem>
+
+                                                                            @foreach (var item in FilteredMedicines)
+                                                                            {
+                                                                                <MudSelectItem Value="@item.Id">@($"{item.MedicineName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+                                                                }
+                                                                
+                                                                <!--HasSurgery-->
+                                                                @if (HasSurgeryId)
+                                                                {
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => CurrentTreatment.SurgeryId)"
+                                                                                   @bind-Value="CurrentTreatment.SurgeryId"
+                                                                                   @bind-Value:after="OnSurgeryChosen"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Choose Surgery" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+
+                                                                            <!-- 1. FIXED: Cast the placeholder '0' value to int? -->
+                                                                            <MudSelectItem Value="@((int?)0)" Disabled>Choose Surgery</MudSelectItem>
+
+                                                                            @foreach (var item in AllSurgeries)
+                                                                            {
+                                                                                <!-- 2. FIXED: Explicitly cast item.Id to int? so it matches SurgeryId -->
+                                                                                <MudSelectItem Value="@((int?)item.Id)">@($"{item.SurgeryName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+                                                                }
+
+
+                                                                <!--HasTherapy-->
+                                                                @if (HasTherapyId)
+                                                                {
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => CurrentTreatment.TherapyId)"
+                                                                                   @bind-Value="CurrentTreatment.TherapyId"
+                                                                                   @bind-Value:after="OnTherapyChosen"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Choose Therapy" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+
+                                                                            <!-- 1. FIXED: Cast the placeholder '0' value to int? -->
+                                                                            <MudSelectItem Value="@((int?)0)" Disabled>Choose Therapy</MudSelectItem>
+
+                                                                            @foreach (var item in AllTherapies)
+                                                                            {
+                                                                                <!-- 2. FIXED: Explicitly cast item.Id to int? so it matches TherapyId -->
+                                                                                <MudSelectItem Value="@((int?)item.Id)">@($"{item.TherapyName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+                                                                }
+
+
+                                                                <!--HasWard-->
+                                                                @if (HasWardId)
+                                                                {
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => CurrentTreatment.WardId)"
+                                                                                   @bind-Value="CurrentTreatment.WardId"
+                                                                                   @bind-Value:after="OnWardChosen"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Choose Ward" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+
+                                                                            <!-- 1. FIXED: Cast the placeholder '0' value to int? -->
+                                                                            <MudSelectItem Value="@((int?)0)" Disabled>Choose Ward</MudSelectItem>
+
+                                                                            @foreach (var item in AllWards)
+                                                                            {
+                                                                                <!-- 2. FIXED: Explicitly cast item.Id to int? so it matches WardId -->
+                                                                                <MudSelectItem Value="@((int?)item.Id)">@($"{item.WardName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+                                                                }
+
+
+                                                                <!--HasRoom-->
+                                                                @if (HasRoomId)
+                                                                {
+                                                                    <MudItem md="4">
+                                                                        <MudSelect For="@(() => CurrentTreatment.RoomId)"
+                                                                                   @bind-Value="CurrentTreatment.RoomId"
+                                                                                   Disabled="@(CurrentVisit.VisitTypeId == 0)"
+                                                                                   Label="Choose Room" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+
+                                                                            <!-- 1. FIXED: Cast the placeholder '0' value to int? -->
+                                                                            <MudSelectItem Value="@((int?)0)" Disabled>Choose Room</MudSelectItem>
+
+                                                                            @foreach (var item in AllRooms)
+                                                                            {
+                                                                                <!-- 2. FIXED: Explicitly cast item.Id to int? so it matches RoomId -->
+                                                                                <MudSelectItem Value="@((int?)item.Id)">@($"{item.RoomName}")</MudSelectItem>
+                                                                            }
+                                                                        </MudSelect>
+                                                                    </MudItem>
+                                                                }
+                                                                <MudItem md="12">
+                                                                    <MudGrid Spacing="1" Justify="Justify.FlexEnd">
+                                                                        <MudItem md="3">
+                                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddTreatmentToBatch" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
+                                                                        </MudItem>
+                                                                        <MudItem md="3">
+                                                                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetTreatments" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
+                                                                        </MudItem>
+                                                                    </MudGrid>
+                                                                </MudItem>
+
                                                             </MudGrid>
                                                             <MudItem md="12">
-                                                                @if (!ConsultationsBatch!.Any())
+                                                                @if (!TreatmentsBatch!.Any())
                                                                 {
                                                                     <NoDataNotice NoDataMessage="No Doctor in Batch" />
                                                                 }
                                                                 else
                                                                 {
 
-                                                                    <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@ConsultationsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
+                                                                    <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@TreatmentsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
                                                                         <HeaderContent>
                                                                             <MudTh>Name</MudTh>
                                                                             <MudTh>Cost</MudTh>
@@ -342,15 +539,15 @@
                                                                             </MudTh>
                                                                         </HeaderContent>
                                                                         <RowTemplate>
-                                                                            <MudTd DataLabel="Name">@docContext.DoctorFullName</MudTd>
-                                                                            <MudTd DataLabel="Consultation Cost">@docContext.ConsultationCost</MudTd>
+                                                                            <MudTd DataLabel="Name">@docContext.TreatmentTypeName</MudTd>
+                                                                            <MudTd DataLabel="Consultation Cost">@docContext.TreatmentCost</MudTd>
                                                                             <MudTd DataLabel="" Class="text-end">
-                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveConsultationFromBatch(docContext))" />
+                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveTreatmentFromBatch(docContext))" />
                                                                             </MudTd>
                                                                         </RowTemplate>
                                                                         <FooterContent>
                                                                             <MudTh>Total Cost</MudTh>
-                                                                            <MudTh>@LabTestsBatch?.Sum(x => x.LabTestCost)</MudTh>
+                                                                            <MudTh>@TreatmentsBatch?.Sum(x => x.TreatmentCost)</MudTh>
                                                                             <MudTh></MudTh>
                                                                         </FooterContent>
                                                                     </MudTable>
@@ -368,10 +565,10 @@
                                             <MudGrid Spacing="1" Justify="Justify.Center" Class="pa-0" Style="border:none;">
                                                 <MudItem md="12" Class="ps-6 pe-0 pt-0">
                                                     <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
-                                                        <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Check-Ups Information</MudText>
+                                                        <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Consultations Information</MudText>
                                                         <MudGrid Class="pa-3">
                                                             <MudGrid Spacing="1" Class="pa-3 ps-6 pe-0 pb-0">
-                                                                <MudItem md="3">
+                                                                <MudItem md="4">
                                                                     <MudSelect For="@(() => selectedDocTypeId)"
                                                                                @bind-Value="selectedDocTypeId"
                                                                                @bind-Value:after="OnDoctorTypeChange"
@@ -405,11 +602,15 @@
                                                                                    Label="Start On" Variant="Variant.Outlined" Placeholder="Start On"
                                                                                    UserAttributes="@(new() { { "autocomplete", "licenceexpdate" }, { "aria-required", "true" } } )" />
                                                                 </MudItem>
-                                                                <MudItem md="3">
-                                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddConsultationToBatch(selectedDocStaffId))" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
-                                                                </MudItem>
-                                                                <MudItem md="2">
-                                                                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetConsultationss" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
+                                                                <MudItem md="12">
+                                                                    <MudGrid Justify="Justify.FlexEnd" Spacing="1">
+                                                                        <MudItem md="3">
+                                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddConsultationToBatch(selectedDocStaffId))" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
+                                                                        </MudItem>
+                                                                        <MudItem md="3">
+                                                                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetConsultationss" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
+                                                                        </MudItem>
+                                                                    </MudGrid>
                                                                 </MudItem>
                                                             </MudGrid>
                                                             <MudItem md="12">
@@ -452,34 +653,50 @@
                                 </MudGrid>
                             </MudStep>
                             <MudStep Title="Step 3">
-                                <MudGrid>
-                                    <MudItem md="3">
+                                <MudGrid Class="mb-3">
+                                    <MudItem md="2">
                                         <MudCheckBox @bind-Value="_step3Complete" ReadOnly="true" Dense="true" Color="Color.Success">Preliminary Test</MudCheckBox>
                                     </MudItem>
-                                    <MudItem md="9">
-                                        @if (isCreatedSuccessfully)
-                                        {
-                                            <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">@saveMessage</MudAlert>
-                                        }
+                                    <MudItem md="10">
+                                        <MudText Color="Color.Error" Align="Align.End">Patient should proceed to the cashier make payment for any of the requested service before proceeding with preliminary tests</MudText>
                                     </MudItem>
                                 </MudGrid>
-                                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                                <MudGrid Spacing="5" Justify="Justify.Center" Class="rounded-2" Style="border:none; background-color: rgba(0,0,0,0.5)">
                                     <MudItem md="12" Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
                                         <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Preliminary Tests</MudText>
                                         <MudGrid Class="pa-3">
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryPressure)" @bind-Value="CurrentPreliminaryTest.PreliminaryPressure" Margin="Margin.Dense"
                                                                  Label="Pressure" Variant="Variant.Outlined" Placeholder="Pressure"
+                                                                 ReadOnly="@(!(
+                                                                                (CurrentVisit.Consultations?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.LabTests?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.MedicinePrescription?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.Treatments?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false)
+                                                                            ))"
+
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminarypressure" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryWeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryWeight" Margin="Margin.Dense"
                                                                  Label="Weight" Variant="Variant.Outlined" Placeholder="Weight"
+                                                                 ReadOnly="@(!(
+                                                                                (CurrentVisit.Consultations?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.LabTests?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.MedicinePrescription?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.Treatments?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false)
+                                                                            ))"
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminaryweight" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryHeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryHeight" Margin="Margin.Dense"
                                                                  Label="Height" Variant="Variant.Outlined" Placeholder="Height"
+                                                                 ReadOnly="@(!(
+                                                                                (CurrentVisit.Consultations?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.LabTests?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.MedicinePrescription?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.Treatments?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false)
+                                                                            ))"
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminaryheight" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                         </MudGrid>
@@ -520,16 +737,30 @@
     List<ConsultationDto>? ConsultationsBatch = new();
     List<LabTestDto>? LabTestsBatch = new();
     List<TreatmentDto>? TreatmentsBatch = new();
+    List<TreatmentTypeDto>? AllTreatmentTypes = new();
+    List<SurgeryDto>? AllSurgeries = new();
+    List<TherapyDto>? AllTherapies = new();
+    List<MedicalDepartmentDto>? AllMedicalDepts = new();
+    List<MedicineGenreDto>? AllMedicineGenres = new();
+    List<MedicineTypeDto>? AllMedicineTypes = new();
+    List<MedicineTypeDto>? FilteredMedicineTypes = new();
+    List<MedicineDto>? AllMedicines = new();
+    List<MedicineDto>? FilteredMedicines = new();
+    List<WardDto>? AllWards = new();
+    List<RoomDto>? AllRooms = new();
 
     PaymentModeDto CurrentPaymentMode = new();
     PatientDto CurrentPatient = new();
     VisitDto CurrentVisit = new();
+    TreatmentDto CurrentTreatment = new();
     PreliminaryTestDto CurrentPreliminaryTest = new();
     ConsultationDto CurrentConsultation = new();
     LabTestDto CurrentLabTest = new();
     InsuaranceDto CurrentInsuaranceCompany = new();
     DoctorDto CurrentDoctor = new();
 
+    int selectedMedGenreId = 0;
+    int selectedMedTypeId = 0;
     int selectedDocTypeId = 0;
     string selectedDocStaffId = string.Empty;
     string saveMessage = string.Empty;
@@ -544,6 +775,14 @@
     private bool? _step2TextInput;
     private bool? _step3Complete;
 
+    bool HasMedicineId;
+    bool HasSurgeryId;
+    bool HasTherapyId;
+    bool HasMedicalDeptId;
+    bool HasWardId;
+    bool HasDoctorId;
+    bool HasRoomId;
+
     protected override async Task OnInitializedAsync()
     {
         PatientStatus = await patientService.GetAllPatientTypesAsync();
@@ -554,6 +793,48 @@
         AllDiseases = await diseaseService.GetAllDiseasesAsync();
         AllDoctors = await doctorService.GetAllDoctorsAsync();
         AllDoctorTypes = await doctorService.GetDoctorTypesAsync();
+        AllTreatmentTypes = await medicineService.GetAllTreatmentTypeAsync();
+        AllMedicineGenres = await medicineService.GetAllMedicineGenresAsync();
+        AllMedicineTypes = await medicineService.GetAllMedicineTypesAsync();
+        AllMedicines = await medicineService.GetAllMedicinesAsync();
+        AllSurgeries = await medicineService.GetAllSurgeriesAsync();
+        AllTherapies = await medicineService.GetAllTherapiesAsync();
+        AllMedicalDepts = await medicineService.GetAllMedicalDeptsAsync();
+        AllWards = await roomService.GetAllWardsAsync();
+        AllRooms = await roomService.GetAllRoomsAsync();
+    }
+
+    public async Task OnMedicineGenreChange()
+    {
+        FilteredMedicineTypes = AllMedicineTypes?.Where(gen => gen.MedicineGenreId == selectedMedGenreId).ToList();
+
+        // int selectedMedGenreId = 0;
+        // int selectedMedTypeId = 0;
+    }
+
+    public async Task OnMedicineTypeChange()
+    {
+        FilteredMedicines = AllMedicines?.Where(gen => gen.MedicineTypeId == selectedMedTypeId && gen.MedicineStatusName.ToLower().Trim() == "instock").ToList();
+    }
+
+    public async Task OnMedicineChoose()
+    {
+        CurrentTreatment.TreatmentCost = AllMedicines?.FirstOrDefault(gen => gen.Id == CurrentTreatment.MedicineId)?.BuyingPrice ?? 0m;
+    }
+
+    public async Task OnSurgeryChosen()
+    {
+        CurrentTreatment.TreatmentCost = AllSurgeries?.FirstOrDefault(gen => gen.Id == CurrentTreatment.SurgeryId)?.SurgeryCost ?? 0m;
+    }
+
+    public async Task OnTherapyChosen()
+    {
+        CurrentTreatment.TreatmentCost = AllTherapies?.FirstOrDefault(gen => gen.Id == CurrentTreatment.TherapyId)?.TherapyCost ?? 0m;
+    }
+
+    public async Task OnWardChosen()
+    {
+        CurrentTreatment.TreatmentCost = AllWards?.FirstOrDefault(gen => gen.Id == CurrentTreatment.WardId)?.WardCost ?? 0m;
     }
 
     public async Task OnDoctorTypeChange()
@@ -656,17 +937,25 @@
                         if (LabTestsBatch != null && LabTestsBatch.Any())
                         {
                             await SaveLabTestAsync();
+
+                            CurrentVisit.LabTests = LabTestsBatch;
                         }
-                        
+
                         if (ConsultationsBatch != null && ConsultationsBatch.Any())
                         {
                             await SaveConsultationsAsync();
+
+                            CurrentVisit.Consultations = ConsultationsBatch;
                         }
 
                         if (TreatmentsBatch != null && TreatmentsBatch.Any())
                         {
                             await SaveTreatmentsAsync();
+
+                            CurrentVisit.Treatments = TreatmentsBatch;
                         }
+
+                        await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
                     }
 
                     if (CurrentPreliminaryTest.Id == 0)
@@ -788,6 +1077,12 @@
         if (ConsultationsBatch != null)
             ConsultationsBatch?.Remove(doctorDto);
     }
+    
+    public async Task ResetConsultationss()
+    {
+        ConsultationsBatch?.Clear();
+
+    }
 
     public async Task AddLabTestToBatch(LabTestDto labTestDto)
     {
@@ -889,7 +1184,7 @@
 
     }
 
-    
+
     public async Task SaveConsultationsAsync()
     {
         addedSuccessfully = "Added:";
@@ -952,6 +1247,66 @@
         }
     }
 
+
+    public async Task OnTreatmentTypeChosen()
+    {
+        CurrentTreatment.TreatmentTypeName = AllTreatmentTypes?.FirstOrDefault(x => x.Id == CurrentTreatment.TreatmentTypeId)?.TreatmentTypeName ?? string.Empty;
+        HasMedicineId = AllTreatmentTypes?.FirstOrDefault(x => x.Id == CurrentTreatment.TreatmentTypeId)?.HasMedicineId ?? false;
+        HasSurgeryId = AllTreatmentTypes?.FirstOrDefault(x => x.Id == CurrentTreatment.TreatmentTypeId)?.HasSurgeryId ?? false;
+        HasTherapyId = AllTreatmentTypes?.FirstOrDefault(x => x.Id == CurrentTreatment.TreatmentTypeId)?.HasTherapyId ?? false;
+        HasMedicalDeptId = AllTreatmentTypes?.FirstOrDefault(x => x.Id == CurrentTreatment.TreatmentTypeId)?.HasMedicalDeptId ?? false;
+        HasWardId = AllTreatmentTypes?.FirstOrDefault(x => x.Id == CurrentTreatment.TreatmentTypeId)?.HasWardId ?? false;
+        HasDoctorId = AllTreatmentTypes?.FirstOrDefault(x => x.Id == CurrentTreatment.TreatmentTypeId)?.HasDoctorId ?? false;
+        HasRoomId = AllTreatmentTypes?.FirstOrDefault(x => x.Id == CurrentTreatment.TreatmentTypeId)?.HasRoomId ?? false;
+    }
+
+    public async Task AddTreatmentToBatch()
+    {
+        //var patient = await patientService.GetPatientByIdAsync(treatmentDto.PatientId);
+        //var disease = await diseaseService.GetDiseaseByNameAsync(treatmentDto.DiseaseName);
+        
+        var newTreatment = new TreatmentDto
+        {
+            StartDate = CurrentTreatment.StartDate,
+            FinishDate = CurrentTreatment.FinishDate,
+            TreatmentQty = CurrentTreatment.TreatmentQty,
+            TreatmentCost = CurrentTreatment.TreatmentCost,
+
+            TreatmentTypeName = CurrentTreatment.TreatmentTypeName,
+            MedicineId = CurrentTreatment.MedicineId,
+            SurgeryId = CurrentTreatment.SurgeryId,
+            TherapyId = CurrentTreatment.TherapyId,
+            MedicalDeptId = CurrentTreatment.MedicalDeptId,
+            WardId = CurrentTreatment.WardId,
+            DoctorId = CurrentTreatment.DoctorId,
+            RoomId = CurrentTreatment.RoomId,
+
+            TreatmentStatusId = CurrentTreatment.TreatmentStatusId,
+            TreatmentTypeId = CurrentTreatment.TreatmentTypeId
+        };
+
+        if (!string.IsNullOrWhiteSpace(newTreatment.TreatmentTypeName))
+            TreatmentsBatch!.Add(newTreatment);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task RemoveTreatmentFromBatch(TreatmentDto labTestDto)
+    {
+        if (TreatmentsBatch != null)
+            TreatmentsBatch.Remove(labTestDto);
+    }
+
+    
+    public async Task ResetTreatments()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isCreatedSuccessfully = false;
+        TreatmentsBatch?.Clear();
+
+    }
+
     public async Task SaveTreatmentsAsync()
     {
         addedSuccessfully = "Added:";
@@ -968,11 +1323,11 @@
 
         try
         {
-            foreach (var consultation in TreatmentsBatch)
+            foreach (var treatment in TreatmentsBatch)
             {
-                if (consultation.Id > 0)
+                if (treatment.Id > 0)
                 {
-                    var isSucess = await medicineService.UpdateTreatmentAsync(consultation, consultation.Id);
+                    var isSucess = await medicineService.UpdateTreatmentAsync(treatment, treatment.Id);
 
                     if (isSucess)
                     {
@@ -988,9 +1343,9 @@
                 else
                 {
 
-                    var isSucess = await medicineService.AddTreatmentAsync(consultation);
+                    var isSucess = await medicineService.AddTreatmentAsync(treatment);
 
-                    if (isSucess)
+                    if (isSucess > 0)
                     {
                         saveMessage = $"Treatment added sucessfully";
                         Console.WriteLine(saveMessage);
@@ -1014,9 +1369,4 @@
         }
     }
 
-    public async Task ResetConsultationss()
-    {
-        ConsultationsBatch?.Clear();
-
-    }
 }

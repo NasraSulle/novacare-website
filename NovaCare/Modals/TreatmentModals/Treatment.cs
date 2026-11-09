@@ -2,6 +2,7 @@
 using NovaCare.Modals.DoctorModals;
 using NovaCare.Modals.JoinTables;
 using NovaCare.Modals.MedicineModals;
+using NovaCare.Modals.PatientModals;
 using NovaCare.Modals.RoomModals; // Assuming Ward and Room live here based on previous steps
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,9 @@ namespace NovaCare.Modals.TreatmentModals
         //properties
         [Key]
         public int Id { get; set; }
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
         public DateTime FinishDate { get; set; }
-        public double TreatmentQty { get; set; } = 0d;
+        public int TreatmentQty { get; set; } = 1;
         public decimal TreatmentCost { get; set; } = 0m;
 
         public int? MedicineId { get; set; }
@@ -59,5 +60,11 @@ namespace NovaCare.Modals.TreatmentModals
 
         [ForeignKey(nameof(RoomId))]
         public Room? Room { get; set; }
+
+
+
+        [ForeignKey(nameof(Bill))]
+        public int? BillId { get; set; }
+        public Bill? Bill { get; set; }
     }
 }

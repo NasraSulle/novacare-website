@@ -1,6 +1,9 @@
-﻿using NovaCare.Shared.DTOs.JoinDto;
+﻿using NovaCare.Modals.MedicineModals;
+using NovaCare.Shared.DTOs.JoinDto;
+using NovaCare.Shared.DTOs.PatientDTOs;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace NovaCare.Shared.DTOs.MedicineDTOs
@@ -12,7 +15,6 @@ namespace NovaCare.Shared.DTOs.MedicineDTOs
         public byte[]? Picture { get; set; }
         public string MedicineName { get; set; } = string.Empty;
         public string MedicineGenre { get; set; } = string.Empty;
-        public string MedicineType { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; }
         public double MedicineQty { get; set; } = 0d;
         public decimal BuyingPrice { get; set; } = 0m;
@@ -20,14 +22,18 @@ namespace NovaCare.Shared.DTOs.MedicineDTOs
 
         //foreign keys
         public int MedicineStatusId { get; set; }
+        public int? MedicineTypeId { get; set; } 
 
         //navigation properties
-        public MedicineStatusDto? MedicineStatus { get; set; }
-        //public List<MedicineMedicineTypeDto>? MedicineMedicineTypes { get; set; }
-        //public List<MedicineTreatmentDto>? MedicineTreatments { get; set; }
+        public MedicineStatus? MedicineStatus { get; set; }
+        public MedicineType? MedicineType { get; set; }
 
         //for display
         public string MedicineStatusName { get; set; } = string.Empty;
+        public string MedicineTypeName { get; set; } = string.Empty;
+
+        public int? BillId { get; set; }
+        public BillDto? Bill { get; set; }
 
     }
 }

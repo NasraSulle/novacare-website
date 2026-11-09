@@ -1,4 +1,5 @@
 ﻿using NovaCare.Modals.DoctorModals;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NovaCare.Modals.TreatmentModals
 {
@@ -9,6 +10,8 @@ namespace NovaCare.Modals.TreatmentModals
         public string SurgeryCodeNumber { get; set; } = string.Empty;
         public decimal SurgeryCost { get; set; } = 0m;
 
+
+        [ForeignKey(nameof(MedicalDepartment))]
         public int MedicalDepartmentId { get; set; }
         public MedicalDepartment? MedicalDepartment { get; set; }
     }

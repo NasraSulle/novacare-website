@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NovaCare")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+44f5f31d614c78659ce32e737263555a10b60c80")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ac89cf03d07cdd4d3b040d5be3ac6c9d02dc43be")]
 [assembly: System.Reflection.AssemblyProductAttribute("NovaCare")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NovaCare")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

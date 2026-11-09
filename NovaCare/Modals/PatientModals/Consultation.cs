@@ -33,5 +33,9 @@ namespace NovaCare.Modals.PatientModals
         public Room? Room { get; set; }
         public Doctor? Doctor { get; set; }
         public Visit? Visit { get; set; }
+
+        [ForeignKey(nameof(Bill))]
+        public int? BillId { get; set; }
+        public Bill? Bill { get; set; }
     }
 }

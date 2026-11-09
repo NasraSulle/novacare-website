@@ -1,5 +1,4 @@
-﻿using NovaCare.Modals.DoctorModals;
-using NovaCare.Shared.DTOs.DoctorDTOs;
+﻿using NovaCare.Shared.DTOs.DoctorDTOs;
 
 namespace NovaCare.Shared.DTOs.PatientDTOs
 {
@@ -20,11 +19,14 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         // Navigation properties
         public DoctorDto? Doctor { get; set; }
         public VisitDto? Visit { get; set; }
-        public MedicalDepartment? MedicalDepartment { get; set; }
+        public MedicalDepartmentDto? MedicalDepartment { get; set; }
 
         public string MedicalDepartmentName { get; set; } = string.Empty;
         public string DoctorFullName { get; set; } = string.Empty;
         public string VisitTypeName { get; set; } = string.Empty;
         public string RoomName { get; set; } = string.Empty;
+
+        public int? BillId { get; set; }
+        public BillDto? Bill { get; set; }
     }
 }

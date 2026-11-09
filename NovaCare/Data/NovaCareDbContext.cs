@@ -36,8 +36,9 @@ namespace NovaCare.Data
                 );
 
             builder.Entity<TreatmentStatus>().HasData(
-                new TreatmentStatus { Id = 1, TreatmentStatusName = "OnGoing" },
-                new TreatmentStatus { Id = 2, TreatmentStatusName = "Completed" }
+                new TreatmentStatus { Id = 1, TreatmentStatusName = "Requested" },
+                new TreatmentStatus { Id = 2, TreatmentStatusName = "OnGoing" },
+                new TreatmentStatus { Id = 3, TreatmentStatusName = "Completed" }
                 );
 
             builder.Entity<StaffType>().HasData(
@@ -254,6 +255,11 @@ namespace NovaCare.Data
                 new Ward { Id = 12, WardName = "Post-Surgical Recovery Ward", WardCost = 30000, MedicalDepartmentId = 15 } // General Surgery
             );
 
+            builder.Entity<VisitStatus>().HasData(
+                new VisitStatus { Id = 1, VisitStatusName = "Active" },    // Patient is currently in the hospital/clinic
+                new VisitStatus { Id = 2, VisitStatusName = "Completed" }, // Discharged & bills finalized (corresponds to "Old")
+                new VisitStatus { Id = 3, VisitStatusName = "Cancelled" }  // Visit created by mistake or patient left before triage
+            );
 
             builder.HasSequence<int>("DoctorCodeSequence").StartsAt(1000).IncrementsBy(1);
             builder.Entity<DoctorCode>().Property(d => d.DocCode).UseSequence("DoctorCodeSequence");
@@ -340,6 +346,8 @@ namespace NovaCare.Data
         public DbSet<VisitType> VisitTypes { get; set; }
         public DbSet<Therapy> Therapies { get; set; }
         public DbSet<MedicalDepartment> MedicalDepartments { get; set; }
+        public DbSet<Surgery> Surgeries { get; set; }
+        public DbSet<Ward> Wards { get; set; }
 
 
         #endregion

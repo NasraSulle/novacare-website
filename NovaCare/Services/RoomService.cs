@@ -64,6 +64,24 @@ namespace NovaCare.Services
             return types ?? new();
         }
 
+        public async Task<List<WardDto>> GetAllWardsAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var types = await context.Wards
+                .AsNoTracking()
+                .Select(type => new WardDto
+                {
+                    Id = type.Id,
+                    WardName = type.WardName,
+                    WardCost = type.WardCost,
+                    MedicalDepartmentId = type.MedicalDepartmentId,
+                    MedicalDepartmentName = type.MedicalDepartment != null ? type.MedicalDepartment.MedicalDepartmentName : string.Empty
+                })
+                .ToListAsync();
+
+            return types ?? new();
+        }
+
         public async Task<RoomDto> GetRoomByIdAsync(int roomId)
         {
             using var context = _contextFactory.CreateDbContext();

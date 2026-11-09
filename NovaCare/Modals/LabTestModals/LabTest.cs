@@ -32,5 +32,9 @@ namespace NovaCare.Modals.LabTestModals
         //navigation properties
         public Visit? Visit { get; set; }
         public List<LabTestResultComposition>? LabTestResultCompositions { get; set; }
+
+        [ForeignKey(nameof(Bill))]
+        public int? BillId { get; set; }
+        public Bill? Bill { get; set; }
     }
 }
