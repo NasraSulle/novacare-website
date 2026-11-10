@@ -1,0 +1,77 @@
+﻿@page "/BillsIndex"
+
+<PageTitle>BillIndex - NovaCare</PageTitle>
+
+@using Microsoft.AspNetCore.Authorization
+@inject IDialogService Dialog
+
+@rendermode InteractiveServer
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+@attribute [Authorize]
+<PageTitle>Payments - NovaCare</PageTitle>
+
+<MudGrid Class="pa-3" Justify="Justify.FlexStart">
+    <SectionTitle Icon="@icon" Title="@title" />
+</MudGrid>
+<MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
+    <MudItem Class="pa-0" md="12">
+            <MudTabs Outlined="true" Position="Position.Start" Rounded="false" Border="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-1">
+                <MudTabPanel Style="text-transform: none;" Text="Bills" OnClick="@(() => { genre = "Bills"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Text="All Bills" Style="text-transform: none;">
+                                <Bills CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Interim Bills" Style="text-transform: none;">
+                                <Bills CurrentUser="currentUser" FilterBy="Interim" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Advance Bills" Style="text-transform: none;">
+                                <Bills CurrentUser="currentUser" FilterBy="Advance" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Final Bills" Style="text-transform: none;">
+                                <Bills CurrentUser="currentUser" FilterBy="Final" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+                <MudTabPanel Style="text-transform: none;" Text="Payments" OnClick="@(() => { genre = "Payments"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Style="text-transform: none;" Text="All Payment">
+                                <Payments CurrentUser="currentUser" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Partial Payments">
+                                <Payments CurrentUser="currentUser" FilterBy="Partial" Genre="@genre" />
+                            </MudTabPanel>
+                            <MudTabPanel Style="text-transform: none;" Text="Full Payments">
+                                <Payments CurrentUser="currentUser" FilterBy="Full" Genre="@genre" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+            </MudTabs>
+        </MudItem>
+</MudGrid>
+
+    @code {
+
+    StaffDto currentUser = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+
+    string genre = string.Empty;
+    public string icon = Icons.Material.Filled.Payments;
+    public string title = "Bills & Payments Section";
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await userService.GetLoggedInUserAsync();
+
+        genre = "Bills";
+        await InvokeAsync(StateHasChanged);
+    }
+
+}
+

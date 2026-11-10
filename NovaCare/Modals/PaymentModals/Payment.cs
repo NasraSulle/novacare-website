@@ -23,9 +23,12 @@ namespace NovaCare.Modals.PaymentModals
         [ForeignKey(nameof(Bill))]
         public int BillId { get; set; }
 
+        [ForeignKey(nameof(PaymentMode))]
+        public int PaymentModeId { get; set; }
+
         //navigation properties
+        public PaymentMode? PaymentMode { get; set; }
         public Bill? Bill { get; set; }
         public PaymentStatus? PaymentStatus { get; set; }
-        public List<PatientPaymentMode>? PatientPaymentModes { get; set; }
     }
 }
