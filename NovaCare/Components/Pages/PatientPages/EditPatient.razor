@@ -10,10 +10,11 @@
 <MudSnackbarProvider /> *@
 
 @using NovaCare.Shared.DTOs.DiseaseDTOs
+@using NovaCare.Shared.DTOs.JoinDTOs
 @using NovaCare.Shared.DTOs.PatientDTOs
 @using NovaCare.Shared.DTOs.PaymentDTOs
-@using NovaCare.Shared.DTOs.TreatmentDTOs
 @using NovaCare.Shared.DTOs.RoomDTOs
+@using NovaCare.Shared.DTOs.TreatmentDTOs
 
 <PageTitle>New Patient</PageTitle>
 
@@ -653,34 +654,49 @@
                                 </MudGrid>
                             </MudStep>
                             <MudStep Title="Step 3">
-                                <MudGrid>
-                                    <MudItem md="3">
+                                <MudGrid Class="mb-3">
+                                    <MudItem md="2">
                                         <MudCheckBox @bind-Value="_step3Complete" ReadOnly="true" Dense="true" Color="Color.Success">Preliminary Test</MudCheckBox>
                                     </MudItem>
-                                    <MudItem md="9">
-                                        @if (isCreatedSuccessfully)
-                                        {
-                                            <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">@saveMessage</MudAlert>
-                                        }
+                                    <MudItem md="10">
+                                        <MudText Color="Color.Error" Align="Align.End">Patient should proceed to the cashier to make payment for any of the requested service before proceeding with preliminary tests</MudText>
                                     </MudItem>
                                 </MudGrid>
-                                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                                <MudGrid Spacing="5" Justify="Justify.Center" Class="rounded-2" Style="border:none; background-color: rgba(0,0,0,0.5)">
                                     <MudItem md="12" Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
                                         <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Preliminary Tests</MudText>
                                         <MudGrid Class="pa-3">
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryPressure)" @bind-Value="CurrentPreliminaryTest.PreliminaryPressure" Margin="Margin.Dense"
                                                                  Label="Pressure" Variant="Variant.Outlined" Placeholder="Pressure"
+                                                                 ReadOnly="@(!(
+                                                                                (CurrentVisit.Consultations?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.LabTests?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.MedicinePrescription?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.Treatments?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false)
+                                                                            ))"
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminarypressure" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryWeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryWeight" Margin="Margin.Dense"
                                                                  Label="Weight" Variant="Variant.Outlined" Placeholder="Weight"
+                                                                 ReadOnly="@(!(
+                                                                                (CurrentVisit.Consultations?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.LabTests?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.MedicinePrescription?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.Treatments?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false)
+                                                                            ))"
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminaryweight" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryHeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryHeight" Margin="Margin.Dense"
                                                                  Label="Height" Variant="Variant.Outlined" Placeholder="Height"
+                                                                 ReadOnly="@(!(
+                                                                                (CurrentVisit.Consultations?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.LabTests?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.MedicinePrescription?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false) ||
+                                                                                (CurrentVisit.Treatments?.Any(x => x.BillId != null && (x.Bill?.Payments?.Any() ?? false)) ?? false)
+                                                                            ))"
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminaryheight" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                         </MudGrid>
@@ -861,6 +877,7 @@
             {
                 saveMessage = string.Empty;
                 CurrentPatient.RegisteredDate = DateTime.Now;
+
                 var patientCode = await patientService.AddPatientAsync(CurrentPatient);
 
                 if (!string.IsNullOrWhiteSpace(patientCode))
@@ -898,6 +915,21 @@
             {
                 saveMessage = string.Empty;
                 var savedpatient = await patientService.GetPatientByCodeAsync(CurrentPatient.PatientCode);
+
+                if (!string.IsNullOrWhiteSpace(selectedDocStaffId))
+                {
+                    var currentDoc = await doctorService.GetDoctorByStaffId(selectedDocStaffId);
+
+                    CurrentPatient.DoctorPatients = new List<DoctorPatientDto>
+                    {
+                        new DoctorPatientDto
+                        {
+                            DoctorId = currentDoc.Id,
+                            PatientId = savedpatient.Id,
+                        }
+                    };
+                }
+
                 var success = await patientService.UpdatePatientAsync(CurrentPatient, savedpatient.Id);
                 if (success)
                 {
@@ -942,18 +974,17 @@
                         await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
                     }
 
-                    if (CurrentPreliminaryTest.Id == 0)
-                    {
-                        result = await patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
-                        if (result != null)
-                            CurrentVisit.PreliminaryTest = result;
-                    }
+                    // if (CurrentPreliminaryTest.Id == 0)
+                    // {
+                    //     result = await patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
+                    //     if (result != null)
+                    //         CurrentVisit.PreliminaryTest = result;
+                    // }
                     var visitUpdateResponse = await patientService.UpdateVisitAsync(CurrentVisit, addedVisitId);
 
                     _step2TextInput = true;
                     StateHasChanged();
                 }
-
 
             }
             catch (Exception ex)

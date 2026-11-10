@@ -10,10 +10,11 @@
 <MudSnackbarProvider /> *@
 
 @using NovaCare.Shared.DTOs.DiseaseDTOs
+@using NovaCare.Shared.DTOs.JoinDTOs
 @using NovaCare.Shared.DTOs.PatientDTOs
 @using NovaCare.Shared.DTOs.PaymentDTOs
-@using NovaCare.Shared.DTOs.TreatmentDTOs
 @using NovaCare.Shared.DTOs.RoomDTOs
+@using NovaCare.Shared.DTOs.TreatmentDTOs
 
 <PageTitle>New Patient</PageTitle>
 
@@ -658,7 +659,7 @@
                                         <MudCheckBox @bind-Value="_step3Complete" ReadOnly="true" Dense="true" Color="Color.Success">Preliminary Test</MudCheckBox>
                                     </MudItem>
                                     <MudItem md="10">
-                                        <MudText Color="Color.Error" Align="Align.End">Patient should proceed to the cashier make payment for any of the requested service before proceeding with preliminary tests</MudText>
+                                        <MudText Color="Color.Error" Align="Align.End">Patient should proceed to the cashier to make payment for any of the requested service before proceeding with preliminary tests</MudText>
                                     </MudItem>
                                 </MudGrid>
                                 <MudGrid Spacing="5" Justify="Justify.Center" Class="rounded-2" Style="border:none; background-color: rgba(0,0,0,0.5)">
@@ -877,6 +878,7 @@
             {
                 saveMessage = string.Empty;
                 CurrentPatient.RegisteredDate = DateTime.Now;
+
                 var patientCode = await patientService.AddPatientAsync(CurrentPatient);
 
                 if (!string.IsNullOrWhiteSpace(patientCode))
@@ -914,6 +916,21 @@
             {
                 saveMessage = string.Empty;
                 var savedpatient = await patientService.GetPatientByCodeAsync(CurrentPatient.PatientCode);
+
+                if (!string.IsNullOrWhiteSpace(selectedDocStaffId))
+                {
+                    var currentDoc = await doctorService.GetDoctorByStaffId(selectedDocStaffId);
+
+                    CurrentPatient.DoctorPatients = new List<DoctorPatientDto>
+                    {
+                        new DoctorPatientDto
+                        {
+                            DoctorId = currentDoc.Id,
+                            PatientId = savedpatient.Id,
+                        }
+                    };
+                }
+
                 var success = await patientService.UpdatePatientAsync(CurrentPatient, savedpatient.Id);
                 if (success)
                 {
@@ -958,18 +975,17 @@
                         await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
                     }
 
-                    if (CurrentPreliminaryTest.Id == 0)
-                    {
-                        result = await patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
-                        if (result != null)
-                            CurrentVisit.PreliminaryTest = result;
-                    }
+                    // if (CurrentPreliminaryTest.Id == 0)
+                    // {
+                    //     result = await patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
+                    //     if (result != null)
+                    //         CurrentVisit.PreliminaryTest = result;
+                    // }
                     var visitUpdateResponse = await patientService.UpdateVisitAsync(CurrentVisit, addedVisitId);
 
                     _step2TextInput = true;
                     StateHasChanged();
                 }
-
 
             }
             catch (Exception ex)

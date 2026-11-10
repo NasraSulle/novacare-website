@@ -188,72 +188,68 @@
                         <MudItem Style="height:100%;" Class="pa-0">
                             <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-bottom:none; border-bottom-right-radius:0px;  border-bottom-left-radius:0px;">Grant Permissions</MudText>
                             <MudTabs Elevation="2" ApplyEffectsToContainer="true" Centered="true" Color="Color.Primary" TabPanelsClass="pa-6" Class="opacity-75 shadow-none" Style="border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;height:90%; border-radius:5px;">
-                                <MudTabPanel Text="Staffs Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
-                                    <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
-                                        <MudItem md="4">
-                 @*                            <MudChipSet T="bool" SelectionMode="SelectionMode.MultiSelection" CheckMark="true">
-                                                <MudChip T="bool" Text="purple" Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => Input.IsGetStaffModules = !Input.IsGetStaffModules)">Get Staff Module</MudChip>
-                                            </MudChipSet> *@
+                                 <MudTabPanel Text="Staffs Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
+                                        <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
+                                            <MudItem md="12" Class="d-flex flex-wrap gap-2">
+                                                <MudChip T="bool" OnClick="@(() => {Input.IsGetStaffModules = !Input.IsGetStaffModules; StateHasChanged();})" @bind-Selected="Input.IsGetStaffModules" Variant="Variant.Outlined" Color="@(Input.IsGetStaffModules ? Color.Primary : Color.Default)" Icon="@(Input.IsGetStaffModules ? Icons.Material.Filled.Check : null)">Get Staff Module</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllStaffs = !Input.IsViewAllStaffs; StateHasChanged(); })" @bind-Selected="Input.IsViewAllStaffs" Variant="Variant.Outlined" Color="@(Input.IsViewAllStaffs ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllStaffs ? Icons.Material.Filled.Check : null)">View all staffs</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsCreateNewStaff = !Input.IsCreateNewStaff; StateHasChanged(); })" @bind-Selected="Input.IsCreateNewStaff" Variant="Variant.Outlined" Color="@(Input.IsCreateNewStaff ? Color.Primary : Color.Default)" Icon="@(Input.IsCreateNewStaff ? Icons.Material.Filled.Check : null)">Create New Staff</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsUpdateOrEditStaff = !Input.IsUpdateOrEditStaff; StateHasChanged(); })" @bind-Selected="Input.IsUpdateOrEditStaff" Variant="Variant.Outlined" Color="@(Input.IsUpdateOrEditStaff ? Color.Primary : Color.Default)" Icon="@(Input.IsUpdateOrEditStaff ? Icons.Material.Filled.Check : null)">Edit Staff Details</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewStaffById = !Input.IsViewStaffById; StateHasChanged(); })" @bind-Selected="Input.IsViewStaffById" Variant="Variant.Outlined" Color="@(Input.IsViewStaffById ? Color.Primary : Color.Default)" Icon="@(Input.IsViewStaffById ? Icons.Material.Filled.Check : null)">View Staff Profile</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.CanChooseStaffOfTheWeek = !Input.CanChooseStaffOfTheWeek; StateHasChanged(); })" @bind-Selected="Input.CanChooseStaffOfTheWeek" Variant="Variant.Outlined" Color="@(Input.CanChooseStaffOfTheWeek ? Color.Primary : Color.Default)" Icon="@(Input.CanChooseStaffOfTheWeek ? Icons.Material.Filled.Check : null)">Award Staff Of The Week</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllHelps = !Input.IsViewAllHelps; StateHasChanged(); })" @bind-Selected="Input.IsViewAllHelps" Variant="Variant.Outlined" Color="@(Input.IsViewAllHelps ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllHelps ? Icons.Material.Filled.Check : null)">View All Helpdesk</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewHelpById = !Input.IsViewHelpById; StateHasChanged(); })" @bind-Selected="Input.IsViewHelpById" Variant="Variant.Outlined" Color="@(Input.IsViewHelpById ? Color.Primary : Color.Default)" Icon="@(Input.IsViewHelpById ? Icons.Material.Filled.Check : null)">View Helpdesk Profile</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllLeaders = !Input.IsViewAllLeaders; StateHasChanged(); })" @bind-Selected="Input.IsViewAllLeaders" Variant="Variant.Outlined" Color="@(Input.IsViewAllLeaders ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllLeaders ? Icons.Material.Filled.Check : null)">View All Leaders</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewLeaderById = !Input.IsViewLeaderById; StateHasChanged(); })" @bind-Selected="Input.IsViewLeaderById" Variant="Variant.Outlined" Color="@(Input.IsViewLeaderById ? Color.Primary : Color.Default)" Icon="@(Input.IsViewLeaderById ? Icons.Material.Filled.Check : null)">View Leader Profile</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllNurses = !Input.IsViewAllNurses; StateHasChanged(); })" @bind-Selected="Input.IsViewAllNurses" Variant="Variant.Outlined" Color="@(Input.IsViewAllNurses ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllNurses ? Icons.Material.Filled.Check : null)">View All Nurses</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllAdmins = !Input.IsViewAllAdmins; StateHasChanged(); })" @bind-Selected="Input.IsViewAllAdmins" Variant="Variant.Outlined" Color="@(Input.IsViewAllAdmins ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllAdmins ? Icons.Material.Filled.Check : null)">View All System Admins</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllDoctors = !Input.IsViewAllDoctors; StateHasChanged(); })" @bind-Selected="Input.IsViewAllDoctors" Variant="Variant.Outlined" Color="@(Input.IsViewAllDoctors ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllDoctors ? Icons.Material.Filled.Check : null)">View All Doctors</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewDoctorById = !Input.IsViewDoctorById; StateHasChanged(); })" @bind-Selected="Input.IsViewDoctorById" Variant="Variant.Outlined" Color="@(Input.IsViewDoctorById ? Color.Primary : Color.Default)" Icon="@(Input.IsViewDoctorById ? Icons.Material.Filled.Check : null)">View Doctor Profile</MudChip>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudTabPanel>
 
-                                            <MudCheckBox Class="" @bind-Value="Input.IsGetStaffModules" Label="Get Staff Module" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllStaffs" Label="View all staffs" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsCreateNewStaff" Label="Create New Staff" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsUpdateOrEditStaff" Label="Edit Staff Details" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewStaffById" Label="View Staff Profile" Color="Color.Dark"></MudCheckBox>
-                                        </MudItem>
-                                        <MudItem md="4">
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllHelps" Label="View All Helpdesk" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewHelpById" Label="View Helpdesk Profile" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllLeaders" Label="View All Leaders" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewLeaderById" Label="View Leader Profile" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllNurses" Label="View All Nurses" Color="Color.Dark"></MudCheckBox>
-                                        </MudItem>
-                                        <MudItem md="4">
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllAdmins" Label="View All System Admins" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllDoctors" Label="View All Doctors" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewDoctorById" Label="View Doctor Profile" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.CanChooseStaffOfTheWeek" Label="Can Choose Staff Of The Week" Color="Color.Dark"></MudCheckBox>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudTabPanel>
-                                <MudTabPanel Text="Patients Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
-                                    <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
-                                        <MudItem md="5">
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllPatients" Label="View all patients" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsCreateNewPatient" Label="Create New Patient" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsUpdateOrEditPatient" Label="Edit Patient Details" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewPatientById" Label="View Patient Profile" Color="Color.Dark"></MudCheckBox>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudTabPanel>
-                                <MudTabPanel Text="Medicines Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
-                                    <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
-                                        <MudItem md="5">
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllMedicines" Label="View all medicines" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsCreateNewMedicine" Label="Create New Medicine" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsUpdateOrEditMedicine" Label="Edit Medicine Details" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewMedicineById" Label="View Medicine Profile" Color="Color.Dark"></MudCheckBox>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudTabPanel>
-                                <MudTabPanel Text="LabTests Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
-                                    <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
-                                        <MudItem md="5">
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllLabTests" Label="View all lab tests" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsCreateNewLabTest" Label="Create New lab test" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsUpdateOrEditLabTest" Label="Update lab result" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewLabTestById" Label="View Lab Test" Color="Color.Dark"></MudCheckBox>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudTabPanel>
-                                <MudTabPanel Text="Rooms Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
-                                    <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
-                                        <MudItem md="4">
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewAllRooms" Label="View all rooms" Color="Color.Dark"></MudCheckBox>
-                                            <MudCheckBox Class="" @bind-Value="Input.IsViewRoomById" Label="Create New Room" Color="Color.Dark"></MudCheckBox>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudTabPanel>
+                                    <MudTabPanel Text="Patients Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
+                                        <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
+                                            <MudItem md="12" Class="d-flex flex-wrap gap-2">
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllPatients = !Input.IsViewAllPatients; StateHasChanged(); })" @bind-Selected="Input.IsViewAllPatients" Variant="Variant.Outlined" Color="@(Input.IsViewAllPatients ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllPatients ? Icons.Material.Filled.Check : null)">View all patients</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsCreateNewPatient = !Input.IsCreateNewPatient; StateHasChanged(); })" @bind-Selected="Input.IsCreateNewPatient" Variant="Variant.Outlined" Color="@(Input.IsCreateNewPatient ? Color.Primary : Color.Default)" Icon="@(Input.IsCreateNewPatient ? Icons.Material.Filled.Check : null)">Create New Patient</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsUpdateOrEditPatient = !Input.IsUpdateOrEditPatient; StateHasChanged(); })" @bind-Selected="Input.IsUpdateOrEditPatient" Variant="Variant.Outlined" Color="@(Input.IsUpdateOrEditPatient ? Color.Primary : Color.Default)" Icon="@(Input.IsUpdateOrEditPatient ? Icons.Material.Filled.Check : null)">Edit Patient Details</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewPatientById = !Input.IsViewPatientById; StateHasChanged(); })" @bind-Selected="Input.IsViewPatientById" Variant="Variant.Outlined" Color="@(Input.IsViewPatientById ? Color.Primary : Color.Default)" Icon="@(Input.IsViewPatientById ? Icons.Material.Filled.Check : null)">View Patient Profile</MudChip>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudTabPanel>
+
+                                    <MudTabPanel Text="Medicines Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
+                                        <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
+                                            <MudItem md="12" Class="d-flex flex-wrap gap-2">
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllMedicines = !Input.IsViewAllMedicines; StateHasChanged(); })" @bind-Selected="Input.IsViewAllMedicines" Variant="Variant.Outlined" Color="@(Input.IsViewAllMedicines ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllMedicines ? Icons.Material.Filled.Check : null)">View all medicines</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsCreateNewMedicine = !Input.IsCreateNewMedicine; StateHasChanged(); })" @bind-Selected="Input.IsCreateNewMedicine" Variant="Variant.Outlined" Color="@(Input.IsCreateNewMedicine ? Color.Primary : Color.Default)" Icon="@(Input.IsCreateNewMedicine ? Icons.Material.Filled.Check : null)">Create New Medicine</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsUpdateOrEditMedicine = !Input.IsUpdateOrEditMedicine; StateHasChanged(); })" @bind-Selected="Input.IsUpdateOrEditMedicine" Variant="Variant.Outlined" Color="@(Input.IsUpdateOrEditMedicine ? Color.Primary : Color.Default)" Icon="@(Input.IsUpdateOrEditMedicine ? Icons.Material.Filled.Check : null)">Edit Medicine Details</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewMedicineById = !Input.IsViewMedicineById; StateHasChanged(); })" @bind-Selected="Input.IsViewMedicineById" Variant="Variant.Outlined" Color="@(Input.IsViewMedicineById ? Color.Primary : Color.Default)" Icon="@(Input.IsViewMedicineById ? Icons.Material.Filled.Check : null)">View Medicine Profile</MudChip>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudTabPanel>
+
+                                    <MudTabPanel Text="LabTests Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
+                                        <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
+                                            <MudItem md="12" Class="d-flex flex-wrap gap-2">
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllLabTests = !Input.IsViewAllLabTests; StateHasChanged(); })" @bind-Selected="Input.IsViewAllLabTests" Variant="Variant.Outlined" Color="@(Input.IsViewAllLabTests ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllLabTests ? Icons.Material.Filled.Check : null)">View all lab tests</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsCreateNewLabTest = !Input.IsCreateNewLabTest; StateHasChanged(); })" @bind-Selected="Input.IsCreateNewLabTest" Variant="Variant.Outlined" Color="@(Input.IsCreateNewLabTest ? Color.Primary : Color.Default)" Icon="@(Input.IsCreateNewLabTest ? Icons.Material.Filled.Check : null)">Create New lab test</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsUpdateOrEditLabTest = !Input.IsUpdateOrEditLabTest; StateHasChanged(); })" @bind-Selected="Input.IsUpdateOrEditLabTest" Variant="Variant.Outlined" Color="@(Input.IsUpdateOrEditLabTest ? Color.Primary : Color.Default)" Icon="@(Input.IsUpdateOrEditLabTest ? Icons.Material.Filled.Check : null)">Update lab result</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewLabTestById = !Input.IsViewLabTestById; StateHasChanged(); })" @bind-Selected="Input.IsViewLabTestById" Variant="Variant.Outlined" Color="@(Input.IsViewLabTestById ? Color.Primary : Color.Default)" Icon="@(Input.IsViewLabTestById ? Icons.Material.Filled.Check : null)">View Lab Test</MudChip>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudTabPanel>
+
+                                    <MudTabPanel Text="Rooms Permissions" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
+                                        <MudGrid Spacing="5" Class="overflow-auto px-3" Style="max-height:200px;">
+                                            <MudItem md="12" Class="d-flex flex-wrap gap-2">
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewAllRooms = !Input.IsViewAllRooms; StateHasChanged(); })" @bind-Selected="Input.IsViewAllRooms" Variant="Variant.Outlined" Color="@(Input.IsViewAllRooms ? Color.Primary : Color.Default)" Icon="@(Input.IsViewAllRooms ? Icons.Material.Filled.Check : null)">View all rooms</MudChip>
+                                                <MudChip T="bool" OnClick="@(() => { Input.IsViewRoomById = !Input.IsViewRoomById; StateHasChanged(); })" @bind-Selected="Input.IsViewRoomById" Variant="Variant.Outlined" Color="@(Input.IsViewRoomById ? Color.Primary : Color.Default)" Icon="@(Input.IsViewRoomById ? Icons.Material.Filled.Check : null)">Create New Room</MudChip>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudTabPanel>
                             </MudTabs>
                         </MudItem>
                     </MudItem>
@@ -470,6 +466,7 @@
             user.CanChooseStaffOfTheWeek = Input.CanChooseStaffOfTheWeek;
             user.EmailConfirmed = true;
 
+
             #endregion
 
             await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
@@ -566,5 +563,4 @@
         }
         return (IUserEmailStore<Staff>)UserStore;
     }
-
 }

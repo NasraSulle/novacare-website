@@ -17,24 +17,98 @@
 </MudGrid>
 <MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
     <MudItem Class="pa-0" md="12">
-        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
-            <MudTabPanel Text="All Patients" Style="text-transform: none;">
-                <Patients />
-            </MudTabPanel>
-            <MudTabPanel Text="Out Patients" Style="text-transform: none;">
-                <Patients FilterBy="OutSide" />
-            </MudTabPanel>
-            <MudTabPanel Text="Hospitalized Patients" Style="text-transform: none;">
-                <Patients FilterBy="Hospitalized" />
-            </MudTabPanel>
-            <MudTabPanel Text="Clinic Patients" Style="text-transform: none;">
-                <Patients FilterBy="Clinic" />
-            </MudTabPanel>
-        </MudTabs>
+            <MudTabs Outlined="true" Position="Position.Start" Rounded="false" Border="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-1">
+                <MudTabPanel Style="text-transform: none;" Text="All Patients" OnClick="@(() => { patientGenre = "All Patients"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                        <MudTabPanel Text="All Patients" Style="text-transform: none;">
+                            <Patients PatientGenre="@patientGenre" />
+                        </MudTabPanel>
+                        <MudTabPanel Text="Out Patients" Style="text-transform: none;">
+                            <Patients PatientGenre="@patientGenre" FilterBy="OutSide" />
+                        </MudTabPanel>
+                        <MudTabPanel Text="Hospitalized Patients" Style="text-transform: none;">
+                            <Patients PatientGenre="@patientGenre" FilterBy="Hospitalized" />
+                        </MudTabPanel>
+                        <MudTabPanel Text="Clinic Patients" Style="text-transform: none;">
+                            <Patients PatientGenre="@patientGenre" FilterBy="Clinic" />
+                        </MudTabPanel>
+                    </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+                @if(CurrentUser.ClinicalTitleName.Trim().ToLower() == "doctor")
+                {
+                    <MudTabPanel Style="text-transform: none;" Text="My Patients" OnClick="@(() => { patientGenre = "My Patients"; StateHasChanged(); })">
+                        <MudItem md="12" Class="">
+                            <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                                <MudTabPanel Text="All Patients" Style="text-transform: none;">
+                                    <Patients PatientGenre="@patientGenre" />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Out Patients" Style="text-transform: none;">
+                                    <Patients PatientGenre="@patientGenre" FilterBy="OutSide" />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Hospitalized Patients" Style="text-transform: none;">
+                                    <Patients PatientGenre="@patientGenre" FilterBy="Hospitalized" />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Clinic Patients" Style="text-transform: none;">
+                                    <Patients PatientGenre="@patientGenre" FilterBy="Clinic" />
+                                </MudTabPanel>
+                            </MudTabs>
+                        </MudItem>
+                    </MudTabPanel>
+                    <MudTabPanel Style="text-transform: none;" Text="Consultation Requests" OnClick="@(() => { patientGenre = "Consultation Requests"; StateHasChanged(); })">
+                        <MudItem md="12" Class="">
+                            <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                                <MudTabPanel Text="All Patients" Style="text-transform: none;">
+                                    <Patients PatientGenre="@patientGenre" />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Out Patients" Style="text-transform: none;">
+                                    <Patients PatientGenre="@patientGenre" FilterBy="OutSide" />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Hospitalized Patients" Style="text-transform: none;">
+                                    <Patients PatientGenre="@patientGenre" FilterBy="Hospitalized" />
+                                </MudTabPanel>
+                                <MudTabPanel Text="Clinic Patients" Style="text-transform: none;">
+                                    <Patients PatientGenre="@patientGenre" FilterBy="Clinic" />
+                                </MudTabPanel>
+                            </MudTabs>
+                        </MudItem>
+                    </MudTabPanel>
+                }
+
+            @if (CurrentUser.ClinicalTitleName.Trim().ToLower() == "nurse" || CurrentUser.AdministrativeTitleName.Trim().ToLower() == "help desk")
+            {
+                <MudTabPanel Style="text-transform: none;" Text="Vitals Requests" OnClick="@(() => { patientGenre = "Vitals Requests"; StateHasChanged(); })">
+                <MudItem md="12" Class="">
+                    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                        <MudTabPanel Text="All Patients" Style="text-transform: none;">
+                            <Patients PatientGenre="@patientGenre" />
+                        </MudTabPanel>
+                        <MudTabPanel Text="Out Patients" Style="text-transform: none;">
+                            <Patients PatientGenre="@patientGenre" FilterBy="OutSide" />
+                        </MudTabPanel>
+                        <MudTabPanel Text="Hospitalized Patients" Style="text-transform: none;">
+                            <Patients PatientGenre="@patientGenre" FilterBy="Hospitalized" />
+                        </MudTabPanel>
+                        <MudTabPanel Text="Clinic Patients" Style="text-transform: none;">
+                            <Patients PatientGenre="@patientGenre" FilterBy="Clinic" />
+                        </MudTabPanel>
+                    </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
+            }
+            </MudTabs>
     </MudItem>
 </MudGrid>
 
 @code {
+    StaffDto CurrentUser { get; set; } = new();
     public string icon = Icons.Material.Filled.AssistWalker;
     public string title = "Patients Section";
+    public string patientGenre = "All";
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = await userService.GetLoggedInUserAsync(); 
+    }
 }

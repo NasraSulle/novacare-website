@@ -8,6 +8,7 @@ using NovaCare.Modals.JoinTables;
 using NovaCare.Modals.PatientModals;
 using NovaCare.Modals.StaffModals;
 using NovaCare.Shared.DTOs.JoinDto;
+using NovaCare.Shared.DTOs.JoinDTOs;
 using NovaCare.Shared.DTOs.PatientDTOs;
 using NovaCare.Shared.DTOs.ReportDTOs;
 using NovaCare.Shared.DTOs.StaffDTOs;
@@ -38,11 +39,18 @@ namespace NovaCare.Services
                     PatientTypeName = patient.PatientType!.PatientTypeName,
                     Gender = patient.Gender,
                     Age = patient.Age,
+                    DoctorPatients = patient.DoctorPatients == null
+                        ? new List<DoctorPatientDto>()
+                        : patient.DoctorPatients.Select(dp => new DoctorPatientDto
+                        {
+                            DoctorId = dp.DoctorId
+                        }).ToList()
                 })
                 .ToListAsync();
 
             return patients;
         }
+
 
         public async Task<List<PatientTypeDto>> GetAllPatientStatusesAsync()
         {
@@ -144,7 +152,7 @@ namespace NovaCare.Services
                     KinPhoneNumber = dto.KinPhoneNumber,
                     KinHomeAddress = dto.KinHomeAddress,
                     PatientStatusId = dto.PatientStatusId,
-                    PatientTypeId = dto.PatientTypeId,
+                    PatientTypeId = dto.PatientTypeId
                 };
 
                 var result = context.Patients.Add(patient);
@@ -177,6 +185,12 @@ namespace NovaCare.Services
                     PatientTypeName = patient.PatientType!.PatientTypeName,
                     Gender = patient.Gender,
                     Age = patient.Age,
+                    DoctorPatients = patient.DoctorPatients == null
+                        ? new List<DoctorPatientDto>()
+                        : patient.DoctorPatients.Select(dp => new DoctorPatientDto
+                        {
+                            DoctorId = dp.DoctorId
+                        }).ToList()
                 })
                 .ToListAsync();
 
@@ -207,6 +221,12 @@ namespace NovaCare.Services
                     PatientTypeName = patient.PatientType!.PatientTypeName,
                     Gender = patient.Gender,
                     Age = patient.Age,
+                    DoctorPatients = patient.DoctorPatients == null
+                        ? new List<DoctorPatientDto>()
+                        : patient.DoctorPatients.Select(dp => new DoctorPatientDto
+                        {
+                            DoctorId = dp.DoctorId
+                        }).ToList()
                 })
                 .FirstOrDefaultAsync(x => x.Id == patientId);
 

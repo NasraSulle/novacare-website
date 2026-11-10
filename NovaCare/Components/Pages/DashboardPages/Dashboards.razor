@@ -1,146 +1,178 @@
 ﻿@rendermode InteractiveServer
 
-<MudGrid Style="" Spacing="3" Class="pa-3">
-    <MudItem md="12" Class="">
-        <MudGrid Justify="Justify.Center" Class="pa-0" Spacing="3" Style="">
-            <MudItem md="3"><TopSummary DataCount="allStaffs.Count" Title="Our Staff" Icon="@Icons.Material.Filled.People" /></MudItem>
-            <MudItem md="3"><TopSummary DataCount="allPatients.Count" Title="Patients" Icon="@Icons.Material.Filled.AssistWalker" /></MudItem>
-            <MudItem md="3"><TopSummary DataCount="allLabTests.Count" Title="Lab Tests" Icon="@Icons.Material.Filled.Biotech" /></MudItem>
-            <MudItem md="3"><TopSummary DataCount="allMedicines.Count" Title="Medicine Inventory" Icon="@Icons.Material.Filled.LocalPharmacy" /></MudItem>
-        </MudGrid>
-    </MudItem>
-    <MudItem md="12">
-        <MudGrid Justify="Justify.Center" Class="pa-0" Spacing="3">
-            <MudItem md="2">
-                <MudPaper Elevation="4">
-                    <MudText Typo="Typo.h6" Align="Align.Center">Weekly Patients</MudText>
-                    <MudChart T="double"
-                              ChartType="ChartType.Pie"
-                              ChartSeries="@_weeklyPatients"
-                              ChartLabels="@_labels"
-                              LegendPosition="Position.Right"
-                              Width="100%" Height="160px" CanHideSeries MatchBoundsToSize>
-                    </MudChart>
-                </MudPaper>
-            </MudItem>
-            <MudItem md="5">
-                <MudPaper Elevation="4" Height="275px">
-                    <MudText Typo="Typo.h6" Align="Align.Center">Weekly Patients By Type</MudText>
-                    <MudChart T="double" ChartType="ChartType.Bar"
-                              ChartSeries="_weeklyPatientsByType"
-                              ChartLabels="@_labels"
-                              Width="100%" Height="150px" CanHideSeries MatchBoundsToSize />
-                </MudPaper>
-            </MudItem>
-            <MudItem md="5">
-                <MudPaper Elevation="4">
-                    <MudText Typo="Typo.h6" Align="Align.Center">Weekly Patients By Age</MudText>
-                    <MudChart T="double" ChartType="ChartType.Line"
-                              ChartSeries="_weeklyPatientsByAge"
-                              ChartLabels="@_labels"
-                              Width="100%" Height="180px" CanHideSeries MatchBoundsToSize />
-                </MudPaper>
-            </MudItem>
-        </MudGrid>
-    </MudItem>
-    
-    <MudItem md="12">
-        <MudGrid Justify="Justify.Center" Class="pa-0" Spacing="3">
-            <MudItem md="6">
-                <MudPaper Elevation="4">
-                    <MudItem md="12">
-                        <MudText Typo="Typo.h6" Align="Align.Center">Weekly Doctors By Specialization</MudText>
-                        <MudChart T="double" ChartType="ChartType.Bar"
-                                  ChartSeries="_weeklyDoctorsBySpecialization"
-                                  ChartLabels="@_labels"
-                                  Width="100%" Height="320px" CanHideSeries MatchBoundsToSize />
-                    </MudItem>
-                </MudPaper>
-            </MudItem>
-            <MudItem md="6">
-                <MudItem md="12" Class="mb-3">
-                    <MudPaper Elevation="4" Class="pa-3" Style=" background-color: rgba(92, 107, 192,0.9); text-align:center; align-content:center; color:white">
-                        <MudGrid Justify="Justify.FlexStart">
-                            <MudItem md="2">
+<style>
+    .dashboard-container {
+        background-color: #f8fafc;
+        min-height: 100vh;
+    }
+
+    .metric-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 5px;
+    }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+        }
+
+    .chart-card {
+        border-radius: 5px;
+        padding: 20px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .staff-card {
+        background: linear-gradient(135deg, #7986cb 0%, #1a237e 100%) !important;
+        border-radius: 5px;
+        color: white !important;
+    }
+
+
+    .carousel-metric-card {
+        background: linear-gradient(135deg, #424242 0%, #212121 100%);
+        border-radius: 5px;
+        color: white;
+    }
+</style>
+
+<div class="dashboard-container pa-6">
+    <MudGrid Spacing="4">
+        <!-- Top Metrics Row -->
+        <MudItem xs="12">
+            <MudGrid Spacing="3">
+                <MudItem xs="12" sm="6" md="3">
+                    <div class="metric-card"><TopSummary DataCount="allStaffs.Count" Title="Our Staff" Icon="@Icons.Material.Filled.People" /></div>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <div class="metric-card"><TopSummary DataCount="allPatients.Count" Title="Patients" Icon="@Icons.Material.Filled.AssistWalker" /></div>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <div class="metric-card"><TopSummary DataCount="allLabTests.Count" Title="Lab Tests" Icon="@Icons.Material.Filled.Biotech" /></div>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <div class="metric-card"><TopSummary DataCount="allMedicines.Count" Title="Medicine Inventory" Icon="@Icons.Material.Filled.LocalPharmacy" /></div>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+
+        <!-- Charts Layer 1 -->
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="2" Class="chart-card">
+                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-4" Color="Color.Secondary">Weekly Distribution</MudText>
+                <MudChart T="double"
+                          ChartType="ChartType.Pie"
+                          ChartSeries="@_weeklyPatients"
+                          ChartLabels="@_labels"
+                          LegendPosition="Position.Bottom"
+                          Width="100%" Height="220px" CanHideSeries MatchBoundsToSize />
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="2" Class="chart-card">
+                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-4" Color="Color.Secondary">Weekly Patients By Type</MudText>
+                <MudChart T="double" ChartType="ChartType.Bar"
+                          ChartSeries="_weeklyPatientsByType"
+                          ChartLabels="@_labels"
+                          LegendPosition="Position.Bottom"
+                          Width="100%" Height="220px" CanHideSeries MatchBoundsToSize />
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="2" Class="chart-card">
+                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-4" Color="Color.Secondary">Weekly Patients By Age</MudText>
+                <MudChart T="double" ChartType="ChartType.Line"
+                          ChartSeries="_weeklyPatientsByAge"
+                          ChartLabels="@_labels"
+                          LegendPosition="Position.Bottom"
+                          Width="100%" Height="220px" CanHideSeries MatchBoundsToSize />
+            </MudPaper>
+        </MudItem>
+
+        <!-- Charts & Custom Blocks Layer 2 -->
+        <MudItem xs="12" md="6">
+            <MudPaper Elevation="2" Class="chart-card">
+                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-4" Color="Color.Secondary">Weekly Doctors By Specialization</MudText>
+                <MudChart T="double" ChartType="ChartType.Bar"
+                          ChartSeries="_weeklyDoctorsBySpecialization"
+                          ChartLabels="@(new string[] { "MD", "Specialists" })"
+                          LegendPosition="Position.Bottom"
+                          Width="100%" Height="260px" CanHideSeries MatchBoundsToSize />
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudGrid Spacing="3">
+                <!-- Staff of the Week Card -->
+                <MudItem xs="12">
+                    <MudPaper Elevation="3" Class="staff-card pa-4">
+                        <MudGrid AlignItems="Center">
+                            <MudItem xs="12" sm="3" Class="d-flex justify-center">
                                 @if (StaffOfTheWeek.StaffPhoto == null)
                                 {
-                                    <MudImage ObjectFit="ObjectFit.Cover" Height="100" Width="100" Src="Images/dp.png" Alt="Profile Photo" Elevation="25" Class="rounded-circle" />
+                                    <MudAvatar Image="Images/dp.png" Style="width:90px; height:90px;" Class="elevation-3" />
                                 }
                                 else
                                 {
-                                    <MudImage ObjectFit="ObjectFit.Cover" Height="100" Width="100" Src="@( $"data:image/jpeg;base64,{Convert.ToBase64String(StaffOfTheWeek.StaffPhoto)}" )" Alt="Profile Photo" Elevation="25" Class="rounded-circle" />
+                                    <MudAvatar Image="@($"data:image/jpeg;base64,{Convert.ToBase64String(StaffOfTheWeek.StaffPhoto)}")" Style="width:90px; height:90px;" Class="elevation-3" />
                                 }
                             </MudItem>
-                            <MudItem md="4">
-                                <MudText Align="Align.Start" Typo="Typo.h6">Staff Of The Week</MudText>
-                                <MudText Align="Align.Start" Typo="Typo.body1">Name : @($"{StaffOfTheWeek.FisrtName} .{middleName}. {StaffOfTheWeek.LastName}") </MudText>
-                                <MudText Align="Align.Start" Typo="Typo.body1">Titles : @StaffOfTheWeek.AdministrativeTitleName / @StaffOfTheWeek.ClinicalTitleName</MudText>
-                            </MudItem>
-                            <MudItem md="6">
-                                <MudText Align="Align.Center" Typo="Typo.body1">
-                                    🎉 Thank you for your outstanding dedication, reliability, and the positive energy you bring to the workplace. Our hospital is a better place because of your hard work! 👏👏
+                            <MudItem xs="12" sm="9">
+                                <MudText Typo="Typo.caption" Class="text-uppercase tracking-wider" Style="opacity: 0.8;">🌟 Staff Of The Week</MudText>
+                                <MudText Typo="Typo.h5" Class="font-weight-bold mb-1">@($"{StaffOfTheWeek.FisrtName} {middleName} {StaffOfTheWeek.LastName}")</MudText>
+                                <MudText Typo="Typo.body2" Class="mb-2" Style="opacity: 0.9;">@StaffOfTheWeek.AdministrativeTitleName &bull; @StaffOfTheWeek.ClinicalTitleName</MudText>
+                                <MudText Typo="Typo.body2" FontStyle="FontStyle.Italic" Style="opacity: 0.8; line-height: 1.4;">
+                                    "Thank you for your outstanding dedication, reliability, and the positive energy you bring to the workplace!"
                                 </MudText>
                             </MudItem>
                         </MudGrid>
                     </MudPaper>
-                </MudItem> 
-                <MudItem>
-                    <MudGrid>
-                        <MudItem md="8">
-                            <MudPaper Elevation="4">
-                                <MudItem md="12">
-                                    <MudText Typo="Typo.h6" Align="Align.Center">Doctors Availability</MudText>
-                                    <MudChart T="double" ChartType="ChartType.Donut"
-                                              ChartSeries="_weeklyAvailableDoctors"
-                                              ChartLabels="@_labels"
-                                              Width="100%" Height="180px" CanHideSeries MatchBoundsToSize />
-                                </MudItem>
-                            </MudPaper>
-                        </MudItem>
-                        <MudItem md="4" Style="height: 100%">
-                            <MudPaper Elevation="4" Class="pa-3">
-                                <MudPaper Class="pa-1 mb-3" Style=" background-color: rgba(92, 107, 192,0.9); text-align:center; align-content:center; color:white;">
-                                    <MudText Typo="Typo.h6" Align="Align.Center">Clinical Staff Today</MudText>
-                                </MudPaper>
-                                <MudPaper Class="pa-1 mb-3" Style=" background-color: rgba(92, 107, 192,0.9); text-align:center; align-content:center; color:white">
-                                    <MudCarousel Class="mud-width-full" Style="height:30px;" ShowArrows="false" ShowBullets="false" EnableSwipeGesture="true" AutoCycle="true" TData="object">
-                                        <MudCarouselItem Transition="transition">
-                                            <MudText Typo="Typo.h6" Align="Align.Center">Doctors</MudText>
-                                        </MudCarouselItem>
-                                        <MudCarouselItem Transition="transition">
-                                            <MudText Typo="Typo.h6" Align="Align.Center">Nurses</MudText>
-                                        </MudCarouselItem>
-                                    </MudCarousel>
-                                </MudPaper>
-                                <MudPaper Class="pa-3" Style=" background-color: rgba(92, 107, 192,0.9); text-align:center; align-content:center; color:white">
-                                    <MudCarousel Class="mud-width-full" Style="height:115px;" ShowArrows="false" ShowBullets="false" EnableSwipeGesture="true" AutoCycle="true" TData="object">
-                                        <MudCarouselItem Transition="transition">
-                                            <MudText Typo="Typo.h1" Align="Align.Center">@DocCount</MudText>
-                                        </MudCarouselItem>
-                                        <MudCarouselItem Transition="transition">
-                                            <MudText Typo="Typo.h1" Align="Align.Center">@NurCount</MudText>
-                                        </MudCarouselItem>
-                                    </MudCarousel>
-                                </MudPaper>
-                            </MudPaper>
-                        </MudItem>
-                    </MudGrid>
                 </MudItem>
-            </MudItem>
-        </MudGrid>
-    </MudItem>
-</MudGrid>
 
+                <!-- Doctors Availability & Carousel Grid -->
+                <MudItem xs="12" sm="7">
+                    <MudPaper Elevation="2" Class="chart-card">
+                        <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2" Color="Color.Secondary">Doctors Availability</MudText>
+                        <MudChart T="double" ChartType="ChartType.Donut"
+                                  ChartSeries="_weeklyAvailableDoctors"
+                                  ChartLabels="@_labels"
+                                  LegendPosition="Position.Right"
+                                  Width="100%" Height="140px" CanHideSeries MatchBoundsToSize />
+                    </MudPaper>
+                </MudItem>
 
+                <MudItem xs="12" sm="5">
+                    <MudPaper Elevation="3" Class="carousel-metric-card pa-4 d-flex flex-column justify-center align-center" Style="height: 100%; min-height: 204px;">
+                        <MudText Typo="Typo.subtitle2" Class="text-uppercase mb-2" Style="color: #b0bec5; font-weight: 700;">On Duty Today</MudText>
+
+                        <MudCarousel Class="mud-width-full" Style="height:110px;" ShowArrows="false" ShowBullets="false" AutoCycle="true" TData="object">
+                            <MudCarouselItem Transition="Transition.Fade">
+                                <div class="d-flex flex-column align-center justify-center">
+                                    <MudText Typo="Typo.h2" Class="font-weight-bold color-white">@DocCount</MudText>
+                                    <MudText Typo="Typo.body1" Style="color: #e0e0e0;">Active Doctors</MudText>
+                                </div>
+                            </MudCarouselItem>
+                            <MudCarouselItem Transition="Transition.Fade">
+                                <div class="d-flex flex-column align-center justify-center">
+                                    <MudText Typo="Typo.h2" Class="font-weight-bold color-white">@NurCount</MudText>
+                                    <MudText Typo="Typo.body1" Style="color: #e0e0e0;">Active Nurses</MudText>
+                                </div>
+                            </MudCarouselItem>
+                        </MudCarousel>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+</div>
 
 @code {
     private string[] _labels = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
-    private List<ChartSeries<double>> _dataSet =>
-    [
-            new() { Name = "Out Patients", Data = new([60, 54, 23, 42, 67, 31,10]) },
-            new() { Name = "Hospitalized Patients",      Data = new([47, 30, 43, 25, 59, 63,21]) },
-            new() { Name = "Clinic Patients",         Data = new([14, 27, 65, 43, 21, 58,45]) },
-    ];
 
     List<DoctorDto> allDoctors = new();
     List<StaffDto> allStaffs = new();
@@ -151,21 +183,15 @@
     List<ChartSeries<double>> _weeklyPatients = new();
     List<ChartSeries<double>> _weeklyPatientsByType = new();
     List<ChartSeries<double>> _weeklyPatientsByAge = new();
-
     List<ChartSeries<double>> _weeklyAvailableDoctors = new();
-    List<ChartSeries<double>> _weeklyDoctorsBySpecialization = new ();
+    List<ChartSeries<double>> _weeklyDoctorsBySpecialization = new();
 
     StaffDto StaffOfTheWeek = new();
-
     DateTime sevenDaysAgo = DateTime.Now.AddDays(-7);
-
-    private Transition transition = Transition.Slide;
-
     int NurCount = 0;
     int DocCount = 0;
 
-    string middleName => string.IsNullOrWhiteSpace(StaffOfTheWeek.MiddleName) ? "" : $"{StaffOfTheWeek.MiddleName.ToUpper().Substring(0, 1)}";
-    bool isToggle = true;
+    string middleName => string.IsNullOrWhiteSpace(StaffOfTheWeek.MiddleName) ? "" : $"{StaffOfTheWeek.MiddleName.ToUpper().Substring(0, 1)}.";
 
     protected override async Task OnInitializedAsync()
     {
@@ -180,40 +206,28 @@
         await ClinicalStaffToday();
         await WeeklyPatients();
         await WeeklyPatientsByType();
-        await WeeklyPatientsByAge();
         await WeeklyPatientsByAge2();
-
         await WeeklyDoctorsBySpecialization();
         await WeeklyDoctorsAvailability();
     }
 
     private async Task ClinicalStaffToday()
     {
-        NurCount = allStaffs.Where(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "nurse").ToList().Count;
-        DocCount = allStaffs.Where(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "doctor").ToList().Count;
+        NurCount = allStaffs.Count(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "nurse");
+        DocCount = allStaffs.Count(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "doctor");
     }
 
     private async Task WeeklyPatients()
     {
         var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
-
         var countByDay = weeklyPatients.GroupBy(x => x.RegisteredDate.DayOfWeek)
-        .ToDictionary(
-            g => g.Key == DayOfWeek.Sunday ? 6 : (int)g.Key - 1,
-            g => (double)g.Count()
-        );
+            .ToDictionary(g => g.Key == DayOfWeek.Sunday ? 6 : (int)g.Key - 1, g => (double)g.Count());
 
         _weeklyPatients = new List<ChartSeries<double>>();
-
         for (int i = 0; i < 7; i++)
         {
             double count = countByDay.ContainsKey(i) ? countByDay[i] : 0.0;
-
-            _weeklyPatients.Add(new ChartSeries<double>
-            {
-                Name = _labels[i],
-                Data = new double[] {count}
-            });
+            _weeklyPatients.Add(new ChartSeries<double> { Name = _labels[i], Data = new double[] { count } });
         }
     }
 
@@ -223,48 +237,20 @@
         var groupedByType = weeklyPatients.GroupBy(x => x.PatientTypeName);
 
         _weeklyPatientsByType = new List<ChartSeries<double>>();
-
         foreach (var typeGroup in groupedByType)
         {
             var countByDay = typeGroup.GroupBy(x => x.RegisteredDate.DayOfWeek)
-            .ToDictionary( g => g.Key == DayOfWeek.Sunday ? 6 : (int)g.Key - 1, g => (double)g.Count() );
+                .ToDictionary(g => g.Key == DayOfWeek.Sunday ? 6 : (int)g.Key - 1, g => (double)g.Count());
 
             double[] weeklyData = Enumerable.Range(0, 7).Select(i => countByDay.ContainsKey(i) ? countByDay[i] : 0.0).ToArray();
-
             _weeklyPatientsByType.Add(new ChartSeries<double> { Name = typeGroup.Key, Data = weeklyData });
         }
     }
 
-    private async Task WeeklyPatientsByAge()
-    {
-        string[] ageGroups = { "0-14", "15-45", "Above 45" };
-        var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
-
-        _weeklyPatientsByAge = new List<ChartSeries<double>>();
-
-        double count0To14 = weeklyPatients.Count(x => x.Age >= 0 && x.Age <= 14);
-        double count15To45 = weeklyPatients.Count(x => x.Age >= 15 && x.Age <= 45);
-        double countAbove45 = weeklyPatients.Count(x => x.Age > 45);
-
-        _weeklyPatientsByAge.Add(new ChartSeries<double> { Name = "0-14", Data = new double[] { count0To14 } });
-        _weeklyPatientsByAge.Add(new ChartSeries<double> { Name = "15-45", Data = new double[] { count15To45 } });
-        _weeklyPatientsByAge.Add(new ChartSeries<double> { Name = "Above 45", Data = new double[] { countAbove45 } });
-    }
     private async Task WeeklyPatientsByAge2()
     {
-        var weeklyPatients = allPatients
-            .Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now)
-            .ToList();
-
-        DayOfWeek[] daysOrder = {
-        DayOfWeek.Monday,
-        DayOfWeek.Tuesday,
-        DayOfWeek.Wednesday,
-        DayOfWeek.Thursday,
-        DayOfWeek.Friday,
-        DayOfWeek.Saturday,
-        DayOfWeek.Sunday
-    };
+        var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
+        DayOfWeek[] daysOrder = { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday };
 
         double[] data0To14 = new double[7];
         double[] data15To45 = new double[7];
@@ -272,36 +258,31 @@
 
         for (int i = 0; i < daysOrder.Length; i++)
         {
-            DayOfWeek day = daysOrder[i];
-
-            var patientsOnDay = weeklyPatients.Where(x => x.RegisteredDate.DayOfWeek == day);
-
+            var patientsOnDay = weeklyPatients.Where(x => x.RegisteredDate.DayOfWeek == daysOrder[i]).ToList();
             data0To14[i] = patientsOnDay.Count(x => x.Age >= 0 && x.Age <= 14);
             data15To45[i] = patientsOnDay.Count(x => x.Age >= 15 && x.Age <= 45);
             dataAbove45[i] = patientsOnDay.Count(x => x.Age > 45);
         }
 
         _weeklyPatientsByAge = new List<ChartSeries<double>>
-    {
-        new ChartSeries<double> { Name = "0-14", Data = data0To14 },
-        new ChartSeries<double> { Name = "15-45", Data = data15To45 },
-        new ChartSeries<double> { Name = "Above 45", Data = dataAbove45 }
-    };
+        {
+            new ChartSeries<double> { Name = "0-14", Data = data0To14 },
+            new ChartSeries<double> { Name = "15-45", Data = data15To45 },
+            new ChartSeries<double> { Name = "Above 45", Data = dataAbove45 }
+        };
     }
-
 
     private async Task WeeklyDoctorsBySpecialization()
     {
-        string[] ageGroups = { "MD", "Specialists" };
         var weeklyDoctors = allStaffs.Where(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "doctor" && x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
+        double countMd = weeklyDoctors.Count(x => x.ClinicalTitleName.ToLower() == "md");
+        double countSpecialist = weeklyDoctors.Count(x => x.ClinicalTitleName.ToLower() != "md");
 
-        _weeklyDoctorsBySpecialization = new List<ChartSeries<double>>();
-
-        double count0To14 = weeklyDoctors.Count(x => x.ClinicalTitleName.ToLower() == "md");
-        double count15To45 = weeklyDoctors.Count(x => x.ClinicalTitleName.ToLower() != "md");
-
-        _weeklyDoctorsBySpecialization.Add(new ChartSeries<double> { Name = "MD", Data = new double[] { count0To14 } });
-        _weeklyDoctorsBySpecialization.Add(new ChartSeries<double> { Name = "Specialists", Data = new double[] { count15To45 } });
+        _weeklyDoctorsBySpecialization = new List<ChartSeries<double>>
+        {
+            new ChartSeries<double> { Name = "MD", Data = new double[] { countMd, 0 } },
+            new ChartSeries<double> { Name = "Specialists", Data = new double[] { 0, countSpecialist } }
+        };
     }
 
     private async Task WeeklyDoctorsAvailability()
@@ -310,14 +291,12 @@
         var groupedByType = weeklyDoctors.GroupBy(x => x.StaffStatusName);
 
         _weeklyAvailableDoctors = new List<ChartSeries<double>>();
-
         foreach (var typeGroup in groupedByType)
         {
             var countByDay = typeGroup.GroupBy(x => x.RegisteredDate.DayOfWeek)
-            .ToDictionary(g => g.Key == DayOfWeek.Sunday ? 6 : (int)g.Key - 1, g => (double)g.Count());
+                .ToDictionary(g => g.Key == DayOfWeek.Sunday ? 6 : (int)g.Key - 1, g => (double)g.Count());
 
             double[] weeklyData = Enumerable.Range(0, 7).Select(i => countByDay.ContainsKey(i) ? countByDay[i] : 0.0).ToArray();
-
             _weeklyAvailableDoctors.Add(new ChartSeries<double> { Name = typeGroup.Key, Data = weeklyData });
         }
     }

@@ -111,6 +111,7 @@
     [Parameter] public DateTime? fromDate { get; set; } = DateTime.Now.AddMonths(-3);
     [Parameter] public DateTime? toDate { get; set; } = DateTime.Now;
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    [Parameter] public string PatientGenre { get; set; } = string.Empty;
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
 
     PatientDto? CurrentPatient;
@@ -125,6 +126,8 @@
     protected override async Task OnInitializedAsync()
     {
         CurrentUser = await userService.GetLoggedInUserAsync();
+        var currentDoc = await doctorService.GetDoctorByStaffId(CurrentUser.Id);
+
         isLoading = true;
         StateHasChanged();
 
@@ -135,7 +138,28 @@
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            FilteredPatients = AllPatients;
+            if (PatientGenre == "My Patients")
+            {
+                FilteredPatients = AllPatients?.Where(p => p.DoctorPatients?.Any(dp => dp.DoctorId == currentDoc.Id) == true).ToList() ?? new();
+            }
+            else if (PatientGenre == "Consultation Requests")
+            {
+                FilteredPatients = AllPatients?.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0 
+                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.BillId != null) == true) == true).ToList() ?? new();
+            }
+            else if (PatientGenre == "Vitals Requests")
+            {
+                FilteredPatients = AllPatients?.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId == 0 
+                    && (((av.Consultations?.Any(avc => avc.BillId != null)) == true) 
+                    || ((av.MedicinePrescription?.Any(avc => avc.BillId != null)) == true)
+                    || ((av.LabTests?.Any(avc => avc.BillId != null)) == true)
+                    || ((av.Treatments?.Any(avc => avc.BillId != null)) == true))) == true).ToList() ?? new();
+
+            }
+            else
+            {
+                FilteredPatients = AllPatients ?? new();
+            }
             messagePatient = "Patients are not avalible!";
         }
         else
@@ -144,13 +168,27 @@
             firstPart = FilterBy;
             messagePatient = $"{firstPart} Patients are not avalible!";
 
-            if (FilterBy != null)
+
+            if (PatientGenre == "My Patients")
             {
-                FilteredPatients = AllPatients?.Where(x => x.PatientTypeName == FilterBy).ToList();
+                FilteredPatients = AllPatients?.Where(p => p.PatientTypeName == FilterBy && p.DoctorPatients?.Any(dp => dp.DoctorId == currentDoc.Id) == true).ToList() ?? new();
+            }
+            else if (PatientGenre == "Consultation Requests")
+            {
+                FilteredPatients = AllPatients?.Where(v => v.PatientTypeName == FilterBy && v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0 && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.BillId != null) == true) == true).ToList() ?? new();
+            }
+            else if (PatientGenre == "Vitals Requests")
+            {
+                FilteredPatients = AllPatients?.Where(v => v.PatientTypeName == FilterBy && v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId == 0 
+                    &&
+                    (((av.Consultations?.Any(avc => avc.BillId != null)) == true)
+                    || ((av.MedicinePrescription?.Any(avc => avc.BillId != null)) == true)
+                    || ((av.LabTests?.Any(avc => avc.BillId != null)) == true)
+                    || ((av.Treatments?.Any(avc => avc.BillId != null)) == true))) == true).ToList() ?? new();
             }
             else
             {
-                FilteredPatients = new();
+                FilteredPatients = AllPatients ?? new();
             }
         }
         isLoading = false;
@@ -178,18 +216,17 @@
         }
         else
         {
-            var prop = typeof(StaffDto).GetProperty(FilterBy);
 
             firstPart = FilterBy.Substring(2);
             messageStaff = $"{firstPart}s are not avalible!";
 
-            if (prop != null)
+            if (FilterBy != null)
             {
-                FilteredPatients = AllPatients?.Where(x => (bool?)prop.GetValue(x, null) == true && x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+                FilteredPatients = AllPatients?.Where(x => x.PatientTypeName == FilterBy && x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
             }
             else
             {
-                FilteredPatients = null;
+                FilteredPatients = new();
             }
         }
         isSearchLoading = false;

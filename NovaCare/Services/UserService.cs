@@ -108,7 +108,6 @@ namespace NovaCare.Services
 
         public async Task<StaffDto> GetLoggedInUserAsync()
         {
-            Staff? staff = new();
             var authState = await _authStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
@@ -118,67 +117,108 @@ namespace NovaCare.Services
                 if (!string.IsNullOrEmpty(userId))
                 {
                     using var context = _contextFactory.CreateDbContext();
-                    //staff = await _userManager.FindByIdAsync(userId);
-                    staff = await context.Users.AsNoTracking().FirstOrDefaultAsync(x =>x.Id == userId);
+
+                    // Project directly into the DTO to let EF Core build the perfect SQL query
+                    var currentStaff = await context.Users
+                        .AsNoTracking()
+                        .Where(x => x.Id == userId)
+                        .Select(staff => new StaffDto
+                        {
+                            Id = staff.Id,
+                            FisrtName = staff.FisrtName,
+                            MiddleName = staff.MiddleName,
+                            LastName = staff.LastName,
+                            StaffPhoto = staff.StaffPhoto,
+                            Email = staff.Email == null ? string.Empty : staff.Email,
+
+                            // Clinical Titles (StaffTypeId == 2)
+                            ClinicalTitleName = staff.StaffTitles
+                                .Where(x => x.StaffTypeId == 2)
+                                .Select(x => x.StaffTitleName)
+                                .FirstOrDefault() == null
+                                    ? string.Empty
+                                    : staff.StaffTitles.Where(x => x.StaffTypeId == 2).Select(x => x.StaffTitleName).FirstOrDefault(),
+
+                            ClinicalTitleGroupName = staff.StaffTitles
+                                .Where(x => x.StaffTypeId == 2)
+                                .Select(x => x.StaffTitleGroup.GroupName)
+                                .FirstOrDefault() == null
+                                    ? string.Empty
+                                    : staff.StaffTitles.Where(x => x.StaffTypeId == 2).Select(x => x.StaffTitleGroup.GroupName).FirstOrDefault(),
+
+                            // Administrative Titles (StaffTypeId == 1)
+                            AdministrativeTitleName = staff.StaffTitles
+                                .Where(x => x.StaffTypeId == 1)
+                                .Select(x => x.StaffTitleName)
+                                .FirstOrDefault() == null
+                                    ? string.Empty
+                                    : staff.StaffTitles.Where(x => x.StaffTypeId == 1).Select(x => x.StaffTitleName).FirstOrDefault(),
+
+                            AdministrativeTitleGroupName = staff.StaffTitles
+                                .Where(x => x.StaffTypeId == 1)
+                                .Select(x => x.StaffTitleGroup.GroupName)
+                                .FirstOrDefault() == null
+                                    ? string.Empty
+                                    : staff.StaffTitles.Where(x => x.StaffTypeId == 1).Select(x => x.StaffTitleGroup.GroupName).FirstOrDefault(),
+
+                            AdministrativeGroupId = staff.StaffTitles
+                                .Where(x => x.StaffTypeId == 1)
+                                .Select(x => x.TitleGroupId)
+                                .FirstOrDefault(),
+
+                            ClinicalGroupId = staff.StaffTitles
+                                .Where(x => x.StaffTypeId == 2)
+                                .Select(x => x.TitleGroupId)
+                                .FirstOrDefault(),
+
+                            // for permissions
+                            IsGetStaffModules = staff.IsGetStaffModules,
+                            IsViewAllAdmins = staff.IsViewAllAdmins,
+                            IsViewAllNurses = staff.IsViewAllNurses,
+                            IsViewAllPatients = staff.IsViewAllPatients,
+                            IsViewAllDoctors = staff.IsViewAllDoctors,
+                            IsViewAllStaffs = staff.IsViewAllStaffs,
+                            IsViewAllHelps = staff.IsViewAllHelps,
+                            IsViewAllLeaders = staff.IsViewAllLeaders,
+                            IsViewAllMedicines = staff.IsViewAllMedicines,
+                            IsViewAllRooms = staff.IsViewAllRooms,
+                            IsViewAllLabTests = staff.IsViewAllLabTests,
+
+                            IsViewLabTestById = staff.IsViewLabTestById,
+                            IsViewPatientById = staff.IsViewPatientById,
+                            IsViewDoctorById = staff.IsViewDoctorById,
+                            IsViewStaffById = staff.IsViewStaffById,
+                            IsViewHelpById = staff.IsViewHelpById,
+                            IsViewLeaderById = staff.IsViewLeaderById,
+                            IsViewMedicineById = staff.IsViewMedicineById,
+                            IsViewRoomById = staff.IsViewRoomById,
+
+                            CanChooseStaffOfTheWeek = staff.CanChooseStaffOfTheWeek,
+
+                            IsCreateNewLabTest = staff.IsCreateNewLabTest,
+                            IsCreateNewPatient = staff.IsCreateNewPatient,
+                            IsCreateNewStaff = staff.IsCreateNewStaff,
+                            IsCreateNewMedicine = staff.IsCreateNewMedicine,
+
+                            IsUpdateOrEditLabTest = staff.IsUpdateOrEditLabTest,
+                            IsUpdateOrEditPatient = staff.IsUpdateOrEditPatient,
+                            IsUpdateOrEditStaff = staff.IsUpdateOrEditStaff,
+                            AccessConfigurations = staff.AccessConfigurations,
+                            IsUpdateOrEditMedicine = staff.IsUpdateOrEditMedicine
+                        })
+                        .FirstOrDefaultAsync();
+
+                    if (currentStaff != null)
+                    {
+                        return currentStaff;
+                    }
                 }
             }
 
-            if (staff == null)
-            {
-                return new();
-            }
-
-            var currentStaff = new StaffDto
-            {
-                FisrtName = staff.FisrtName,
-                MiddleName = staff.MiddleName,
-                LastName = staff.LastName,
-                StaffPhoto = staff.StaffPhoto,
-                Email = staff.Email ?? string.Empty,
-
-                ClinicalTitleName = staff.StaffTitles?.Where(x => x.StaffTypeId == 2).Select(x => x.StaffTitleName).FirstOrDefault() ?? string.Empty,
-                AdministrativeTitleName = staff.StaffTitles?.Where(x => x.StaffTypeId == 1).Select(x => x.StaffTitleName).FirstOrDefault() ?? string.Empty,
-                AdministrativeGroupId = staff.StaffTitles?.Where(x => x.StaffTypeId == 1).Select(x => x.TitleGroupId).FirstOrDefault() ?? 0,
-                ClinicalGroupId = staff.StaffTitles?.Where(x => x.StaffTypeId == 2).Select(x => x.TitleGroupId).FirstOrDefault() ?? 0,
-
-                //for permissions
-                IsGetStaffModules = staff.IsGetStaffModules,
-                IsViewAllAdmins = staff.IsViewAllAdmins,
-                IsViewAllNurses = staff.IsViewAllNurses,
-                IsViewAllPatients = staff.IsViewAllPatients,
-                IsViewAllDoctors = staff.IsViewAllDoctors,
-                IsViewAllStaffs = staff.IsViewAllStaffs,
-                IsViewAllHelps = staff.IsViewAllHelps,
-                IsViewAllLeaders = staff.IsViewAllLeaders,
-                IsViewAllMedicines = staff.IsViewAllMedicines,
-                IsViewAllRooms = staff.IsViewAllRooms,
-                IsViewAllLabTests = staff.IsViewAllLabTests,
-
-                IsViewLabTestById = staff.IsViewLabTestById,
-                IsViewPatientById = staff.IsViewPatientById,
-                IsViewDoctorById = staff.IsViewDoctorById,
-                IsViewStaffById = staff.IsViewStaffById,
-                IsViewHelpById = staff.IsViewHelpById,
-                IsViewLeaderById = staff.IsViewLeaderById,
-                IsViewMedicineById = staff.IsViewMedicineById,
-                IsViewRoomById = staff.IsViewRoomById,
-
-                CanChooseStaffOfTheWeek = staff.CanChooseStaffOfTheWeek,
-
-                IsCreateNewLabTest = staff.IsCreateNewLabTest,
-                IsCreateNewPatient = staff.IsCreateNewPatient,
-                IsCreateNewStaff = staff.IsCreateNewStaff,
-                IsCreateNewMedicine = staff.IsCreateNewMedicine,
-
-                IsUpdateOrEditLabTest = staff.IsUpdateOrEditLabTest,
-                IsUpdateOrEditPatient = staff.IsUpdateOrEditPatient,
-                IsUpdateOrEditStaff = staff.IsUpdateOrEditStaff,
-                AccessConfigurations = staff.AccessConfigurations,
-                IsUpdateOrEditMedicine = staff.IsUpdateOrEditMedicine
-            };
-
-            return currentStaff;
+            // Fallback if not authenticated or not found in database
+            return new StaffDto();
         }
+
 
         public async Task<string> FindStaffValidEmailAddressAsync(string email)
         {
