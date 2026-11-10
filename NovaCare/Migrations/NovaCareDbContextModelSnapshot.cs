@@ -1498,6 +1498,9 @@ namespace NovaCare.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("DischargedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
@@ -1746,6 +1749,10 @@ namespace NovaCare.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BedAvailability")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("BedCodeNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1757,7 +1764,7 @@ namespace NovaCare.Migrations
 
                     b.HasIndex("WardId");
 
-                    b.ToTable("Bed");
+                    b.ToTable("Beds");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.RoomModals.Room", b =>

@@ -13,6 +13,7 @@ namespace NovaCare.Modals.PatientModals
         [Key]
         public int Id { get; set; }
         public DateTime VisitDate { get; set; }
+        public DateTime DischargedDate { get; set; }
 
 
         [ForeignKey(nameof(VisitType))]

@@ -8,6 +8,7 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
     {
         public int Id { get; set; }
         public DateTime VisitDate { get; set; }
+        public DateTime DischargedDate { get; set; }
 
         public int VisitTypeId { get; set; }
         public int PatientId { get; set; }

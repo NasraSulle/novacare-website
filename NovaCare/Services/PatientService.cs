@@ -287,7 +287,8 @@ namespace NovaCare.Services
                     existingPatient.Visits = dto.Visits?.Select(x => new Visit
                     {
                         VisitTypeId = x.VisitTypeId,
-                        PatientId = x.PatientId
+                        PatientId = x.PatientId,
+                        DischargedDate = x.DischargedDate
                     }).ToList();
 
                     context.Patients.Update(existingPatient);
@@ -313,15 +314,23 @@ namespace NovaCare.Services
                     VisitDate = visit.VisitDate,
                     VisitTypeId = visit.VisitTypeId,
                     PatientId = visit.PatientId,
-                    Bills = visit.Bills.Select(visit => new BillDto
-                            {
-                                Id = visit.Id,
-                                BillDate = visit.BillDate,
-                                BillDescription = visit.BillDescription,
-                                VisitId = visit.VisitId,
-                                TotalAmount = visit.TotalAmount
+                    DischargedDate = visit.DischargedDate,
+                    Bills = visit.Bills.Select(bill => new BillDto
+                    {
+                        Id = bill.Id,
+                        BillDate = bill.BillDate,
+                        BillDescription = bill.BillDescription,
+                        VisitId = bill.VisitId,
+                        TotalAmount = bill.TotalAmount
+                    }).ToList(),
 
-                            }).ToList()
+                    Patient = visit.Patient == null ? null : new PatientDto
+                    {
+                        Id = visit.Patient.Id,
+                        PatientTypeName = visit.Patient.PatientType!.PatientTypeName,
+                        PatientStatusName = visit.Patient.PatientStatus!.PatientStatusName
+                    }
+
                 }).ToListAsync();
 
             return visits;
@@ -365,6 +374,7 @@ namespace NovaCare.Services
                 {
                     existingVisit.VisitTypeId = dto.VisitTypeId;
                     existingVisit.PatientId = dto.PatientId;
+                    existingVisit.DischargedDate = dto.DischargedDate;
 
                     existingVisit.VisitStatusId = dto.VisitStatusId;
 

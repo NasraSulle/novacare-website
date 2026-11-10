@@ -2314,16 +2314,7 @@ C:\Users\8th Gen\source\repos\NasraSulle\novacare-website\NovaCare\obj\Debug\net
 C:\Users\8th Gen\source\repos\NasraSulle\novacare-website\NovaCare\obj\Debug\net10.0\NovaCare.pdb
 C:\Users\8th Gen\source\repos\NasraSulle\novacare-website\NovaCare\obj\Debug\net10.0\NovaCare.genruntimeconfig.cache
 C:\Users\8th Gen\source\repos\NasraSulle\novacare-website\NovaCare\obj\Debug\net10.0\ref\NovaCare.dll
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\EmbeddedAttribute.cs
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\ValidatableTypeAttribute.cs
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.csproj.AssemblyReference.cache
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\rpswa.dswa.cache.json
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.AssemblyInfoInputs.cache
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.AssemblyInfo.cs
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.csproj.CoreCompileInputs.cache
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.sourcelink.json
+C:\Users\8th Gen\source\repos\NasraSulle\novacare-website\NovaCare\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\bin\Debug\net10.0\appsettings.Development.json
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\bin\Debug\net10.0\appsettings.json
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\bin\Debug\net10.0\libman.json
@@ -2471,6 +2462,16 @@ C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\bin\Debug\net10.0\r
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\bin\Debug\net10.0\runtimes\win-arm64\native\msalruntime_arm64.dll
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\bin\Debug\net10.0\runtimes\win-x64\native\msalruntime.dll
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\bin\Debug\net10.0\runtimes\win-x86\native\msalruntime_x86.dll
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\EmbeddedAttribute.cs
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\ValidatableTypeAttribute.cs
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.csproj.AssemblyReference.cache
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.AssemblyInfoInputs.cache
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.AssemblyInfo.cs
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.csproj.CoreCompileInputs.cache
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.sourcelink.json
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\rjimswa.dswa.cache.json
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
@@ -4630,5 +4631,3 @@ C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\r
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.pdb
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.genruntimeconfig.cache
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\ref\NovaCare.dll
-C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
-C:\Users\8th Gen\source\repos\NasraSulle\novacare-website\NovaCare\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt

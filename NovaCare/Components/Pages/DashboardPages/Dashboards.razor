@@ -1,184 +1,845 @@
-﻿@rendermode InteractiveServer
+﻿@using NovaCare.Shared.DTOs.RoomDTOs
+@rendermode InteractiveServer
 
 <style>
     .dashboard-container {
-        background-color: #f8fafc;
+        background-color: #f4f6f9;
         min-height: 100vh;
     }
 
-    .metric-card {
+    /* Header Ping Dot */
+    .relative-dot-container {
+        position: relative;
+        display: flex;
+        width: 8px;
+        height: 8px;
+    }
+
+    .dot-solid, .dot-ping {
+        border-radius: 50%;
+        background-color: var(--mud-palette-error);
+        width: 100%;
+        height: 100%;
+    }
+
+    .dot-ping {
+        position: absolute;
+        display: inline-flex;
+        opacity: 0.7;
+        animation: mud-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    @@keyframes mud-ping {
+        75%, 100% {
+            transform: scale(2.6);
+            opacity: 0;
+        }
+    }
+
+    /* Vitals Bridge Container */
+    .vitals-bridge {
+        position: relative;
+        background: linear-gradient(180deg, rgba(63,81,181,1) 0%, rgba(63,81,181,0.2) 100%) !important;
+        /* border: 1px solid var(--mud-palette-lines-default); */
+        border-radius: 5px;
+        overflow: hidden;
+        width: 100%;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .vitals-bridge__score {
+    flex-direction: column;
+    justify-content: center;
+    padding-top: .5rem;
+    display: flex;
+    }
+
+    .vitals-bridge__score-label {
+        color: #9fe6c9;
+        margin-top: .15rem;
+        font-size: 12.5px;
+        font-weight: 700;
+    }
+
+    .vitals-bridge__score-foot {
+        color: oklab(95.6268% -.0106561 .00230426 / .6);
+        align-items: center;
+        gap: .3rem;
+        margin-top: .65rem;
+        font-size: 10.5px;
+        display: flex;
+    }
+    .vitals-bridge__eyebrow {
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: oklab(95.6268% -.0106561 .00230426 / .65);
+        align-items: center;
+        gap: .4rem;
+        font-size: 10.5px;
+        font-weight: 700;
+        display: flex;
+    }
+
+    .vitals-bridge__score-num {
+        font-family: var(--font-display, inherit);
+        letter-spacing: -.02em;
+        color: #0000;
+        background: linear-gradient(135deg, #fff, #9fe6c9);
+        -webkit-background-clip: text;
+        background-clip: text;
+        font-size: 52px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .vitals-bridge__score-row {
+    align-items: baseline;
+    gap: .15rem;
+    margin-top: .6rem;
+    display: flex;
+}
+
+    .vitals-bridge__score-unit {
+        color: oklab(95.6268% -.0106561 .00230426 / .55);
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Animated Ambient ECG Trace */
+    .vitals-bridge__ecg {
+/*         position: absolute;
+        top: 0;
+        left: 0; */
+        width: 100%;
+        height: 30px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .vitals-bridge__ecg-track {
+        fill: none;
+        stroke: var(--mud-palette-success);
+        stroke-width: 1.5;
+        opacity: 0.12;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .vitals-bridge__ecg-pulse {
+        fill: none;
+        stroke: var(--mud-palette-success);
+        stroke-width: 2.5;
+        opacity: 0.55;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 280 1200;
+        stroke-dashoffset: 1480;
+        animation: ecg-sweep 4.5s linear infinite;
+    }
+
+    @@keyframes ecg-sweep {
+        0% {
+            stroke-dashoffset: 1480;
+        }
+
+        100% {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    /* Live Glowing Status Marker */
+    .vitals-bridge__dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--mud-palette-success);
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 8px var(--mud-palette-success);
+        animation: pulse-glow 2s infinite;
+    }
+
+    @@keyframes pulse-glow {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+        }
+    }
+
+    /* Desktop Grid Dividers */
+    @@media (min-width: 960px) {
+        .border-end-md {
+            border-right: 1px solid var(--mud-palette-lines-default);
+        }
+
+        .border-start-md {
+            border-left: 1px solid var(--mud-palette-lines-default);
+        }
+    }
+
+    /* Vital Sign Tiles */
+    .text-sm {
+        font-size: 0.8rem;
+    }
+
+    .text-muted {
+        color: var(--mud-palette-text-secondary);
+    }
+
+    .relative-tile {
+        border:1px solid white !important;
+        color: white !important;
+        background-color: transparent !important;
+        border-radius: 8px !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        z-index: 2;
+    }
+
+        .relative-tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+    .vital-tile--alert {
+        border-left: 4px solid var(--mud-palette-error) !important;
+        background-color: rgba(var(--mud-palette-error-rgb), 0.03) !important;
+    }
+
+    /* Clinical AI Box */
+    .ai-sparkle-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    .chip-alert {
+        background-color: rgba(var(--mud-palette-error-rgb), 0.1);
+        color: var(--mud-palette-error);
+    }
+
+    .chip-neutral {
+        background-color: rgba(var(--mud-palette-action-disabled-background-rgb), 0.5);
+        color: var(--mud-palette-text-secondary);
+    }
+
+    /* Metric & Chart Cards */
+    .metric-card-wrapper {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         border-radius: 5px;
     }
 
-        .metric-card:hover {
+        .metric-card-wrapper:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
         }
 
     .chart-card {
-        border-radius: 5px;
-        padding: 20px;
+        position: relative;
         height: 100%;
+        padding: 20px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        background-color: #ffffff;
+        border: 1px solid var(--mud-palette-lines-default);
+        border-radius: 5px;
+        overflow: hidden;
+        width: 100%;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     }
 
     .staff-card {
-        background: linear-gradient(135deg, #7986cb 0%, #1a237e 100%) !important;
+        background: linear-gradient(135deg, #3949ab 0%, #1a237e 100%) !important;
         border-radius: 5px;
         color: white !important;
     }
 
-
     .carousel-metric-card {
-        background: linear-gradient(135deg, #424242 0%, #212121 100%);
+        background: linear-gradient(135deg, #263238 0%, #101619 100%);
         border-radius: 5px;
         color: white;
     }
+
+    /* Entrance Animation */
+    .animate-rise-in {
+        animation: riseIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @@keyframes riseIn {
+        from {
+            transform: translateY(12px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Interactive card hover matching your metric cards */
+    .surface-card {
+        border-radius: 5px;
+        border: 1px solid var(--mud-palette-lines-default);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .surface-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+        }
+
+    /* Soft tinted funnel stage cards using MudBlazor theme variables */
+    .funnel-tile {
+        border: 1px solid transparent;
+    }
+
+    .funnel-primary {
+        background-color: rgba(var(--mud-palette-primary-rgb), 0.08) !important;
+    }
+
+    .funnel-warning {
+        background-color: rgba(var(--mud-palette-warning-rgb), 0.08) !important;
+    }
+
+    .funnel-info {
+        background-color: rgba(var(--mud-palette-info-rgb), 0.08) !important;
+    }
+
+    .funnel-success {
+        background-color: rgba(var(--mud-palette-success-rgb), 0.08) !important;
+    }
+
+    /* Multi-stage funnel gradient bar */
+    .funnel-gradient-bar {
+        height: 8px;
+        width: 100%;
+        border-radius: 999px;
+        background: linear-gradient( 90deg, var(--mud-palette-primary) 0%, var(--mud-palette-warning) 35%, var(--mud-palette-info) 70%, var(--mud-palette-success) 100% );
+    }
+
+    .badge-warning-soft {
+        background-color: rgba(var(--mud-palette-warning-rgb), 0.14) !important;
+    }
+
 </style>
 
-<div class="dashboard-container pa-6">
-    <MudGrid Spacing="4">
-        <!-- Top Metrics Row -->
-        <MudItem xs="12">
-            <MudGrid Spacing="3">
-                <MudItem xs="12" sm="6" md="3">
-                    <div class="metric-card"><TopSummary DataCount="allStaffs.Count" Title="Our Staff" Icon="@Icons.Material.Filled.People" /></div>
+<MudGrid Class="dashboard-container pa-6" Spacing="4" id="another_unique_identifier">
+    <!-- Command Console Header -->
+    <MudItem xs="12">
+        <div class="d-flex align-center gap-2 mb-1">
+            <span class="relative-dot-container">
+                <span class="dot-ping"></span>
+                <span class="dot-solid"></span>
+            </span>
+
+            <MudText Typo="Typo.caption"
+                     Style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;"
+                     Color="Color.Error">
+                Smart Healthcare Operations Center
+            </MudText>
+        </div>
+
+        <div class="d-flex flex-wrap align-center justify-space-between gap-2">
+            <MudText Typo="Typo.h5"
+                     Style="font-weight: 800; font-family: var(--mud-theme-font-family-display, inherit);">
+                NovaCare Medical Center
+            </MudText>
+            <MudText Typo="Typo.caption" Class="text-muted">
+                Last Synced: @DateTime.Now.ToString("MMM dd, yyyy HH:mm")
+            </MudText>
+        </div>
+    </MudItem>
+
+    <!-- Animated Vitals Bridge -->
+    <MudItem xs="12">
+        <MudItem xs="12" Class="vitals-bridge animate-rise-in">
+            <!-- Moving Ambient ECG Trace -->
+            <MudItem xs="12">
+                <svg class="vitals-bridge__ecg" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+                    <path class="vitals-bridge__ecg-track" d="M0,30 L140,30 L160,10 L180,50 L200,30 L230,30 L250,4 L262,56 L274,30 L320,30 L340,30 L360,16 L380,44 L400,30 L740,30 L760,10 L780,50 L800,30 L830,30 L850,4 L862,56 L874,30 L920,30 L940,30 L960,16 L980,44 L1000,30 L1200,30" />
+                    <path class="vitals-bridge__ecg-pulse" d="M0,30 L140,30 L160,10 L180,50 L200,30 L230,30 L250,4 L262,56 L274,30 L320,30 L340,30 L360,16 L380,44 L400,30 L740,30 L760,10 L780,50 L800,30 L830,30 L850,4 L862,56 L874,30 L920,30 L940,30 L960,16 L980,44 L1000,30 L1200,30" />
+                </svg>
+            </MudItem>
+            <MudGrid Spacing="1" Class="pa-3" Style="position: relative; z-index: 2;">
+                <!-- Live Status & Dynamic Score Readout -->
+                <MudItem xs="12" md="2">
+                    <MudPaper Elevation="0" Class="d-flex flex-column justify-space-between h-100 pa-3 bg-transparent">
+                        <div>
+                            <div class="d-flex align-center gap-2 mb-2">
+                                <span class="vitals-bridge__dot"></span>
+                                <MudText Typo="Typo.caption" Class="vitals-bridge__eyebrow" Style="letter-spacing: 0.05em;">
+                                    Live Hospital Vitals
+                                </MudText>
+                            </div>
+                            <div class="d-flex align-baseline vitals-bridge__score-row">
+                                <MudText Typo="Typo.h2" Class="vitals-bridge__score-num">@OverallVitalsScore</MudText>
+                                <MudText Typo="Typo.h5" Class="vitals-bridge__score-unit">/100</MudText>
+                            </div>
+                            <MudText Typo="Typo.subtitle1" Class="vitals-bridge__score-label">
+                                @OverallStatusText
+                            </MudText>
+                        </div>
+                        <div class="d-flex align-center gap-1 mt-4 vitals-bridge__score-foot">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" Color="Color.Success" />
+                            <MudText Typo="Typo.body2">@allPatients.Count total registered patients</MudText>
+                        </div>
+                    </MudPaper>
                 </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <div class="metric-card"><TopSummary DataCount="allPatients.Count" Title="Patients" Icon="@Icons.Material.Filled.AssistWalker" /></div>
+
+                <!-- Vital Sign Tiles (Bound to Real Data + Operational Metrics) -->
+                <MudItem xs="12" md="7">
+                    <MudGrid Spacing="2">
+                        <!-- Doctor Availability (Calculated from real allStaffs data) -->
+                        <MudItem xs="12" sm="6">
+                            <MudPaper Outlined="true" Class="@($"pa-3 relative-tile {(DoctorAvailabilityPct < 60 ? "vital-tile--alert" : "")}")">
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <span class="d-flex align-center gap-2 text-white text-sm">
+                                        <MudIcon Icon="@Icons.Material.Outlined.MedicalServices" Size="Size.Small" /> Doctor Availability
+                                    </span>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@DoctorAvailabilityPct%</MudText>
+                                </div>
+                                <MudProgressLinear Value="@DoctorAvailabilityPct" Color="@(DoctorAvailabilityPct < 60 ? Color.Error : Color.Info)" Size="Size.Small" Rounded="true" />
+                            </MudPaper>
+                        </MudItem>
+
+                        <!-- Overall Staff Readiness (Calculated from real allStaffs data) -->
+                        <MudItem xs="12" sm="6">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <span class="d-flex align-center gap-2  text-white text-sm">
+                                        <MudIcon Icon="@Icons.Material.Outlined.Badge" Size="Size.Small" /> Staff Readiness
+                                    </span>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@StaffReadinessPct%</MudText>
+                                </div>
+                                <MudProgressLinear Value="@StaffReadinessPct" Color="Color.Success" Size="Size.Small" Rounded="true" />
+                            </MudPaper>
+                        </MudItem>
+
+                        <!-- ICU Capacity -->
+                        <MudItem xs="12" sm="6">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile vital-tile--alert">
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <span class="d-flex align-center gap-2 text-white text-sm">
+                                        <MudIcon Class="text-white" Icon="@Icons.Material.Outlined.LocalActivity" Size="Size.Small" /> ICU Capacity
+                                    </span>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold text-white">@AvailableICUBedsPercentage%</MudText>
+                                </div>
+                                <MudProgressLinear Value="@AvailableICUBedsPercentage" Color="Color.Error" Size="Size.Small" Rounded="true" />
+                            </MudPaper>
+                        </MudItem>
+
+                        <!-- Bed Occupancy -->
+                        <MudItem xs="12" sm="6">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <span class="d-flex align-center gap-2  text-white text-sm">
+                                        <MudIcon Icon="@Icons.Material.Outlined.Bed" Size="Size.Small" /> Bed Occupancy
+                                    </span>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@AvailableBedsPercentage%</MudText>
+                                </div>
+                                <MudProgressLinear Value="@AvailableBedsPercentage" Color="Color.Warning" Size="Size.Small" Rounded="true" />
+                            </MudPaper>
+                        </MudItem>
+
+                        <!-- Emergency Readiness -->
+                        <MudItem xs="12" sm="6">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <span class="d-flex align-center gap-2  text-white text-sm">
+                                        <MudIcon Icon="@Icons.Material.Outlined.Emergency" Size="Size.Small" /> Emergency Readiness
+                                    </span>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">@AvailableERBedsPercentage%</MudText>
+                                </div>
+                                <MudProgressLinear Value="@AvailableERBedsPercentage" Color="Color.Success" Size="Size.Small" Rounded="true" />
+                            </MudPaper>
+                        </MudItem>
+
+                        <!-- Surgery Success -->
+                        <MudItem xs="12" sm="6">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <span class="d-flex align-center gap-2  text-white text-sm">
+                                        <MudIcon Icon="@Icons.Material.Outlined.MonitorHeart" Size="Size.Small" /> Surgery Success
+                                    </span>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">98.6%</MudText>
+                                </div>
+                                <MudProgressLinear Value="98.6" Color="Color.Success" Size="Size.Small" Rounded="true" />
+                            </MudPaper>
+                        </MudItem>
+
+                        <!-- Patient Satisfaction -->
+                        <MudItem xs="12" sm="6">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <span class="d-flex align-center gap-2  text-white text-sm">
+                                        <MudIcon Icon="@Icons.Material.Outlined.SentimentSatisfied" Size="Size.Small" /> Patient Satisfaction
+                                    </span>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">94%</MudText>
+                                </div>
+                                <MudProgressLinear Value="94" Color="Color.Success" Size="Size.Small" Rounded="true" />
+                            </MudPaper>
+                        </MudItem>
+
+                        <!-- Clinical Quality -->
+                        <MudItem xs="12" sm="6">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                                <div class="d-flex align-center justify-space-between mb-1">
+                                    <span class="d-flex align-center gap-2  text-white text-sm">
+                                        <MudIcon Icon="@Icons.Material.Outlined.Shield" Size="Size.Small" /> Clinical Quality
+                                    </span>
+                                    <MudText Typo="Typo.body2" Class="font-weight-bold">96%</MudText>
+                                </div>
+                                <MudProgressLinear Value="96" Color="Color.Primary" Size="Size.Small" Rounded="true" />
+                            </MudPaper>
+                        </MudItem>
+                    </MudGrid>
                 </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <div class="metric-card"><TopSummary DataCount="allLabTests.Count" Title="Lab Tests" Icon="@Icons.Material.Filled.Biotech" /></div>
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <div class="metric-card"><TopSummary DataCount="allMedicines.Count" Title="Medicine Inventory" Icon="@Icons.Material.Filled.LocalPharmacy" /></div>
+
+                <!-- Dynamic Clinical Operation Summary -->
+                <MudItem xs="12" md="3">
+                    <MudPaper Elevation="0" Class="d-flex flex-column justify-space-between h-100 pa-3 bg-transparent border-start-md ms-3">
+                        <div>
+                            <div class="d-flex gap-3 align-start mb-3">
+                                <div class="ai-sparkle-box">
+                                    <MudIcon Icon="@Icons.Material.Outlined.AutoAwesome" Color="Color.Primary" Size="Size.Small" />
+                                </div>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold text-white">Clinical Operation Summary</MudText>
+                                    <MudText Typo="Typo.caption" Class=" text-white">Live telemetry · auto-updated</MudText>
+                                </div>
+                            </div>
+
+                            <MudText Typo="Typo.body2" Class="text-white mb-3" Style="line-height: 1.55;">
+                                Currently tracking <strong>@DocCount active doctors</strong> and <strong>@NurCount active nurses</strong> on shift across @allPatients.Count patient records. ICU trending toward capacity — overflow protocol pre-staged.
+                            </MudText>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <div class="status-chip chip-alert">
+                                <MudIcon Icon="@Icons.Material.Outlined.Warning" Size="Size.Small" /> ICU at 92%
+                            </div>
+                            <div class="status-chip chip-neutral">
+                                <MudIcon Icon="@Icons.Material.Outlined.People" Size="Size.Small" /> @UnavailableStaffCount staff off-duty
+                            </div>
+                        </div>
+                    </MudPaper>
                 </MudItem>
             </MudGrid>
         </MudItem>
+    </MudItem>
 
-        <!-- Charts Layer 1 -->
-        <MudItem xs="12" md="4">
-            <MudPaper Elevation="2" Class="chart-card">
-                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-4" Color="Color.Secondary">Weekly Distribution</MudText>
-                <MudChart T="double"
-                          ChartType="ChartType.Pie"
-                          ChartSeries="@_weeklyPatients"
-                          ChartLabels="@_labels"
-                          LegendPosition="Position.Bottom"
-                          Width="100%" Height="220px" CanHideSeries MatchBoundsToSize />
-            </MudPaper>
-        </MudItem>
+    <!-- Top Metrics Row -->
+    <MudItem xs="12">
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="6" md="3">
+                <div class="metric-card-wrapper">
+                    <TopSummary DataCount="@allStaffs.Count" Title="Our Staff" Icon="@Icons.Material.Filled.People" AccentColor="Color.Primary" />
+                </div>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <div class="metric-card-wrapper">
+                    <TopSummary DataCount="@allPatients.Count" Title="Patients" Icon="@Icons.Material.Filled.AssistWalker" AccentColor="Color.Info" />
+                </div>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <div class="metric-card-wrapper">
+                    <TopSummary DataCount="@allLabTests.Count" Title="Lab Tests" Icon="@Icons.Material.Filled.Biotech" AccentColor="Color.Warning" />
+                </div>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <div class="metric-card-wrapper">
+                    <TopSummary DataCount="@allMedicines.Count" Title="Medicine Inventory" Icon="@Icons.Material.Filled.LocalPharmacy" AccentColor="Color.Success" />
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
 
-        <MudItem xs="12" md="4">
-            <MudPaper Elevation="2" Class="chart-card">
-                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-4" Color="Color.Secondary">Weekly Patients By Type</MudText>
-                <MudChart T="double" ChartType="ChartType.Bar"
-                          ChartSeries="_weeklyPatientsByType"
-                          ChartLabels="@_labels"
-                          LegendPosition="Position.Bottom"
-                          Width="100%" Height="220px" CanHideSeries MatchBoundsToSize />
-            </MudPaper>
-        </MudItem>
+    <!-- Charts Layer 1 -->
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="0" Class="chart-card">
+            <MudText Typo="Typo.subtitle1" Class="font-weight-bold" Color="Color.Secondary">Weekly Distribution</MudText>
+            <MudChart T="double"
+                      ChartType="ChartType.Pie"
+                      ChartSeries="@_weeklyPatients"
+                      ChartLabels="@_labels"
+                      LegendPosition="Position.Bottom"
+                      Width="100%" Height="230px" CanHideSeries MatchBoundsToSize />
+        </MudPaper>
+    </MudItem>
 
-        <MudItem xs="12" md="4">
-            <MudPaper Elevation="2" Class="chart-card">
-                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-4" Color="Color.Secondary">Weekly Patients By Age</MudText>
-                <MudChart T="double" ChartType="ChartType.Line"
-                          ChartSeries="_weeklyPatientsByAge"
-                          ChartLabels="@_labels"
-                          LegendPosition="Position.Bottom"
-                          Width="100%" Height="220px" CanHideSeries MatchBoundsToSize />
-            </MudPaper>
-        </MudItem>
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="0" Class="chart-card">
+            <MudText Typo="Typo.subtitle1" Class="font-weight-bold" Color="Color.Secondary">Weekly Patients By Type</MudText>
+            <MudChart T="double" ChartType="ChartType.Bar"
+                      ChartSeries="@_weeklyPatientsByType"
+                      ChartLabels="@_labels"
+                      LegendPosition="Position.Bottom"
+                      Width="100%" Height="230px" CanHideSeries MatchBoundsToSize />
+        </MudPaper>
+    </MudItem>
 
-        <!-- Charts & Custom Blocks Layer 2 -->
-        <MudItem xs="12" md="6">
-            <MudPaper Elevation="2" Class="chart-card">
-                <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-4" Color="Color.Secondary">Weekly Doctors By Specialization</MudText>
-                <MudChart T="double" ChartType="ChartType.Bar"
-                          ChartSeries="_weeklyDoctorsBySpecialization"
-                          ChartLabels="@(new string[] { "MD", "Specialists" })"
-                          LegendPosition="Position.Bottom"
-                          Width="100%" Height="260px" CanHideSeries MatchBoundsToSize />
-            </MudPaper>
-        </MudItem>
+    <MudItem xs="12" md="4">
+        <MudPaper Elevation="0" Class="chart-card">
+            <MudText Typo="Typo.subtitle1" Class="font-weight-bold" Color="Color.Secondary">Weekly Patients By Age</MudText>
+            <MudChart T="double" ChartType="ChartType.Line"
+                      ChartSeries="@_weeklyPatientsByAge"
+                      ChartLabels="@_labels"
+                      LegendPosition="Position.Bottom"
+                      Width="100%" Height="230px" CanHideSeries MatchBoundsToSize />
+        </MudPaper>
+    </MudItem>
 
-        <MudItem xs="12" md="6">
-            <MudGrid Spacing="3">
-                <!-- Staff of the Week Card -->
-                <MudItem xs="12">
-                    <MudPaper Elevation="3" Class="staff-card pa-4">
-                        <MudGrid AlignItems="Center">
-                            <MudItem xs="12" sm="3" Class="d-flex justify-center">
-                                @if (StaffOfTheWeek.StaffPhoto == null)
-                                {
-                                    <MudAvatar Image="Images/dp.png" Style="width:90px; height:90px;" Class="elevation-3" />
-                                }
-                                else
-                                {
-                                    <MudAvatar Image="@($"data:image/jpeg;base64,{Convert.ToBase64String(StaffOfTheWeek.StaffPhoto)}")" Style="width:90px; height:90px;" Class="elevation-3" />
-                                }
+    <MudItem xs="12" md="12">
+        <MudGrid Spacing="4" Class="mb-4">
+
+            <!-- Patient Flow Monitor — stepped funnel (7 columns on desktop) -->
+            <MudItem xs="12" lg="7">
+                <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
+                    <div class="d-flex align-start justify-space-between gap-3">
+                        <div>
+                            <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Patient Flow Monitor</MudText>
+                            <MudText Typo="Typo.caption" Class="text-muted">Admission &rarr; triage &rarr; treatment &rarr; discharge &middot; today</MudText>
+                        </div>
+@*                         <MudIconButton Icon="@(_isFlowExpanded ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)"
+                                       Size="Size.Small"
+                                       OnClick="@(() => _isFlowExpanded = !_isFlowExpanded)"
+                                       aria-label="Collapse panel" /> *@
+                    </div>
+
+                    <MudCollapse Expanded="@_isFlowExpanded">
+                        <MudGrid Spacing="2">
+                            <!-- Admitted -->
+                            <MudItem xs="6" sm="3">
+                                <MudPaper Elevation="0" Class="py-4 px-2 text-center rounded-lg funnel-tile funnel-primary">
+                                    <MudIcon Icon="@Icons.Material.Outlined.PostAdd" Color="Color.Primary" Size="Size.Medium" />
+                                    <MudText Typo="Typo.h5" Class="font-weight-bold mt-2">@admittedPatientsCount</MudText>
+                                    <MudText Typo="Typo.caption" Class="text-muted">Admitted</MudText>
+                                </MudPaper>
                             </MudItem>
-                            <MudItem xs="12" sm="9">
-                                <MudText Typo="Typo.caption" Class="text-uppercase tracking-wider" Style="opacity: 0.8;">🌟 Staff Of The Week</MudText>
-                                <MudText Typo="Typo.h5" Class="font-weight-bold mb-1">@($"{StaffOfTheWeek.FisrtName} {middleName} {StaffOfTheWeek.LastName}")</MudText>
-                                <MudText Typo="Typo.body2" Class="mb-2" Style="opacity: 0.9;">@StaffOfTheWeek.AdministrativeTitleName &bull; @StaffOfTheWeek.ClinicalTitleName</MudText>
-                                <MudText Typo="Typo.body2" FontStyle="FontStyle.Italic" Style="opacity: 0.8; line-height: 1.4;">
-                                    "Thank you for your outstanding dedication, reliability, and the positive energy you bring to the workplace!"
-                                </MudText>
+
+                            <!-- Triaged -->
+                            <MudItem xs="6" sm="3">
+                                <MudPaper Elevation="0" Class="py-4 px-2 text-center rounded-lg funnel-tile funnel-warning">
+                                    <MudIcon Icon="@Icons.Material.Outlined.MedicalServices" Color="Color.Warning" Size="Size.Medium" />
+                                    <MudText Typo="Typo.h5" Class="font-weight-bold mt-2">@triagedPatientsCount</MudText>
+                                    <MudText Typo="Typo.caption" Class="text-muted">Triaged</MudText>
+                                </MudPaper>
+                            </MudItem>
+
+                            <!-- In Treatment -->
+                            <MudItem xs="6" sm="3">
+                                <MudPaper Elevation="0" Class="py-4 px-2 text-center rounded-lg funnel-tile funnel-info">
+                                    <MudIcon Icon="@Icons.Material.Outlined.MonitorHeart" Color="Color.Info" Size="Size.Medium" />
+                                    <MudText Typo="Typo.h5" Class="font-weight-bold mt-2">@inTreatmentPatientsCount</MudText>
+                                    <MudText Typo="Typo.caption" Class="text-muted">In treatment</MudText>
+                                </MudPaper>
+                            </MudItem>
+
+                            <!-- Discharged -->
+                            <MudItem xs="6" sm="3">
+                                <MudPaper Elevation="0" Class="py-4 px-2 text-center rounded-lg funnel-tile funnel-success">
+                                    <MudIcon Icon="@Icons.Material.Outlined.Logout" Color="Color.Success" Size="Size.Medium" />
+                                    <MudText Typo="Typo.h5" Class="font-weight-bold mt-2">@dischargedPatientsCount</MudText>
+                                    <MudText Typo="Typo.caption" Class="text-muted">Discharged</MudText>
+                                </MudPaper>
                             </MudItem>
                         </MudGrid>
-                    </MudPaper>
-                </MudItem>
 
-                <!-- Doctors Availability & Carousel Grid -->
-                <MudItem xs="12" sm="7">
-                    <MudPaper Elevation="2" Class="chart-card">
-                        <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2" Color="Color.Secondary">Doctors Availability</MudText>
-                        <MudChart T="double" ChartType="ChartType.Donut"
-                                  ChartSeries="_weeklyAvailableDoctors"
-                                  ChartLabels="@_labels"
-                                  LegendPosition="Position.Right"
-                                  Width="100%" Height="140px" CanHideSeries MatchBoundsToSize />
-                    </MudPaper>
-                </MudItem>
+                        <!-- Funnel Conversion Gradient Bar -->
+                        <div class="funnel-gradient-bar mt-4"></div>
 
-                <MudItem xs="12" sm="5">
-                    <MudPaper Elevation="3" Class="carousel-metric-card pa-4 d-flex flex-column justify-center align-center" Style="height: 100%; min-height: 204px;">
-                        <MudText Typo="Typo.subtitle2" Class="text-uppercase mb-2" Style="color: #b0bec5; font-weight: 700;">On Duty Today</MudText>
+                        <MudText Typo="Typo.caption" Class="text-muted d-block mt-3">
+                            Avg. length of stay 2.4 days &middot; 42% funnel conversion admission-to-discharge today
+                        </MudText>
+                    </MudCollapse>
+                </MudPaper>
+            </MudItem>
 
-                        <MudCarousel Class="mud-width-full" Style="height:110px;" ShowArrows="false" ShowBullets="false" AutoCycle="true" TData="object">
-                            <MudCarouselItem Transition="Transition.Fade">
-                                <div class="d-flex flex-column align-center justify-center">
-                                    <MudText Typo="Typo.h2" Class="font-weight-bold color-white">@DocCount</MudText>
-                                    <MudText Typo="Typo.body1" Style="color: #e0e0e0;">Active Doctors</MudText>
-                                </div>
-                            </MudCarouselItem>
-                            <MudCarouselItem Transition="Transition.Fade">
-                                <div class="d-flex flex-column align-center justify-center">
-                                    <MudText Typo="Typo.h2" Class="font-weight-bold color-white">@NurCount</MudText>
-                                    <MudText Typo="Typo.body1" Style="color: #e0e0e0;">Active Nurses</MudText>
-                                </div>
-                            </MudCarouselItem>
-                        </MudCarousel>
-                    </MudPaper>
-                </MudItem>
-            </MudGrid>
-        </MudItem>
-    </MudGrid>
-</div>
+            <!-- Live Bed Occupancy (5 columns on desktop) -->
+            <MudItem xs="12" lg="5">
+                <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100" Style="animation-delay: 0.08s;">
+                    <div class="d-flex align-center justify-space-between gap-3">
+                        <div class="d-flex align-center gap-2">
+                            <MudIcon Icon="@Icons.Material.Outlined.Bed" Size="Size.Small" />
+                            <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Live Bed Occupancy</MudText>
+                        </div>
+                        <MudChip T="string" Color="Color.Warning" Size="Size.Small" Variant="Variant.Text" Class="font-weight-bold badge-warning-soft">
+                            87.4% full
+                        </MudChip>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <!-- General Ward -->
+                        <div>
+                            <div class="d-flex align-center justify-space-between mb-1">
+                                <MudText Typo="Typo.caption" Class="font-weight-bold">General Ward &middot; GW-1</MudText>
+                                <MudText Typo="Typo.caption" Class="text-muted">142 / 160</MudText>
+                            </div>
+                            <MudProgressLinear Value="88.7" Color="Color.Warning" Size="Size.Medium" Rounded="true" />
+                        </div>
+
+                        <!-- ICU-B -->
+                        <div>
+                            <div class="d-flex align-center justify-space-between mb-1">
+                                <MudText Typo="Typo.caption" Class="font-weight-bold">ICU-B</MudText>
+                                <MudText Typo="Typo.caption" Class="text-muted">33 / 36</MudText>
+                            </div>
+                            <MudProgressLinear Value="91.6" Color="Color.Error" Size="Size.Medium" Rounded="true" />
+                        </div>
+
+                        <!-- Pediatrics -->
+                        <div>
+                            <div class="d-flex align-center justify-space-between mb-1">
+                                <MudText Typo="Typo.caption" Class="font-weight-bold">Pediatrics &middot; PW-2</MudText>
+                                <MudText Typo="Typo.caption" Class="text-muted">38 / 60</MudText>
+                            </div>
+                            <MudProgressLinear Value="63.3" Color="Color.Info" Size="Size.Medium" Rounded="true" />
+                        </div>
+
+                        <!-- Maternity -->
+                        <div>
+                            <div class="d-flex align-center justify-space-between mb-1">
+                                <MudText Typo="Typo.caption" Class="font-weight-bold">Maternity &middot; MW-1</MudText>
+                                <MudText Typo="Typo.caption" Class="text-muted">21 / 40</MudText>
+                            </div>
+                            <MudProgressLinear Value="52.5" Color="Color.Success" Size="Size.Medium" Rounded="true" />
+                        </div>
+                    </div>
+                </MudPaper>
+            </MudItem>
+
+        </MudGrid>
+
+    </MudItem>
+    <!-- Charts & Custom Blocks Layer 2 -->
+    <MudItem xs="12" md="6" Class="pt-0">
+        <MudPaper Elevation="0" Class="chart-card">
+            <MudText Typo="Typo.subtitle1" Class="font-weight-bold" Color="Color.Secondary">Doctors By Clinical Role</MudText>
+            <MudChart T="double" ChartType="ChartType.Bar"
+                      ChartSeries="@_weeklyDoctorsBySpecialization"
+                      ChartLabels="@(new string[] { "MD", "Specialists" })"
+                      LegendPosition="Position.Bottom"
+                      Width="100%" Height="260px" CanHideSeries MatchBoundsToSize />
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6" Class="pt-0">
+        <MudGrid Spacing="3">
+            <!-- Staff of the Week Card -->
+            <MudItem xs="12">
+                <MudPaper Elevation="3" Class="staff-card pa-4">
+                    <MudGrid Justify="Justify.Center">
+                        <MudItem xs="12" sm="3" Class="d-flex justify-center">
+                            @if (StaffOfTheWeek.StaffPhoto == null)
+                            {
+                                <MudAvatar Style="width:110px; height:110px;" Class="elevation-3">
+                                    <MudImage Src="Images/dp.png"></MudImage>
+                                </MudAvatar>
+                            }
+                            else
+                            {
+                                <MudAvatar Style="width:110px; height:110px;" Class="elevation-3">
+                                    <MudImage Src="@($"data:image/jpeg;base64,{Convert.ToBase64String(StaffOfTheWeek.StaffPhoto)}")"></MudImage>
+                                </MudAvatar>
+                            }
+                        </MudItem>
+                        <MudItem xs="12" sm="9">
+                            <MudText Typo="Typo.caption" Class="text-uppercase tracking-wider" Style="opacity: 0.85; font-weight: 600;">
+                                Staff Of The Week
+                            </MudText>
+                            <MudText Typo="Typo.h5" Class="font-weight-bold mb-1">
+                                @(string.IsNullOrWhiteSpace(StaffOfTheWeek.FisrtName) ? "No Selection Yet" : $"{StaffOfTheWeek.FisrtName} {middleName} {StaffOfTheWeek.LastName}")
+                            </MudText>
+                            <MudText Typo="Typo.body2" Class="mb-2" Style="opacity: 0.9;">
+                                @StaffOfTheWeek.AdministrativeTitleName &bull; @StaffOfTheWeek.ClinicalTitleName
+                            </MudText>
+                            <MudText Typo="Typo.body2" Style="opacity: 0.85; font-style: italic; line-height: 1.4;">
+                                "Thank you for your outstanding dedication, reliability, and the positive energy you bring to the workplace!"
+                            </MudText>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            </MudItem>
+
+            <!-- Doctors Availability & Carousel Grid -->
+            <MudItem xs="12" sm="7">
+                <MudPaper Elevation="0" Class="chart-card">
+                    <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2" Color="Color.Secondary">Doctors Availability</MudText>
+                    <MudChart T="double" ChartType="ChartType.Donut"
+                              ChartSeries="@_weeklyAvailableDoctors"
+                              ChartLabels="@_labels"
+                              LegendPosition="Position.Right"
+                              Width="100%" Height="145px" CanHideSeries MatchBoundsToSize />
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" sm="5">
+                <MudPaper Elevation="3" Class="carousel-metric-card pa-4 d-flex flex-column justify-center align-center" Style="height: 100%; min-height: 208px;">
+                    <MudText Typo="Typo.subtitle2" Class="text-uppercase mb-2" Style="color: #90a4ae; font-weight: 700; letter-spacing: 0.05em;">
+                        On Duty Today
+                    </MudText>
+
+                    <MudCarousel Class="mud-width-full" Style="height:115px;" ShowArrows="false" ShowBullets="false" AutoCycle="true" TData="object">
+                        <MudCarouselItem Transition="Transition.Fade">
+                            <div class="d-flex flex-column align-center justify-center">
+                                <MudText Typo="Typo.h2" Class="font-weight-bold" Style="color: #ffffff;">@DocCount</MudText>
+                                <MudText Typo="Typo.body1" Style="color: #cfd8dc;">Active Doctors</MudText>
+                            </div>
+                        </MudCarouselItem>
+                        <MudCarouselItem Transition="Transition.Fade">
+                            <div class="d-flex flex-column align-center justify-center">
+                                <MudText Typo="Typo.h2" Class="font-weight-bold" Style="color: #ffffff;">@NurCount</MudText>
+                                <MudText Typo="Typo.body1" Style="color: #cfd8dc;">Active Nurses</MudText>
+                            </div>
+                        </MudCarouselItem>
+                    </MudCarousel>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+<MudItem>
+    <MudScrollToTop TopOffset="100"
+                    VisibleCssClass="visible fixed"
+                    HiddenCssClass="hidden fixed"
+                    Style="bottom:20px; right:20px; z-index: 1300;">
+@*         <div class="mud-theme-secondary px-3 py-6 mud-elevation-16 rounded-xl">
+            Scroll to top custom button
+        </div> *@
+        <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ArrowUpward" />
+    </MudScrollToTop>
+</MudItem>
 
 @code {
     private string[] _labels = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
 
     List<DoctorDto> allDoctors = new();
     List<StaffDto> allStaffs = new();
+    List<VisitDto> allVisits = new();
     List<PatientDto> allPatients = new();
     List<LabTestDto> allLabTests = new();
     List<MedicineDto> allMedicines = new();
+    List<BedDto> allBeds = new();
+    List<WardDto> allWards = new();
 
     List<ChartSeries<double>> _weeklyPatients = new();
     List<ChartSeries<double>> _weeklyPatientsByType = new();
@@ -188,36 +849,116 @@
 
     StaffDto StaffOfTheWeek = new();
     DateTime sevenDaysAgo = DateTime.Now.AddDays(-7);
+
     int NurCount = 0;
     int DocCount = 0;
+    int UnavailableStaffCount = 0;
 
-    string middleName => string.IsNullOrWhiteSpace(StaffOfTheWeek.MiddleName) ? "" : $"{StaffOfTheWeek.MiddleName.ToUpper().Substring(0, 1)}.";
+    int admittedPatientsCount = 0;
+    int triagedPatientsCount = 0;
+    int inTreatmentPatientsCount = 0;
+    int dischargedPatientsCount = 0;
+
+    double AvailableBedsPercentage = 0;
+    double AvailableERBedsPercentage = 0;
+    double AvailableICUBedsPercentage = 0;
+
+    double DoctorAvailabilityPct = 0;
+    double StaffReadinessPct = 0;
+    int OverallVitalsScore = 94;
+    private bool _isFlowExpanded = true;
+
+    Color OverallScoreColor => OverallVitalsScore >= 85 ? Color.Success : (OverallVitalsScore >= 70 ? Color.Warning : Color.Error);
+    string OverallStatusText => OverallVitalsScore >= 85 ? "Operating Normally" : (OverallVitalsScore >= 70 ? "Elevated Load" : "Critical Attention");
+
+    string middleName => string.IsNullOrWhiteSpace(StaffOfTheWeek.MiddleName)
+        ? ""
+        : $"{StaffOfTheWeek.MiddleName.Trim().ToUpper().Substring(0, 1)}.";
 
     protected override async Task OnInitializedAsync()
     {
-        allStaffs = await staffService.GetAllStaffsAsync();
-        allPatients = await patientService.GetAllPatientsAsync();
-        allLabTests = await labTestService.GetAllLabTestsAsync();
-        allMedicines = await medicineService.GetAllMedicinesAsync();
-        allDoctors = await doctorService.GetAllDoctorsAsync();
+        allStaffs = await staffService.GetAllStaffsAsync() ?? new();
+        allPatients = await patientService.GetAllPatientsAsync() ?? new();
+        allLabTests = await labTestService.GetAllLabTestsAsync() ?? new();
+        allMedicines = await medicineService.GetAllMedicinesAsync() ?? new();
+        allDoctors = await doctorService.GetAllDoctorsAsync() ?? new();
+        allBeds = await roomService.GetAllBedsAsync() ?? new();
+        allWards = await roomService.GetAllWardsAsync() ?? new();
+        allVisits = await patientService.GetAllVisitsAsync() ?? new();
 
         StaffOfTheWeek = allStaffs.FirstOrDefault(x => x.IsStaffOfTTheWeek) ?? new();
 
-        await ClinicalStaffToday();
-        await WeeklyPatients();
-        await WeeklyPatientsByType();
-        await WeeklyPatientsByAge2();
-        await WeeklyDoctorsBySpecialization();
-        await WeeklyDoctorsAvailability();
+        PatientFlowMonitorData();
+        BedsAvailability();
+        CalculateLiveVitals();
+        WeeklyPatients();
+        WeeklyPatientsByType();
+        WeeklyPatientsByAge();
+        WeeklyDoctorsBySpecialization();
+        WeeklyDoctorsAvailability();
+
+        StateHasChanged();
     }
 
-    private async Task ClinicalStaffToday()
+    private void PatientFlowMonitorData()
     {
-        NurCount = allStaffs.Count(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "nurse");
-        DocCount = allStaffs.Count(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "doctor");
+        //Admitted Patients
+        admittedPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() != "cancelled" && v.VisitDate.ToShortDateString() == DateTime.Now.ToShortDateString()).Count();
+
+        //Triaged Patients
+        triagedPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() != "cancelled" && v.VisitDate.ToShortDateString() == DateTime.Now.ToShortDateString() && v.Patient?.PatientTypeName.ToLower().Trim() != "emergency").Count();
+        
+        //In Treatment Patients
+        inTreatmentPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() != "cancelled" && v.VisitDate.ToShortDateString() == DateTime.Now.ToShortDateString() && v.Treatments.Any()).Count();
+
+        //Discharged Patients
+        dischargedPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() == "completed" && v.DischargedDate.ToShortDateString() == DateTime.Now.ToShortDateString()).Count();
     }
 
-    private async Task WeeklyPatients()
+    private void BedsAvailability()
+    {
+        //All Beds
+        var unsuedBedsCount = allBeds.Where(b => b.BedAvailability.ToLower().Trim() == "unused").Count();
+        var totalBeds = allBeds.Where(b => b.BedAvailability.ToLower().Trim() == "unused").Count();
+        if (totalBeds > 0)
+            AvailableBedsPercentage = Math.Round(((double)unsuedBedsCount / totalBeds) * 100);
+        
+        //All ER Beds
+        var unsuedERBedsCount = allBeds.Where(b => b.BedAvailability.ToLower().Trim() == "unused" && b.WardName.ToLower().Trim() == "general ward").Count();
+        var totalERBeds = allBeds.Where(b => b.BedAvailability.ToLower().Trim() == "unused" && b.WardName.ToLower().Trim() == "general ward").Count();
+        if (totalERBeds > 0)
+            AvailableERBedsPercentage = Math.Round(((double)unsuedERBedsCount / totalERBeds) * 100);
+
+        //All ICU Beds
+        var unsuedICUBedsCount = allBeds.Where(b => b.BedAvailability.ToLower().Trim() == "unused" && b.WardName.ToLower().Trim() == "medical icu").Count();
+        var totalICUBeds = allBeds.Where(b => b.BedAvailability.ToLower().Trim() == "unused" && b.WardName.ToLower().Trim() == "medical icu").Count();
+        if (totalICUBeds > 0)
+            AvailableICUBedsPercentage = Math.Round(((double)unsuedICUBedsCount / totalICUBeds) * 100);
+    }
+
+    private void CalculateLiveVitals()
+    {
+        var activeStaff = allStaffs.Where(x => string.Equals(x.StaffStatusName, "available", StringComparison.OrdinalIgnoreCase)).ToList();
+        UnavailableStaffCount = allStaffs.Count - activeStaff.Count;
+
+        NurCount = activeStaff.Count(x => string.Equals(x.ClinicalTitleName, "nurse", StringComparison.OrdinalIgnoreCase));
+        DocCount = activeStaff.Count(x =>
+            string.Equals(x.ClinicalTitleName, "doctor", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(x.ClinicalTitleName, "specialist", StringComparison.OrdinalIgnoreCase));
+
+        int totalDoctors = allStaffs.Count(x =>
+            string.Equals(x.ClinicalTitleGroupName.Trim().ToLower(), "doctors", StringComparison.OrdinalIgnoreCase));
+
+        DoctorAvailabilityPct = totalDoctors > 0 ? Math.Round((double)DocCount / totalDoctors * 100, 1) : 100;
+        StaffReadinessPct = allStaffs.Count > 0 ? Math.Round((double)activeStaff.Count / allStaffs.Count * 100, 1) : 100;
+
+        // Weighted score blending live staff readiness with clinical operational baselines
+        double rawScore = (DoctorAvailabilityPct * 0.25) + (StaffReadinessPct * 0.25) + (95.0 * 0.50);
+        OverallVitalsScore = (int)Math.Round(rawScore);
+    }
+
+    private void WeeklyPatients()
     {
         var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
         var countByDay = weeklyPatients.GroupBy(x => x.RegisteredDate.DayOfWeek)
@@ -231,10 +972,10 @@
         }
     }
 
-    private async Task WeeklyPatientsByType()
+    private void WeeklyPatientsByType()
     {
         var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
-        var groupedByType = weeklyPatients.GroupBy(x => x.PatientTypeName);
+        var groupedByType = weeklyPatients.GroupBy(x => x.PatientTypeName ?? "General");
 
         _weeklyPatientsByType = new List<ChartSeries<double>>();
         foreach (var typeGroup in groupedByType)
@@ -247,7 +988,7 @@
         }
     }
 
-    private async Task WeeklyPatientsByAge2()
+    private void WeeklyPatientsByAge()
     {
         var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
         DayOfWeek[] daysOrder = { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday };
@@ -272,11 +1013,16 @@
         };
     }
 
-    private async Task WeeklyDoctorsBySpecialization()
+    private void WeeklyDoctorsBySpecialization()
     {
-        var weeklyDoctors = allStaffs.Where(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "doctor" && x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
-        double countMd = weeklyDoctors.Count(x => x.ClinicalTitleName.ToLower() == "md");
-        double countSpecialist = weeklyDoctors.Count(x => x.ClinicalTitleName.ToLower() != "md");
+        var availableDoctors = allStaffs.Where(x =>
+            string.Equals(x.StaffStatusName, "available", StringComparison.OrdinalIgnoreCase) &&
+            (string.Equals(x.ClinicalTitleName, "doctor", StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(x.ClinicalTitleName, "specialist", StringComparison.OrdinalIgnoreCase))).ToList();
+
+        double countMd = availableDoctors.Count(x => string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase));
+        double countSpecialist = availableDoctors.Count(x => !string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase));
 
         _weeklyDoctorsBySpecialization = new List<ChartSeries<double>>
         {
@@ -285,10 +1031,16 @@
         };
     }
 
-    private async Task WeeklyDoctorsAvailability()
+    private void WeeklyDoctorsAvailability()
     {
-        var weeklyDoctors = allStaffs.Where(x => x.StaffStatusName.ToLower() == "available" && x.ClinicalTitleName.ToLower() == "doctor" && x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
-        var groupedByType = weeklyDoctors.GroupBy(x => x.StaffStatusName);
+        var weeklyDoctors = allStaffs.Where(x =>
+            string.Equals(x.StaffStatusName, "available", StringComparison.OrdinalIgnoreCase) &&
+            (string.Equals(x.ClinicalTitleName, "doctor", StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase) ||
+             string.Equals(x.ClinicalTitleName, "specialist", StringComparison.OrdinalIgnoreCase)) &&
+            x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
+
+        var groupedByType = weeklyDoctors.GroupBy(x => x.StaffStatusName ?? "Available");
 
         _weeklyAvailableDoctors = new List<ChartSeries<double>>();
         foreach (var typeGroup in groupedByType)

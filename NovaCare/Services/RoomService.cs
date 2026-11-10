@@ -75,11 +75,41 @@ namespace NovaCare.Services
                     WardName = type.WardName,
                     WardCost = type.WardCost,
                     MedicalDepartmentId = type.MedicalDepartmentId,
-                    MedicalDepartmentName = type.MedicalDepartment != null ? type.MedicalDepartment.MedicalDepartmentName : string.Empty
+                    MedicalDepartmentName = type.MedicalDepartment != null ? type.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    Beds = type.Beds.Select(b => new BedDto
+                    {
+                        Id = b.Id,
+                        BedCodeNumber = b.BedCodeNumber,
+                        BedAvailability = b.BedAvailability,
+                    }).ToList()
                 })
                 .ToListAsync();
 
             return types ?? new();
+        }
+
+        public async Task<WardDto> GetWardIdAsync(int wardId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var ward = await context.Wards
+                .AsNoTracking().Where(x => x.Id == wardId)
+                .Select(type => new WardDto
+                {
+                    Id = type.Id,
+                    WardName = type.WardName,
+                    WardCost = type.WardCost,
+                    MedicalDepartmentId = type.MedicalDepartmentId,
+                    MedicalDepartmentName = type.MedicalDepartment != null ? type.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    Beds = type.Beds.Select(b => new BedDto
+                    {
+                        Id = b.Id,
+                        BedCodeNumber = b.BedCodeNumber,
+                        BedAvailability = b.BedAvailability,
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            return ward ?? new();
         }
 
         public async Task<RoomDto> GetRoomByIdAsync(int roomId)
@@ -125,6 +155,58 @@ namespace NovaCare.Services
             {
                 return false;
             }
+        }
+
+        public async Task<List<BedDto>> GetAllBedsAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var types = await context.Beds
+                .AsNoTracking()
+                .Select(type => new BedDto
+                {
+                    Id = type.Id,
+                    BedCodeNumber = type.BedCodeNumber,
+                    BedAvailability = type.BedAvailability,
+                    WardId = type.WardId,
+                    WardName = type.Ward != null ? type.Ward.WardName : string.Empty,
+                    Ward = type.Ward == null ? null : new WardDto
+                    {
+                        Id = type.Ward.Id,
+                        WardName = type.Ward.WardName,
+                        MedicalDepartmentId = type.Ward.MedicalDepartmentId,
+                        MedicalDepartmentName = type.Ward.WardName,
+                        WardCost = type.Ward.WardCost
+                    }
+                })
+                .ToListAsync();
+
+            return types ?? new();
+        }
+
+        public async Task<BedDto> GetBedIdAsync(int bedId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var bed = await context.Beds
+                .AsNoTracking().Where(x => x.Id == bedId)
+                .Select(type => new BedDto
+                {
+                    Id = type.Id,
+                    BedCodeNumber = type.BedCodeNumber,
+                    BedAvailability = type.BedAvailability,
+                    WardId = type.WardId,
+                    WardName = type.Ward != null ? type.Ward.WardName : string.Empty,
+                    Ward = type.Ward == null ? null : new WardDto
+                    {
+                        Id = type.Ward.Id,
+                        WardName = type.Ward.WardName,
+                        MedicalDepartmentId = type.Ward.MedicalDepartmentId,
+                        MedicalDepartmentName = type.Ward.WardName,
+                        WardCost = type.Ward.WardCost
+                    }
+                })
+                .FirstOrDefaultAsync();
+
+            return bed ?? new();
         }
     }
 }
