@@ -30,7 +30,9 @@ namespace NovaCare.Services
                     Picture = medicine.Picture,
                     MedicineName = medicine.MedicineName,
                     MedicineGenre = medicine.MedicineGenre,
-                    MedicineTypeName = medicine.MedicineType != null ? medicine.MedicineType.MedicineTypeName : string.Empty,
+                    MedicineGenreId = medicine.MedicineGenreId,
+                    MedicineType = medicine.MedicineType,
+                    MedicineTypeId = medicine.MedicineTypeId,
                     CreatedDate = medicine.CreatedDate,
                     MedicineQty = medicine.MedicineQty,
                     BuyingPrice = medicine.BuyingPrice,
@@ -66,6 +68,8 @@ namespace NovaCare.Services
                 {
                     Id = type.Id,
                     MedicineTypeName = type.MedicineTypeName,
+                    MedicineGenreId = type.MedicineGenreId,
+                    MedicineGenreName = type.MedicineGenre != null ? type.MedicineGenre.MedicineGenreName : string.Empty
 
                 })
                 .ToListAsync();
@@ -84,6 +88,8 @@ namespace NovaCare.Services
                     Picture = dto.Picture,
                     MedicineName = dto.MedicineName,
                     MedicineGenre = dto.MedicineGenre,
+                    MedicineGenreId = dto.MedicineGenreId,
+                    MedicineType = dto.MedicineType,
                     MedicineTypeId = dto.MedicineTypeId,
                     CreatedDate = dto.CreatedDate,
                     MedicineQty = dto.MedicineQty,
@@ -131,7 +137,9 @@ namespace NovaCare.Services
                     existingMedicine.Picture = dto.Picture;
                     existingMedicine.MedicineName = dto.MedicineName;
                     existingMedicine.MedicineGenre = dto.MedicineGenre;
+                    existingMedicine.MedicineGenreId = dto.MedicineGenreId;
                     existingMedicine.MedicineType = dto.MedicineType;
+                    existingMedicine.MedicineTypeId = dto.MedicineTypeId;
                     existingMedicine.MedicineQty = dto.MedicineQty;
                     existingMedicine.BuyingPrice = dto.BuyingPrice;
                     existingMedicine.SellingPrice = dto.SellingPrice;
@@ -162,7 +170,9 @@ namespace NovaCare.Services
                     Picture = medicine.Picture,
                     MedicineName = medicine.MedicineName,
                     MedicineGenre = medicine.MedicineGenre,
-                    MedicineTypeName = medicine.MedicineType != null ? medicine.MedicineType.MedicineTypeName : string.Empty,
+                    MedicineGenreId = medicine.MedicineGenreId,
+                    MedicineType = medicine.MedicineType,
+                    MedicineTypeId = medicine.MedicineTypeId,
                     CreatedDate = medicine.CreatedDate,
                     MedicineQty = medicine.MedicineQty,
                     BuyingPrice = medicine.BuyingPrice,
@@ -194,7 +204,6 @@ namespace NovaCare.Services
                     FinishDate = dto.FinishDate,
                     TreatmentQty = dto.TreatmentQty,
                     TreatmentCost = dto.TreatmentCost,
-                    MedicineId = dto.MedicineId,
                     SurgeryId = dto.SurgeryId,
                     TherapyId = dto.TherapyId,
                     MedicalDeptId = dto.MedicalDeptId,
@@ -231,7 +240,6 @@ namespace NovaCare.Services
                     existingTreatment.FinishDate = dto.FinishDate;
                     existingTreatment.TreatmentQty = dto.TreatmentQty;
                     existingTreatment.TreatmentCost = dto.TreatmentCost;
-                    existingTreatment.MedicineId = dto.MedicineId;
                     existingTreatment.SurgeryId = dto.SurgeryId;
                     existingTreatment.TherapyId = dto.TherapyId;
                     existingTreatment.MedicalDeptId = dto.MedicalDeptId;
@@ -265,7 +273,6 @@ namespace NovaCare.Services
                     TreatmentTypeName = treatment.TreatmentTypeName,
                     TreatmentTypeCode = treatment.TreatmentTypeCode,
 
-                    HasMedicineId = treatment.HasMedicineId,
                     HasSurgeryId = treatment.HasSurgeryId,
                     HasTherapyId = treatment.HasTherapyId,
                     HasMedicalDeptId = treatment.HasMedicalDeptId,

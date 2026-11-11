@@ -29,11 +29,10 @@ namespace NovaCare.Data
 
             #region[PreDefinedData]
             builder.Entity<TreatmentType>().HasData(
-                new TreatmentType { Id = 1, TreatmentTypeCode = "001", TreatmentTypeName = "Medication", HasMedicalDeptId = false, HasMedicineId = true, HasSurgeryId = false, HasTherapyId = false, HasWardId = false, HasDoctorId = false, HasRoomId = false },
-                new TreatmentType { Id = 2, TreatmentTypeCode = "002", TreatmentTypeName = "Surgery", HasMedicalDeptId = true, HasMedicineId = false, HasSurgeryId = true, HasTherapyId = false, HasWardId = false, HasDoctorId = true, HasRoomId = true },
-                new TreatmentType { Id = 3, TreatmentTypeCode = "003", TreatmentTypeName = "Therapy", HasMedicalDeptId = true, HasMedicineId = false, HasSurgeryId = false, HasTherapyId = true, HasWardId = false, HasDoctorId = true, HasRoomId = true },
-                new TreatmentType { Id = 4, TreatmentTypeCode = "004", TreatmentTypeName = "Hospitalized", HasMedicalDeptId = true, HasMedicineId = false, HasSurgeryId = false, HasTherapyId = false, HasWardId = true, HasDoctorId = true, HasRoomId = false }
-                );
+                new TreatmentType { Id = 1, TreatmentTypeCode = "001", TreatmentTypeName = "Surgery", HasMedicalDeptId = true, HasSurgeryId = true, HasTherapyId = false, HasWardId = false, HasDoctorId = true, HasRoomId = true },
+                new TreatmentType { Id = 2, TreatmentTypeCode = "002", TreatmentTypeName = "Therapy", HasMedicalDeptId = true, HasSurgeryId = false, HasTherapyId = true, HasWardId = false, HasDoctorId = true, HasRoomId = true },
+                new TreatmentType { Id = 3, TreatmentTypeCode = "003", TreatmentTypeName = "Hospitalized", HasMedicalDeptId = true, HasSurgeryId = false, HasTherapyId = false, HasWardId = true, HasDoctorId = true, HasRoomId = false }
+            );
 
             builder.Entity<TreatmentStatus>().HasData(
                 new TreatmentStatus { Id = 1, TreatmentStatusName = "Requested" },
@@ -84,9 +83,11 @@ namespace NovaCare.Data
                 );
 
             builder.Entity<PaymentStatus>().HasData(
-                new PaymentStatus { Id = 1, PaymentStatusName = "Full Payment" },
-                new PaymentStatus { Id = 2, PaymentStatusName = "Partial Payment" }
-                );
+               new PaymentStatus { Id = 1, PaymentStatusName = "Unpaid" },
+               new PaymentStatus { Id = 2, PaymentStatusName = "Partial Payment" },
+               new PaymentStatus { Id = 3, PaymentStatusName = "Full Payment" }
+           );
+
 
             builder.Entity<PaymentMode>().HasData(
                 new PaymentMode { Id = 1, PaymentModeName = "Cash" },
@@ -112,8 +113,19 @@ namespace NovaCare.Data
                 new PatientStatus { Id = 2, PatientStatusName = "Not Emergency" }
                 );
 
+
+            builder.Entity<MedicineGenre>().HasData(
+                new MedicineGenre { Id = 1, MedicineGenreCode = 1, MedicineGenreName = "Painkillers" },
+                new MedicineGenre { Id = 2, MedicineGenreCode = 2, MedicineGenreName = "Antibiotics" },
+                new MedicineGenre { Id = 3, MedicineGenreCode = 3, MedicineGenreName = "Antifungals" },
+                new MedicineGenre { Id = 4, MedicineGenreCode = 4, MedicineGenreName = "Antivirals" },
+                new MedicineGenre { Id = 5, MedicineGenreCode = 5, MedicineGenreName = "Vaccines" },
+                new MedicineGenre { Id = 6, MedicineGenreCode = 6, MedicineGenreName = "Anthelmintics" },
+                new MedicineGenre { Id = 7, MedicineGenreCode = 7, MedicineGenreName = "Antimalarials " }
+                );
+
             builder.Entity<MedicineType>().HasData(
-                new MedicineType { Id = 1, MedicineTypeCode = 1, MedicineTypeName = "Tablets" },
+                new MedicineType { Id = 1, MedicineTypeCode = 1, MedicineTypeName = "Tablets"},
                 new MedicineType { Id = 2, MedicineTypeCode = 2, MedicineTypeName = "Injection" },
                 new MedicineType { Id = 3, MedicineTypeCode = 3, MedicineTypeName = "Syrup" },
                 new MedicineType { Id = 4, MedicineTypeCode = 4, MedicineTypeName = "Drop" },
@@ -167,16 +179,6 @@ namespace NovaCare.Data
             );
 
 
-            builder.Entity<MedicineGenre>().HasData(
-                new MedicineGenre { Id = 1, MedicineGenreCode = 1, MedicineGenreName = "Painkillers" },
-                new MedicineGenre { Id = 2, MedicineGenreCode = 2, MedicineGenreName = "Antibiotics" },
-                new MedicineGenre { Id = 3, MedicineGenreCode = 3, MedicineGenreName = "Antifungals" },
-                new MedicineGenre { Id = 4, MedicineGenreCode = 4, MedicineGenreName = "Antivirals" },
-                new MedicineGenre { Id = 5, MedicineGenreCode = 5, MedicineGenreName = "Vaccines" },
-                new MedicineGenre { Id = 6, MedicineGenreCode = 6, MedicineGenreName = "Anthelmintics" },
-                new MedicineGenre { Id = 7, MedicineGenreCode = 7, MedicineGenreName = "Antimalarials " }
-                );
-
             builder.Entity<BillType>().HasData(
                 new BillType { Id = 1, TypeNme = "Final" },
                 new BillType { Id = 2, TypeNme = "Interim" },
@@ -184,11 +186,11 @@ namespace NovaCare.Data
                 );
 
             builder.Entity<VisitType>().HasData(
-                new VisitType { Id = 1, TypeNme = "Consultation" },
-                new VisitType { Id = 2, TypeNme = "Check-Up" },
-                new VisitType { Id = 3, TypeNme = "Treatment" }
-                );
-
+                   new VisitType { Id = 1, TypeName = "Consultation" },
+                   new VisitType { Id = 2, TypeName = "Check-Up" },
+                   new VisitType { Id = 3, TypeName = "Treatment" },
+                   new VisitType { Id = 4, TypeName = "Pharmacy" }
+               );
 
             builder.Entity<Therapy>().HasData(
                 new Therapy { Id = 1, TherapyName = "Dialysis", TherapyCost = 30000, MedicalDepartmentId = 1 },          // OPD / Outpatient Medical
@@ -350,8 +352,9 @@ namespace NovaCare.Data
         public DbSet<Ward> Wards { get; set; }
         public DbSet<Bed> Beds { get; set; }
         public DbSet<BillItem> BillItems { get; set; }
+        public DbSet<Prescription> Prescriptions { get; set; }
 
-        
+
         #endregion
     }
 }

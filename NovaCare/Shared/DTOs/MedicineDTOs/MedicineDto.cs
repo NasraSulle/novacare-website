@@ -1,39 +1,31 @@
-﻿using NovaCare.Modals.MedicineModals;
-using NovaCare.Shared.DTOs.JoinDto;
-using NovaCare.Shared.DTOs.PatientDTOs;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+﻿using NovaCare.Shared.DTOs.JoinDto;
 
 namespace NovaCare.Shared.DTOs.MedicineDTOs
 {
     public class MedicineDto
     {
-        //properties
         public int Id { get; set; }
         public byte[]? Picture { get; set; }
         public string MedicineName { get; set; } = string.Empty;
         public string MedicineGenre { get; set; } = string.Empty;
-        public DateTime CreatedDate { get; set; }
-        public double MedicineQty { get; set; } = 0d;
+        public int? MedicineGenreId { get; set; }
+        public string MedicineType { get; set; } = string.Empty;
+        public int? MedicineTypeId { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public double MedicineQty { get; set; } = 0d; // Available stock on shelf
         public decimal BuyingPrice { get; set; } = 0m;
         public decimal SellingPrice { get; set; } = 0m;
 
-        //foreign keys
+        // Foreign keys
         public int MedicineStatusId { get; set; }
-        public int? MedicineTypeId { get; set; } 
+        //public int? MedicineTypeId { get; set; }
 
-        //navigation properties
-        public MedicineStatus? MedicineStatus { get; set; }
-        public MedicineType? MedicineType { get; set; }
+        // Navigation properties
+        public MedicineStatusDto? MedicineStatus { get; set; }
+        //public MedicineTypeDto? MedicineType { get; set; }
 
-        //for display
+        // UI Helpers
         public string MedicineStatusName { get; set; } = string.Empty;
-        public string MedicineTypeName { get; set; } = string.Empty;
-
-        public int? BillId { get; set; }
-        public BillDto? Bill { get; set; }
-
+        //public string MedicineTypeName { get; set; } = string.Empty;
     }
 }

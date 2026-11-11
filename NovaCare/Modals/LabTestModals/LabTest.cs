@@ -6,13 +6,13 @@ namespace NovaCare.Modals.LabTestModals
 {
     public class LabTest
     {
-        //properties
+        // Properties
         [Key]
         public int Id { get; set; }
         public string DiseaseName { get; set; } = string.Empty;
-        public string LabTestStatusname { get; set; } = string.Empty;
+        public string LabTestStatusName { get; set; } = string.Empty; // Fixed casing from LabTestStatusname
 
-        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public string TestResult { get; set; } = string.Empty;
         public byte[]? ResultAttachment { get; set; }
 
@@ -22,19 +22,20 @@ namespace NovaCare.Modals.LabTestModals
         public string UpdaterId { get; set; } = string.Empty;
         public decimal LabTestCost { get; set; } = 0m;
 
-        //foreign keys
+        // Foreign Keys
         [ForeignKey(nameof(Visit))]
         public int VisitId { get; set; }
 
         [ForeignKey(nameof(Consultation))]
         public int? ConsultationId { get; set; }
 
-        //navigation properties
-        public Visit? Visit { get; set; }
-        public List<LabTestResultComposition>? LabTestResultCompositions { get; set; }
+        [ForeignKey(nameof(BillItem))]
+        public int? BillItemId { get; set; } // Null = unbilled; HasValue = linked to a BillItem
 
-        [ForeignKey(nameof(Bill))]
-        public int? BillId { get; set; }
-        public Bill? Bill { get; set; }
+        // Navigation Properties
+        public Visit? Visit { get; set; }
+        public Consultation? Consultation { get; set; } // Added to match ConsultationId ForeignKey attribute
+        public BillItem? BillItem { get; set; }
+        public List<LabTestResultComposition> LabTestResultCompositions { get; set; } = new();
     }
 }

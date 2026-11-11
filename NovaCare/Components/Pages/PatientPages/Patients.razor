@@ -145,15 +145,15 @@
             else if (PatientGenre == "Consultation Requests")
             {
                 FilteredPatients = AllPatients?.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0 
-                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.BillId != null) == true) == true).ToList() ?? new();
+                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.BillItemId != null) == true) == true).ToList() ?? new();
             }
             else if (PatientGenre == "Vitals Requests")
             {
                 FilteredPatients = AllPatients?.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId == 0 
-                    && (((av.Consultations?.Any(avc => avc.BillId != null)) == true) 
-                    || ((av.MedicinePrescription?.Any(avc => avc.BillId != null)) == true)
-                    || ((av.LabTests?.Any(avc => avc.BillId != null)) == true)
-                    || ((av.Treatments?.Any(avc => avc.BillId != null)) == true))) == true).ToList() ?? new();
+                    && (((av.Consultations?.Any(avc => avc.BillItemId != null)) == true) 
+                    || ((av.Prescriptions?.Any(avc => avc.BillItemId != null)) == true)
+                    || ((av.LabTests?.Any(avc => avc.BillItemId != null)) == true)
+                    || ((av.Treatments?.Any(avc => avc.BillItemId != null)) == true))) == true).ToList() ?? new();
 
             }
             else
@@ -175,16 +175,16 @@
             }
             else if (PatientGenre == "Consultation Requests")
             {
-                FilteredPatients = AllPatients?.Where(v => v.PatientTypeName == FilterBy && v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0 && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.BillId != null) == true) == true).ToList() ?? new();
+                FilteredPatients = AllPatients?.Where(v => v.PatientTypeName == FilterBy && v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0 && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.BillItemId != null) == true) == true).ToList() ?? new();
             }
             else if (PatientGenre == "Vitals Requests")
             {
                 FilteredPatients = AllPatients?.Where(v => v.PatientTypeName == FilterBy && v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId == 0 
                     &&
-                    (((av.Consultations?.Any(avc => avc.BillId != null)) == true)
-                    || ((av.MedicinePrescription?.Any(avc => avc.BillId != null)) == true)
-                    || ((av.LabTests?.Any(avc => avc.BillId != null)) == true)
-                    || ((av.Treatments?.Any(avc => avc.BillId != null)) == true))) == true).ToList() ?? new();
+                    (((av.Consultations?.Any(avc => avc.BillItemId != null)) == true)
+                    || ((av.Prescriptions?.Any(avc => avc.BillItemId != null)) == true)
+                    || ((av.LabTests?.Any(avc => avc.BillItemId != null)) == true)
+                    || ((av.Treatments?.Any(avc => avc.BillItemId != null)) == true))) == true).ToList() ?? new();
             }
             else
             {

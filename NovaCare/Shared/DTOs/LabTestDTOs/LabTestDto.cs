@@ -18,20 +18,21 @@ namespace NovaCare.Shared.DTOs.LabTestDTOs
         public string UpdaterId { get; set; } = string.Empty;
         public decimal LabTestCost { get; set; } = 0m;
 
-        // foreign keys
+        // Foreign keys
         public int VisitId { get; set; }
         public int PatientId { get; set; }
         public int? ConsultationId { get; set; }
+        public int? BillItemId { get; set; } // Null = unbilled; HasValue = linked to a BillItem
 
-        // navigation properties
+        // Navigation properties
         public VisitDto? Visit { get; set; }
-        public List<LabTestResultCompositionDto>? LabTestResultCompositions { get; set; }
+        public ConsultationDto? Consultation { get; set; }
+        public BillItemDto? BillItem { get; set; }
+        public List<LabTestResultCompositionDto> LabTestResultCompositions { get; set; } = new();
 
-        // for display
+        // For display (UI Helpers)
         public string PatientFullName { get; set; } = string.Empty;
         public string DiseaseTypeName { get; set; } = string.Empty;
-
-        public int? BillId { get; set; }
-        public BillDto? Bill { get; set; }
+        public string PaymentStatusName { get; set; } = string.Empty;
     }
 }

@@ -16,30 +16,37 @@
                                                         UserAttributes="@(new() { { "autocomplete", "medicinename" }, { "aria-required", "true" } } )" />
                                 </MudItem>
                                 <MudItem md="6">
-                                    <MudSelect For="@(() => CurrentMedicine.MedicineGenre)"
-                                               @bind-Value="CurrentMedicine.MedicineGenre"
+                                    <MudSelect T="int?" For="@(() => CurrentMedicine.MedicineGenreId)"
+                                               @bind-Value="CurrentMedicine.MedicineGenreId"
+                                               @bind-Value:after="@(() => { CurrentMedicine.MedicineGenre = AllMedicineGenres.FirstOrDefault(x => x.Id == CurrentMedicine.MedicineGenreId)?.MedicineGenreName ?? string.Empty; })"
                                                Label="Medicine Genre" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
                                         <MudSelectItem Value="0" Disabled>Medicine Genre</MudSelectItem>
 
                                         @foreach (var item in AllMedicineGenres)
                                         {
-                                            <MudSelectItem Value="@item.MedicineGenreName">@item.MedicineGenreName</MudSelectItem>
+                                            <MudSelectItem T="int?" Value="@item.Id">@item.MedicineGenreName</MudSelectItem>
                                         }
                                     </MudSelect>
                                 </MudItem>
                                 <MudItem md="6">
-                                    <MudSelect For="@(() => CurrentMedicine.MedicineType)"
-                                               @bind-Value="CurrentMedicine.MedicineType"
-                                               Label="Medicine Type" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                        <MudSelectItem Value="0" Disabled>Medicine Type</MudSelectItem>
+                                    <MudSelect T="int?"
+                                               For="@(() => CurrentMedicine.MedicineTypeId)"
+                                               @bind-Value="CurrentMedicine.MedicineTypeId"
+                                               @bind-Value:after="@(() => { CurrentMedicine.MedicineType = AllMedicineTypes.FirstOrDefault(x => x.Id == CurrentMedicine.MedicineTypeId)?.MedicineTypeName ?? string.Empty; })"
+                                               Label="Medicine Type"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense"
+                                               UserAttributes="@(new() { { "aria-required", "true" } })">
+
+                                        <MudSelectItem T="int?" Value="0" Disabled>Medicine Type</MudSelectItem>
 
                                         @foreach (var item in AllMedicineTypes)
                                         {
-                                            <MudSelectItem Value="@item.MedicineTypeName">@item.MedicineTypeName</MudSelectItem>
+                                            <MudSelectItem T="int?" Value="@item.Id">@item.MedicineTypeName</MudSelectItem>
                                         }
                                     </MudSelect>
+
                                 </MudItem>
                                 <MudItem md="6">
                                     <MudNumericField @bind-Value="CurrentMedicine.MedicineQty" Margin="Margin.Dense"
@@ -114,11 +121,10 @@
 
         try
         {
-            var existingMed = await medicineService.GetMedicineIdByNameAsync(CurrentMedicine.MedicineName);
 
             //CurrentMedicine.MedicineQty += existingMed.MedicineQty;
 
-            var isSucess = await medicineService.UpdateMedicineAsync(CurrentMedicine, existingMed.Id);
+            var isSucess = await medicineService.UpdateMedicineAsync(CurrentMedicine, CurrentMedicine.Id);
 
             if (isSucess)
             {

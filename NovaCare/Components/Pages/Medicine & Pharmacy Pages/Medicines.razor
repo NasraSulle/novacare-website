@@ -135,7 +135,7 @@
 
                 if (FilterBy != null && Genre != null)
                 {
-                    FilteredMedicines = AllMedicines?.Where(x => x.MedicineTypeName == FilterBy && x.MedicineGenre == Genre).ToList();
+                    FilteredMedicines = AllMedicines?.Where(x => x.MedicineType.Trim().ToLower() == FilterBy.Trim().ToLower() && x.MedicineGenre.Trim().ToLower() == Genre.Trim().ToLower()).ToList() ?? new();
                 }
                 else
                 {
@@ -179,7 +179,7 @@
 
             if (FilterBy != null)
             {
-                FilteredMedicines = AllMedicines?.Where(x => x.MedicineTypeName == FilterBy && x.MedicineName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+                FilteredMedicines = AllMedicines?.Where(x => x.MedicineType == FilterBy && x.MedicineName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
             }
             else
             {

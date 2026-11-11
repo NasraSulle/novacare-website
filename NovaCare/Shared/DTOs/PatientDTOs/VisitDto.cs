@@ -8,7 +8,7 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
     {
         public int Id { get; set; }
         public DateTime VisitDate { get; set; }
-        public DateTime DischargedDate { get; set; }
+        public DateTime? DischargedDate { get; set; } // Nullable until discharged
 
         public int VisitTypeId { get; set; }
         public int PatientId { get; set; }
@@ -20,24 +20,24 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public PreliminaryTestDto? PreliminaryTest { get; set; }
         public VisitStatusDto? VisitStatus { get; set; }
 
-        // Fully normalized operational 
-        public List<BillDto>? Bills { get; set; }
-        public List<ConsultationDto>? Consultations { get; set; }
-        public List<LabTestDto>? LabTests { get; set; }
-        public List<MedicineDto>? MedicinePrescription { get; set; }
-        public List<TreatmentDto>? Treatments { get; set; }
+        // Normalized operational collections
+        public List<BillDto> Bills { get; set; } = new();
+        public List<ConsultationDto> Consultations { get; set; } = new();
+        public List<LabTestDto> LabTests { get; set; } = new();
+        public List<PrescriptionDto> Prescriptions { get; set; } = new(); // Added for patient medications
+        public List<TreatmentDto> Treatments { get; set; } = new(); // Surgery, Therapy, Hospitalized
 
-        //for UI
+        // UI Helpers
         public string VisitTypeName { get; set; } = string.Empty;
         public string PatientFullName { get; set; } = string.Empty;
-        public int PreliminaryTestId { get; set; }
+        public int? PreliminaryTestId { get; set; }
         public string VisitStatusName { get; set; } = string.Empty;
 
+        // Live calculation of unbilled items for this visit
         public decimal TotalUnbilledCharges =>
-            (Consultations?.Where(c => c.BillId == null).Sum(c => c.ConsultationCost) ?? 0) +
-            (LabTests?.Where(l => l.BillId == null).Sum(l => l.LabTestCost) ?? 0) +
-            (MedicinePrescription?.Where(m => m.BillId == null).Sum(m => m.BuyingPrice) ?? 0) +
-            (Treatments?.Where(t => t.BillId == null).Sum(t => t.TreatmentCost) ?? 0);
-
+            Consultations.Where(c => c.BillItemId == null).Sum(c => c.ConsultationCost) +
+            LabTests.Where(l => l.BillItemId == null).Sum(l => l.LabTestCost) +
+            Prescriptions.Where(p => p.BillItemId == null).Sum(p => (decimal)p.Quantity * p.UnitPrice) +
+            Treatments.Where(t => t.BillItemId == null).Sum(t => t.TreatmentQty * t.TreatmentCost);
     }
 }

@@ -24,7 +24,7 @@ namespace NovaCare.Services
                 var labTest = new LabTest
                 {
                     DiseaseName = dto.DiseaseName,
-                    LabTestStatusname = "New",
+                    LabTestStatusName = "New",
                     TestResult = dto.TestResult,
                     ResultAttachment = dto.ResultAttachment,
                     CreatedDate = dto.CreatedDate,
@@ -56,7 +56,7 @@ namespace NovaCare.Services
                 {
                     Id = labTest.Id,
                     DiseaseName = labTest.DiseaseName,
-                    LabTestStatusName = labTest.LabTestStatusname,
+                    LabTestStatusName = labTest.LabTestStatusName,
                     TestResult = labTest.TestResult,
                     LabTestCost = labTest.LabTestCost,
                     ResultAttachment = labTest.ResultAttachment,
@@ -82,7 +82,7 @@ namespace NovaCare.Services
                 {
                     Id = labTest.Id,
                     DiseaseName = labTest.DiseaseName,
-                    LabTestStatusName = labTest.LabTestStatusname,
+                    LabTestStatusName = labTest.LabTestStatusName,
                     TestResult = labTest.TestResult,
                     LabTestCost = labTest.LabTestCost,
                     ResultAttachment = labTest.ResultAttachment,
@@ -116,7 +116,7 @@ namespace NovaCare.Services
                 {
                     existingLabTest.DiseaseName = dto.DiseaseName;
                     existingLabTest.TestResult = dto.TestResult;
-                    existingLabTest.LabTestStatusname = string.IsNullOrWhiteSpace(existingLabTest.TestResult) ? "New" : "Updated";
+                    existingLabTest.LabTestStatusName = string.IsNullOrWhiteSpace(existingLabTest.TestResult) ? "New" : "Updated";
                     existingLabTest.ResultAttachment = dto.ResultAttachment;
                     existingLabTest.RequesteeDoctor = dto.RequesteeDoctor;
                     existingLabTest.UpdaterLabTechnician = dto.UpdaterLabTechnician;
@@ -219,7 +219,7 @@ namespace NovaCare.Services
                 {
                     Id = labTest.Id,
                     DiseaseName = labTest.DiseaseName,
-                    LabTestStatusName = labTest.LabTestStatusname,
+                    LabTestStatusName = labTest.LabTestStatusName,
                     TestResult = labTest.TestResult,
                     LabTestCost = labTest.LabTestCost,
                     ResultAttachment = labTest.ResultAttachment,

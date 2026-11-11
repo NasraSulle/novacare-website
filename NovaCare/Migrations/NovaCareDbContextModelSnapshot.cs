@@ -864,7 +864,7 @@ namespace NovaCare.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BillId")
+                    b.Property<int?>("BillItemId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ConsultationId")
@@ -881,7 +881,7 @@ namespace NovaCare.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("LabTestStatusname")
+                    b.Property<string>("LabTestStatusName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -913,7 +913,11 @@ namespace NovaCare.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BillId");
+                    b.HasIndex("BillItemId")
+                        .IsUnique()
+                        .HasFilter("[BillItemId] IS NOT NULL");
+
+                    b.HasIndex("ConsultationId");
 
                     b.HasIndex("VisitId");
 
@@ -958,9 +962,6 @@ namespace NovaCare.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BillId")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("BuyingPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -972,6 +973,9 @@ namespace NovaCare.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("MedicineGenreId")
+                        .HasColumnType("int");
+
                     b.Property<string>("MedicineName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -981,6 +985,10 @@ namespace NovaCare.Migrations
 
                     b.Property<int>("MedicineStatusId")
                         .HasColumnType("int");
+
+                    b.Property<string>("MedicineType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("MedicineTypeId")
                         .HasColumnType("int");
@@ -992,18 +1000,11 @@ namespace NovaCare.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("VisitId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("BillId");
 
                     b.HasIndex("MedicineStatusId");
 
                     b.HasIndex("MedicineTypeId");
-
-                    b.HasIndex("VisitId");
 
                     b.ToTable("Medicines");
                 });
@@ -1209,14 +1210,21 @@ namespace NovaCare.Migrations
                     b.Property<int>("BillId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Itemname")
+                    b.Property<string>("ItemName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Qty")
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<int>("SourceItemId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("cost")
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
@@ -1269,7 +1277,7 @@ namespace NovaCare.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BillId")
+                    b.Property<int?>("BillItemId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("ConsultationCost")
@@ -1283,7 +1291,7 @@ namespace NovaCare.Migrations
                     b.Property<int?>("DoctorId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FinishDate")
+                    b.Property<DateTime?>("FinishDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("MedicalDepartmentId")
@@ -1300,7 +1308,9 @@ namespace NovaCare.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BillId");
+                    b.HasIndex("BillItemId")
+                        .IsUnique()
+                        .HasFilter("[BillItemId] IS NOT NULL");
 
                     b.HasIndex("DoctorId");
 
@@ -1522,7 +1532,7 @@ namespace NovaCare.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DischargedDate")
+                    b.Property<DateTime?>("DischargedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("PatientId")
@@ -1590,7 +1600,7 @@ namespace NovaCare.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("TypeNme")
+                    b.Property<string>("TypeName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1602,17 +1612,22 @@ namespace NovaCare.Migrations
                         new
                         {
                             Id = 1,
-                            TypeNme = "Consultation"
+                            TypeName = "Consultation"
                         },
                         new
                         {
                             Id = 2,
-                            TypeNme = "Check-Up"
+                            TypeName = "Check-Up"
                         },
                         new
                         {
                             Id = 3,
-                            TypeNme = "Treatment"
+                            TypeName = "Treatment"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            TypeName = "Pharmacy"
                         });
                 });
 
@@ -1761,12 +1776,17 @@ namespace NovaCare.Migrations
                         new
                         {
                             Id = 1,
-                            PaymentStatusName = "Full Payment"
+                            PaymentStatusName = "Unpaid"
                         },
                         new
                         {
                             Id = 2,
                             PaymentStatusName = "Partial Payment"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            PaymentStatusName = "Full Payment"
                         });
                 });
 
@@ -2455,6 +2475,64 @@ namespace NovaCare.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.TreatmentModals.Prescription", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BillItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ConsultationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Dosage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicineId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("PrescribedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("VisitId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillItemId")
+                        .IsUnique()
+                        .HasFilter("[BillItemId] IS NOT NULL");
+
+                    b.HasIndex("ConsultationId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("MedicineId");
+
+                    b.HasIndex("VisitId");
+
+                    b.ToTable("Prescriptions");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.TreatmentModals.Surgery", b =>
                 {
                     b.Property<int>("Id")
@@ -2727,19 +2805,19 @@ namespace NovaCare.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BillId")
+                    b.Property<int?>("BillItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ConsultationId")
                         .HasColumnType("int");
 
                     b.Property<int?>("DoctorId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("FinishDate")
+                    b.Property<DateTime?>("FinishDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("MedicalDeptId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("MedicineId")
                         .HasColumnType("int");
 
                     b.Property<int?>("RoomId")
@@ -2767,7 +2845,7 @@ namespace NovaCare.Migrations
                     b.Property<int>("TreatmentTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VisitId")
+                    b.Property<int>("VisitId")
                         .HasColumnType("int");
 
                     b.Property<int?>("WardId")
@@ -2775,13 +2853,15 @@ namespace NovaCare.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BillId");
+                    b.HasIndex("BillItemId")
+                        .IsUnique()
+                        .HasFilter("[BillItemId] IS NOT NULL");
+
+                    b.HasIndex("ConsultationId");
 
                     b.HasIndex("DoctorId");
 
                     b.HasIndex("MedicalDeptId");
-
-                    b.HasIndex("MedicineId");
 
                     b.HasIndex("RoomId");
 
@@ -2848,9 +2928,6 @@ namespace NovaCare.Migrations
                     b.Property<bool>("HasMedicalDeptId")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("HasMedicineId")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("HasRoomId")
                         .HasColumnType("bit");
 
@@ -2879,53 +2956,37 @@ namespace NovaCare.Migrations
                         new
                         {
                             Id = 1,
-                            HasDoctorId = false,
-                            HasMedicalDeptId = false,
-                            HasMedicineId = true,
-                            HasRoomId = false,
-                            HasSurgeryId = false,
+                            HasDoctorId = true,
+                            HasMedicalDeptId = true,
+                            HasRoomId = true,
+                            HasSurgeryId = true,
                             HasTherapyId = false,
                             HasWardId = false,
                             TreatmentTypeCode = "001",
-                            TreatmentTypeName = "Medication"
+                            TreatmentTypeName = "Surgery"
                         },
                         new
                         {
                             Id = 2,
                             HasDoctorId = true,
                             HasMedicalDeptId = true,
-                            HasMedicineId = false,
                             HasRoomId = true,
-                            HasSurgeryId = true,
-                            HasTherapyId = false,
+                            HasSurgeryId = false,
+                            HasTherapyId = true,
                             HasWardId = false,
                             TreatmentTypeCode = "002",
-                            TreatmentTypeName = "Surgery"
+                            TreatmentTypeName = "Therapy"
                         },
                         new
                         {
                             Id = 3,
                             HasDoctorId = true,
                             HasMedicalDeptId = true,
-                            HasMedicineId = false,
-                            HasRoomId = true,
-                            HasSurgeryId = false,
-                            HasTherapyId = true,
-                            HasWardId = false,
-                            TreatmentTypeCode = "003",
-                            TreatmentTypeName = "Therapy"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            HasDoctorId = true,
-                            HasMedicalDeptId = true,
-                            HasMedicineId = false,
                             HasRoomId = false,
                             HasSurgeryId = false,
                             HasTherapyId = false,
                             HasWardId = true,
-                            TreatmentTypeCode = "004",
+                            TreatmentTypeCode = "003",
                             TreatmentTypeName = "Hospitalized"
                         });
                 });
@@ -3244,9 +3305,13 @@ namespace NovaCare.Migrations
 
             modelBuilder.Entity("NovaCare.Modals.LabTestModals.LabTest", b =>
                 {
-                    b.HasOne("NovaCare.Modals.PatientModals.Bill", "Bill")
-                        .WithMany()
-                        .HasForeignKey("BillId");
+                    b.HasOne("NovaCare.Modals.PatientModals.BillItem", "BillItem")
+                        .WithOne("LabTest")
+                        .HasForeignKey("NovaCare.Modals.LabTestModals.LabTest", "BillItemId");
+
+                    b.HasOne("NovaCare.Modals.PatientModals.Consultation", "Consultation")
+                        .WithMany("LabTests")
+                        .HasForeignKey("ConsultationId");
 
                     b.HasOne("NovaCare.Modals.PatientModals.Visit", "Visit")
                         .WithMany("LabTests")
@@ -3254,7 +3319,9 @@ namespace NovaCare.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Bill");
+                    b.Navigation("BillItem");
+
+                    b.Navigation("Consultation");
 
                     b.Navigation("Visit");
                 });
@@ -3272,29 +3339,17 @@ namespace NovaCare.Migrations
 
             modelBuilder.Entity("NovaCare.Modals.MedicineModals.Medicine", b =>
                 {
-                    b.HasOne("NovaCare.Modals.PatientModals.Bill", "Bill")
-                        .WithMany()
-                        .HasForeignKey("BillId");
-
                     b.HasOne("NovaCare.Modals.MedicineModals.MedicineStatus", "MedicineStatus")
                         .WithMany("Medicines")
                         .HasForeignKey("MedicineStatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NovaCare.Modals.MedicineModals.MedicineType", "MedicineType")
+                    b.HasOne("NovaCare.Modals.MedicineModals.MedicineType", null)
                         .WithMany("Medicines")
                         .HasForeignKey("MedicineTypeId");
 
-                    b.HasOne("NovaCare.Modals.PatientModals.Visit", null)
-                        .WithMany("MedicinePrescription")
-                        .HasForeignKey("VisitId");
-
-                    b.Navigation("Bill");
-
                     b.Navigation("MedicineStatus");
-
-                    b.Navigation("MedicineType");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.MedicineModals.MedicineType", b =>
@@ -3338,9 +3393,9 @@ namespace NovaCare.Migrations
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Consultation", b =>
                 {
-                    b.HasOne("NovaCare.Modals.PatientModals.Bill", "Bill")
-                        .WithMany()
-                        .HasForeignKey("BillId");
+                    b.HasOne("NovaCare.Modals.PatientModals.BillItem", "BillItem")
+                        .WithOne("Consultation")
+                        .HasForeignKey("NovaCare.Modals.PatientModals.Consultation", "BillItemId");
 
                     b.HasOne("NovaCare.Modals.DoctorModals.Doctor", "Doctor")
                         .WithMany("Consultations")
@@ -3362,7 +3417,7 @@ namespace NovaCare.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Bill");
+                    b.Navigation("BillItem");
 
                     b.Navigation("Doctor");
 
@@ -3542,6 +3597,43 @@ namespace NovaCare.Migrations
                     b.Navigation("StaffType");
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.TreatmentModals.Prescription", b =>
+                {
+                    b.HasOne("NovaCare.Modals.PatientModals.BillItem", "BillItem")
+                        .WithOne("Prescription")
+                        .HasForeignKey("NovaCare.Modals.TreatmentModals.Prescription", "BillItemId");
+
+                    b.HasOne("NovaCare.Modals.PatientModals.Consultation", "Consultation")
+                        .WithMany("Prescriptions")
+                        .HasForeignKey("ConsultationId");
+
+                    b.HasOne("NovaCare.Modals.DoctorModals.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId");
+
+                    b.HasOne("NovaCare.Modals.MedicineModals.Medicine", "Medicine")
+                        .WithMany("Prescriptions")
+                        .HasForeignKey("MedicineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.PatientModals.Visit", "Visit")
+                        .WithMany("Prescriptions")
+                        .HasForeignKey("VisitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BillItem");
+
+                    b.Navigation("Consultation");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Medicine");
+
+                    b.Navigation("Visit");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.TreatmentModals.Surgery", b =>
                 {
                     b.HasOne("NovaCare.Modals.DoctorModals.MedicalDepartment", "MedicalDepartment")
@@ -3566,9 +3658,13 @@ namespace NovaCare.Migrations
 
             modelBuilder.Entity("NovaCare.Modals.TreatmentModals.Treatment", b =>
                 {
-                    b.HasOne("NovaCare.Modals.PatientModals.Bill", "Bill")
-                        .WithMany()
-                        .HasForeignKey("BillId");
+                    b.HasOne("NovaCare.Modals.PatientModals.BillItem", "BillItem")
+                        .WithOne("Treatment")
+                        .HasForeignKey("NovaCare.Modals.TreatmentModals.Treatment", "BillItemId");
+
+                    b.HasOne("NovaCare.Modals.PatientModals.Consultation", "Consultation")
+                        .WithMany("Treatments")
+                        .HasForeignKey("ConsultationId");
 
                     b.HasOne("NovaCare.Modals.DoctorModals.Doctor", "Doctor")
                         .WithMany()
@@ -3577,10 +3673,6 @@ namespace NovaCare.Migrations
                     b.HasOne("NovaCare.Modals.DoctorModals.MedicalDepartment", "MedicalDepartment")
                         .WithMany()
                         .HasForeignKey("MedicalDeptId");
-
-                    b.HasOne("NovaCare.Modals.MedicineModals.Medicine", "Medicine")
-                        .WithMany()
-                        .HasForeignKey("MedicineId");
 
                     b.HasOne("NovaCare.Modals.RoomModals.Room", "Room")
                         .WithMany()
@@ -3606,21 +3698,23 @@ namespace NovaCare.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NovaCare.Modals.PatientModals.Visit", null)
+                    b.HasOne("NovaCare.Modals.PatientModals.Visit", "Visit")
                         .WithMany("Treatments")
-                        .HasForeignKey("VisitId");
+                        .HasForeignKey("VisitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("NovaCare.Modals.RoomModals.Ward", "Ward")
                         .WithMany()
                         .HasForeignKey("WardId");
 
-                    b.Navigation("Bill");
+                    b.Navigation("BillItem");
+
+                    b.Navigation("Consultation");
 
                     b.Navigation("Doctor");
 
                     b.Navigation("MedicalDepartment");
-
-                    b.Navigation("Medicine");
 
                     b.Navigation("Room");
 
@@ -3631,6 +3725,8 @@ namespace NovaCare.Migrations
                     b.Navigation("TreatmentStatus");
 
                     b.Navigation("TreatmentType");
+
+                    b.Navigation("Visit");
 
                     b.Navigation("Ward");
                 });
@@ -3691,6 +3787,11 @@ namespace NovaCare.Migrations
                     b.Navigation("LabTestResultCompositions");
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.MedicineModals.Medicine", b =>
+                {
+                    b.Navigation("Prescriptions");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.MedicineModals.MedicineGenre", b =>
                 {
                     b.Navigation("MedicineTypes");
@@ -3713,9 +3814,29 @@ namespace NovaCare.Migrations
                     b.Navigation("Payments");
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.BillItem", b =>
+                {
+                    b.Navigation("Consultation");
+
+                    b.Navigation("LabTest");
+
+                    b.Navigation("Prescription");
+
+                    b.Navigation("Treatment");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.PatientModals.BillType", b =>
                 {
                     b.Navigation("Bills");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.Consultation", b =>
+                {
+                    b.Navigation("LabTests");
+
+                    b.Navigation("Prescriptions");
+
+                    b.Navigation("Treatments");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Patient", b =>
@@ -3749,9 +3870,9 @@ namespace NovaCare.Migrations
 
                     b.Navigation("LabTests");
 
-                    b.Navigation("MedicinePrescription");
-
                     b.Navigation("PreliminaryTest");
+
+                    b.Navigation("Prescriptions");
 
                     b.Navigation("Treatments");
                 });

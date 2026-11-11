@@ -912,7 +912,7 @@
         inTreatmentPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() != "cancelled" && v.VisitDate.ToShortDateString() == DateTime.Now.ToShortDateString() && v.Treatments.Any()).Count();
 
         //Discharged Patients
-        dischargedPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() == "completed" && v.DischargedDate.ToShortDateString() == DateTime.Now.ToShortDateString()).Count();
+        dischargedPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() == "completed" && v.DischargedDate?.ToShortDateString() == DateTime.Now.ToShortDateString()).Count();
     }
 
     private void BedsAvailability()

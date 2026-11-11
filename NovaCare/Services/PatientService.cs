@@ -398,7 +398,7 @@ namespace NovaCare.Services
                 .Select(visit => new VisitTypeDto
                 {
                     Id = visit.Id,
-                    TypeNme = visit.TypeNme
+                    TypeName = visit.TypeName
                 }).ToListAsync();
 
             return visits;
@@ -412,7 +412,7 @@ namespace NovaCare.Services
 
                 var visitType = new VisitType
                 {
-                    TypeNme = dto.TypeNme
+                    TypeName = dto.TypeName
                 };
 
                 var result = context.VisitTypes.Add(visitType);
@@ -437,7 +437,7 @@ namespace NovaCare.Services
 
                 if (existingVisitType != null)
                 {
-                    existingVisitType.TypeNme = dto.TypeNme;
+                    existingVisitType.TypeName = dto.TypeName;
 
                     context.VisitTypes.Update(existingVisitType);
                     await context.SaveChangesAsync();
