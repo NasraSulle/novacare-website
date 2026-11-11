@@ -349,8 +349,9 @@ namespace NovaCare.Data
         public DbSet<Surgery> Surgeries { get; set; }
         public DbSet<Ward> Wards { get; set; }
         public DbSet<Bed> Beds { get; set; }
+        public DbSet<BillItem> BillItems { get; set; }
 
-
+        
         #endregion
     }
 }

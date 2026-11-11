@@ -17,7 +17,7 @@ namespace NovaCare.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.14")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -844,17 +844,12 @@ namespace NovaCare.Migrations
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PaymentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("PaymentModeId")
                         .HasColumnType("int");
 
                     b.HasKey("PatientPaymentModeId");
 
                     b.HasIndex("PatientId");
-
-                    b.HasIndex("PaymentId");
 
                     b.HasIndex("PaymentModeId");
 
@@ -1201,6 +1196,35 @@ namespace NovaCare.Migrations
                     b.HasIndex("VisitId");
 
                     b.ToTable("Bills");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.BillItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BillId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Itemname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Qty")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("cost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillId");
+
+                    b.ToTable("BillItems");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.BillType", b =>
@@ -1671,12 +1695,17 @@ namespace NovaCare.Migrations
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("PaymentModeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("PaymentStatusId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BillId");
+
+                    b.HasIndex("PaymentModeId");
 
                     b.HasIndex("PaymentStatusId");
 
@@ -3202,10 +3231,6 @@ namespace NovaCare.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NovaCare.Modals.PaymentModals.Payment", null)
-                        .WithMany("PatientPaymentModes")
-                        .HasForeignKey("PaymentId");
-
                     b.HasOne("NovaCare.Modals.PaymentModals.PaymentMode", "PaymentMode")
                         .WithMany("PatientPaymentModes")
                         .HasForeignKey("PaymentModeId")
@@ -3298,6 +3323,17 @@ namespace NovaCare.Migrations
                     b.Navigation("BillType");
 
                     b.Navigation("Visit");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.BillItem", b =>
+                {
+                    b.HasOne("NovaCare.Modals.PatientModals.Bill", "Bill")
+                        .WithMany("BillItems")
+                        .HasForeignKey("BillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bill");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Consultation", b =>
@@ -3411,6 +3447,12 @@ namespace NovaCare.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NovaCare.Modals.PaymentModals.PaymentMode", "PaymentMode")
+                        .WithMany()
+                        .HasForeignKey("PaymentModeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("NovaCare.Modals.PaymentModals.PaymentStatus", "PaymentStatus")
                         .WithMany("Payments")
                         .HasForeignKey("PaymentStatusId")
@@ -3418,6 +3460,8 @@ namespace NovaCare.Migrations
                         .IsRequired();
 
                     b.Navigation("Bill");
+
+                    b.Navigation("PaymentMode");
 
                     b.Navigation("PaymentStatus");
                 });
@@ -3664,6 +3708,8 @@ namespace NovaCare.Migrations
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Bill", b =>
                 {
+                    b.Navigation("BillItems");
+
                     b.Navigation("Payments");
                 });
 
@@ -3723,11 +3769,6 @@ namespace NovaCare.Migrations
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.Insuarance", b =>
                 {
                     b.Navigation("PatientInsuarances");
-                });
-
-            modelBuilder.Entity("NovaCare.Modals.PaymentModals.Payment", b =>
-                {
-                    b.Navigation("PatientPaymentModes");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.PaymentMode", b =>

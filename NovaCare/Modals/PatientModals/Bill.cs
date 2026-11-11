@@ -27,5 +27,6 @@ namespace NovaCare.Modals.PatientModals
         public BillType? BillType { get; set; }
         public Visit? Visit { get; set; }
         public List<Payment>? Payments { get; set; }
+        public List<BillItem>? BillItems { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Internal;
 using NovaCare.Data;
 using NovaCare.Interfaces;
+using NovaCare.Shared.DTOs.PatientDTOs;
 using NovaCare.Shared.DTOs.PaymentDTOs;
 
 namespace NovaCare.Services
@@ -12,6 +13,21 @@ namespace NovaCare.Services
         public PaymentService(IDbContextFactory<NovaCareDbContext> contextFactory)
         {
             _contextFactory = contextFactory;
+        }
+
+        public async Task<int> AddBillAsync(BillDto bill)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> AddPaymentAsync(PaymentDto payment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<List<BillDto>> GetAllBillsAsync()
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<List<InsuaranceDto>> GetAllInsuranceCompaniesAsync()
@@ -44,6 +60,31 @@ namespace NovaCare.Services
                 .ToListAsync();
 
             return patientMode;
+        }
+
+        public async Task<List<PaymentDto>> GetAllPaymentsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<BillDto> GetBillByIdAsync(int billId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<PaymentDto> GetPaymentByIdAsync(int paymentId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> UpdateBillAsync(BillDto bill, int billId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<int> UpdatePaymentAsync(PaymentDto payment, int paymentId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
