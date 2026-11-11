@@ -4631,3 +4631,4 @@ C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\r
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.pdb
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\NovaCare.genruntimeconfig.cache
 C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\ref\NovaCare.dll
+C:\Users\ENGO_DEV\source\repos\NovaCare_RE\NovaCare\NovaCare\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
