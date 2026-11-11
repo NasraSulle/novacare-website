@@ -1,0 +1,229 @@
+﻿@inject IDialogService Dialog
+@using NovaCare.Shared.DTOs.PaymentDTOs
+
+<MudGrid>
+    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!isLoading && !FilteredPayments!.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudItem Class="pa-6">
+                <MudGrid>
+                    <MudItem md="12">
+                        <MudGrid Justify="Justify.SpaceBetween">
+                            <MudItem>
+                                <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
+                            </MudItem>
+                            <MudItem>
+                                @if (CurrentUser != null && CurrentUser.IsCreateNewPatient)
+                                {
+                                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+                                }
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+
+                    <MudItem md="12">
+                        <NoDataNotice NoDataMessage="@messagePayment" />
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        }
+        else if (FilteredPayments != null)
+        {
+            <MudDataGrid Loading="@isSearchLoading" Hover="true" T="PaymentDto" Items="@FilteredPayments" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+                         Bordered="false" Dense="true" RowClick="@((args) => PreviewPaymentProfile(args.Item))">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                    <MudSpacer />
+                    <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+
+                    <MudItem>
+                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                      Margin="Margin.Dense" Variant="Variant.Outlined"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+                    </MudItem>
+                    @if (CurrentUser.IsCreateNewMedicine && !isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
+                    }
+                    @if (isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
+                    }
+                </ToolBarContent>
+
+                <Columns>
+                    <PropertyColumn Property="x => x.BillId" Title="BillId" />
+                    <PropertyColumn Property="x => x.PaymentModeName" Title="Payment Mode" />
+                    <PropertyColumn Property="x => x.PaymentDate" Title="Paid Date" />
+                    <TemplateColumn>
+                        <CellTemplate>
+                            <MudItem Style="text-align: center;">
+                                <MudChip Color="@(context.Item.PaymentStatusName.Contains("full", StringComparison.OrdinalIgnoreCase) ? Color.Success : Color.Error)" Size="Size.Small">
+                                    @(context.Item.PaymentStatusName)
+                                </MudChip>
+                            </MudItem>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="PaymentDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+
+    [Parameter] public List<PaymentDto> AllPayments { get; set; } = new();
+    List<PaymentDto> FilteredPayments = new();
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+    [Parameter] public bool isReport { get; set; }
+    [Parameter] public DateTime? fromDate { get; set; } = DateTime.Now.AddMonths(-3);
+    [Parameter] public DateTime? toDate { get; set; } = DateTime.Now;
+
+    PaymentDto? CurrentPayment;
+
+    string messagePayment = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+    string? pdfBase64;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+    private bool _readOnly;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(500);
+
+        if (!isReport)
+        {
+            AllPayments = await paymentService.GetAllPaymentsAsync();
+
+            if (string.IsNullOrWhiteSpace(FilterBy))
+            {
+                FilteredPayments = AllPayments;
+                messagePayment = $"All bills are not avalible!";
+                firstPart = "Bill";
+            }
+            else
+            {
+
+                firstPart = FilterBy;
+                messagePayment = $"{firstPart} bills are not avalible!";
+
+                if (FilterBy != null && Genre != null)
+                {
+                    FilteredPayments = AllPayments?.Where(x => x.PaymentStatusName.Contains(FilterBy, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+                }
+                else
+                {
+                    FilteredPayments = new();
+                }
+            }
+        }
+        else
+        {
+            firstPart = "Medicine";
+            FilteredPayments = AllPayments;
+        }
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task Back()
+    {
+        CurrentPayment = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        await Task.Delay(500);
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            FilteredPayments = AllPayments?.Where(x => x.BillId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PaymentModeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            messagePayment = "Staffs are not avalible!";
+            firstPart = "Staff";
+        }
+        else
+        {
+            firstPart = FilterBy.Substring(2);
+            messagePayment = $"{firstPart}s are not avalible!";
+
+            if (FilterBy != null)
+            {
+                FilteredPayments = AllPayments?.Where(x => x.PaymentStatusName.Contains(FilterBy, StringComparison.OrdinalIgnoreCase) && x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PaymentModeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            }
+            else
+            {
+                FilteredPayments = new();
+            }
+        }
+        isSearchLoading = false;
+    }
+
+    public async Task OpenRegisterModal()
+    {
+        var dialog = await Dialog.ShowAsync<PaymentDetails>("Register New Payment", _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task PreviewPaymentProfile(PaymentDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentPayment" , item}
+        };
+        var dialog = await Dialog.ShowAsync<PaymentDetails>("Payment Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    public async Task GeneratePdf()
+    {
+        var reportDto = new ReportPreviewDto<PaymentDto>
+        {
+            ReportType = "Payments",
+            FromDate = fromDate,
+            ToDate = toDate,
+            Data = FilteredPayments
+        };
+
+        pdfBase64 = pdfExportService.GenerateStaffPreview<PaymentDto>(reportDto, CurrentUser);
+
+        var Parameters = new DialogParameters
+        {
+            {"pdfBase64" , pdfBase64}
+        };
+
+        await Dialog.ShowAsync<PdfPreview>($"Payments Report Pdf", Parameters, _maxWidth);
+    }
+}
