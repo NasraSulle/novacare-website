@@ -7,12 +7,17 @@
     <base href="/" />
     <ResourcePreloader />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+
+    <!-- Third-Party Component / Framework Styles -->
     <link rel="stylesheet" href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" />
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <!-- Custom Application Styles (Loaded last so they override defaults) -->
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["NovaCare.styles.css"]" />
-    <link href="/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+
     <ImportMap />
-    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     @* <link rel="icon" type="image/ico" href="favicon.ico" /> *@
     <link rel="icon" type="image/ico" href="Images/logo.png" />
     <HeadOutlet />

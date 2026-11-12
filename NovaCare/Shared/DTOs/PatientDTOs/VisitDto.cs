@@ -24,8 +24,8 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public List<BillDto> Bills { get; set; } = new();
         public List<ConsultationDto> Consultations { get; set; } = new();
         public List<LabTestDto> LabTests { get; set; } = new();
-        public List<PrescriptionDto> Prescriptions { get; set; } = new(); // Added for patient medications
-        public List<TreatmentDto> Treatments { get; set; } = new(); // Surgery, Therapy, Hospitalized
+        public List<PrescriptionDto> Prescriptions { get; set; } = new();
+        public List<TreatmentDto> Treatments { get; set; } = new(); 
 
         // UI Helpers
         public string VisitTypeName { get; set; } = string.Empty;

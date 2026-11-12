@@ -3,43 +3,40 @@
 
 @inject NavigationManager NavigationManager
 
-
-
-<MudNavMenu Bordered="true" Color="Color.Info" Class="mud-height-full" Style="display: flex; flex-direction:column; justify-content: space-between; background-color:rgba(22,35,104,1);">
+<MudNavMenu Bordered="true" Class="mud-height-full pa-2" Rounded="true" Style="display: flex; flex-direction:column; justify-content: space-between; background-color:rgba(22,35,104,1);">
     <AuthorizeView>
         <Authorized>
             <MudItem>
                 <MudImage Src="Images/logo2.png" Height="100" />
 
-                <!-- text-decoration: none !important; added to the styles -->
-                <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Home</MudNavLink>
+                <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home" IconColor="Color.Inherit">Home</MudNavLink>
 
                 @if (CurrentUser?.IsGetStaffModules ?? false)
                 {
-                    <MudNavLink Href="StaffIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Staffs</MudNavLink>
+                    <MudNavLink Href="StaffIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.People" IconColor="Color.Inherit">Staffs</MudNavLink>
                 }
                 @if (CurrentUser?.IsViewAllPatients ?? false)
                 {
-                    <MudNavLink Href="PatientIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssistWalker" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Patients</MudNavLink>
+                    <MudNavLink Href="PatientIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AssistWalker" IconColor="Color.Inherit">Patients</MudNavLink>
                 }
                 @if (CurrentUser?.IsViewAllLabTests ?? false)
                 {
-                    <MudNavLink Href="LabTestIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Biotech" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Laboratory</MudNavLink>
+                    <MudNavLink Href="LabTestIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Biotech" IconColor="Color.Inherit">Laboratory</MudNavLink>
                 }
                 @if (CurrentUser?.IsViewAllMedicines ?? false)
                 {
-                    <MudNavLink Href="MedicineIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.LocalPharmacy" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Medics & Pharmacy</MudNavLink>
+                    <MudNavLink Href="MedicineIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.LocalPharmacy" IconColor="Color.Inherit">Medics & Pharmacy</MudNavLink>
                 }
                 @if (CurrentUser?.AccessConfigurations ?? false)
                 {
-                    <MudNavLink Href="ConfigurationIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SettingsApplications" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Configurations</MudNavLink>
+                    <MudNavLink Href="ConfigurationIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.SettingsApplications" IconColor="Color.Inherit">Configurations</MudNavLink>
                 }
-                <MudNavLink Href="BillsIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Payments" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Bills & Payments</MudNavLink>
-                <MudNavLink Href="ReportsIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AutoStories" Style="color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">Reports</MudNavLink>
-
+                <MudNavLink Href="BillsIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Payments" IconColor="Color.Inherit">Bills & Payments</MudNavLink>
+                <MudNavLink Href="ReportsIndex" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AutoStories" IconColor="Color.Inherit">Reports</MudNavLink>
             </MudItem>
+
             <MudItem>
-                <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix" Style="margin:0px !important; color: white !important; text-decoration: none !important;" IconColor="Color.Inherit">
+                <MudNavLink Href="Account/Manage" Match="NavLinkMatch.Prefix" Style="margin:0px !important;" IconColor="Color.Inherit">
                     <MudItem Style="display: flex; align-items: center;">
                         <MudAvatar Size="Size.Small">
                             @if (CurrentUser?.StaffPhoto == null)
@@ -57,12 +54,10 @@
                     </MudItem>
                 </MudNavLink>
 
-
                 <form action="Account/Logout" method="post">
                     <AntiforgeryToken />
                     <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                    <!-- Underline fix applied to the manual logout button as well -->
-                    <button type="submit" class="mud-nav-link mud-ripple" style="color: white !important; text-decoration: none !important;">
+                    <button type="submit" class="mud-nav-link mud-ripple">
                         <MudIcon Icon="@Icons.Material.Filled.Logout" Color="Color.Error" Class="mr-3"></MudIcon> Logout
                     </button>
                 </form>
@@ -70,6 +65,7 @@
         </Authorized>
     </AuthorizeView>
 </MudNavMenu>
+
 
 
 

@@ -11,14 +11,36 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public string BillDescription { get; set; } = string.Empty;
         public decimal TotalAmount { get; set; } = 0m;
 
-        // Live Payment Calculations
-        public decimal PaidAmount => Payments.Sum(p => p.Amount);
+        // Live Payment Calculations (Null-safe)
+        public decimal PaidAmount => Payments?.Sum(p => p.Amount) ?? 0m;
         public decimal BalanceDue => TotalAmount - PaidAmount;
+
+        // Computed Payment Status (1 = Unpaid, 2 = Partially Paid, 3 = Fully Paid)
+        public int PaymentStatusId
+        {
+            get
+            {
+                if (PaidAmount <= 0m)
+                    return 1;
+
+                if (PaidAmount < TotalAmount)
+                    return 2;
+
+                return 3;
+            }
+        }
+
+        public string PaymentStatusName => PaymentStatusId switch
+        {
+            1 => "Unpaid",
+            2 => "Partial",
+            3 => "Fully Paid",
+            _ => "Unpaid"
+        };
 
         // Foreign keys
         public int VisitId { get; set; }
         public int BillTypeId { get; set; }
-        public int PaymentStatusId { get; set; } // e.g., 1 = Unpaid, 2 = Partially Paid, 3 = Paid
 
         // Navigation properties 
         public VisitDto? Visit { get; set; }
@@ -29,6 +51,5 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public string VisitName { get; set; } = string.Empty;
         public string BillTypeName { get; set; } = string.Empty;
         public string PatientFullName { get; set; } = string.Empty;
-        public string PaymentStatusName { get; set; } = string.Empty;
     }
 }

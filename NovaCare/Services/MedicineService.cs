@@ -2,7 +2,9 @@
 using NovaCare.Components.Pages.Medicine___Pharmacy_Pages;
 using NovaCare.Data;
 using NovaCare.Interfaces;
+using NovaCare.Modals.DoctorModals;
 using NovaCare.Modals.MedicineModals;
+using NovaCare.Modals.PatientModals;
 using NovaCare.Modals.TreatmentModals;
 using NovaCare.Shared.DTOs.DoctorDTOs;
 using NovaCare.Shared.DTOs.MedicineDTOs;
@@ -110,10 +112,10 @@ namespace NovaCare.Services
             }
         }
 
-        public async Task<MedicineDto> GetMedicineIdByNameAsync(string name)
+        public async Task<MedicineDto> GetMedicineIdByNameAsync(string name, string type, string genre)
         {
             using var context = _contextFactory.CreateDbContext();
-            var medicine = await context.Medicines.Where(x => x.MedicineName.ToLower().Trim() == name.ToLower().Trim())
+            var medicine = await context.Medicines.Where(x => x.MedicineName.ToLower().Trim() == name.ToLower().Trim() && x.MedicineType.ToLower().Trim() == type.ToLower().Trim() && x.MedicineGenre.ToLower().Trim() == genre.ToLower().Trim())
                         .Select(med => new MedicineDto
                         {
                             Id = med.Id,
@@ -193,7 +195,6 @@ namespace NovaCare.Services
 
         public async Task<int> AddTreatmentAsync(TreatmentDto dto)
         {
-
             try
             {
                 using var context = _contextFactory.CreateDbContext();
@@ -207,10 +208,12 @@ namespace NovaCare.Services
                     SurgeryId = dto.SurgeryId,
                     TherapyId = dto.TherapyId,
                     MedicalDeptId = dto.MedicalDeptId,
+                    VisitId = dto.VisitId,
+                    ConsultationId = dto.ConsultationId,
                     WardId = dto.WardId,
                     DoctorId = dto.DoctorId,
                     RoomId = dto.RoomId,
-                    TreatmentStatusId = dto.TreatmentStatusId,
+                    TreatmentStatusId = 1,
                     TreatmentTypeId = dto.TreatmentTypeId,
                 };
 
@@ -337,6 +340,73 @@ namespace NovaCare.Services
                 .ToListAsync();
 
             return depts;
+        }
+
+        public async Task<int> AddPrescriptionAsync(PrescriptionDto dto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var prescription = new Prescription
+                {
+                    PrescribedDate = dto.PrescribedDate,
+                    Quantity = dto.Quantity,
+                    Dosage = dto.Dosage,
+                    Notes = dto.Notes,
+                    UnitPrice = dto.UnitPrice,
+                    VisitId = dto.VisitId,
+                    ConsultationId = dto.ConsultationId,
+                    DoctorId = dto.DoctorId,
+                    MedicineId = dto.MedicineId,
+                    BillItemId = dto.BillItemId,
+                };
+
+                var result = context.Prescriptions.Add(prescription);
+                await context.SaveChangesAsync();
+
+                return result.Entity.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return 0;
+            }
+        }
+
+        public async Task<bool> UpdatePrescriptionAsync(PrescriptionDto dto, int prescId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var existingPresc = await context.Prescriptions.FirstOrDefaultAsync(x => x.Id == prescId);
+
+
+                if (existingPresc != null)
+                {
+                    existingPresc.PrescribedDate = dto.PrescribedDate;
+                    existingPresc.Quantity = dto.Quantity;
+                    existingPresc.Dosage = dto.Dosage;
+                    existingPresc.Notes = dto.Notes;
+
+                    existingPresc.UnitPrice = dto.UnitPrice;
+                    existingPresc.VisitId = dto.VisitId;
+                    existingPresc.ConsultationId = dto.ConsultationId;
+                    existingPresc.MedicineId = dto.MedicineId;
+                    existingPresc.DoctorId = dto.DoctorId;
+                    existingPresc.BillItemId = dto.BillItemId;
+
+                    context.Prescriptions.Update(existingPresc);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return false;
+            }
         }
     }
 }

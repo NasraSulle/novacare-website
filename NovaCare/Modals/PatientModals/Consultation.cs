@@ -21,7 +21,7 @@ namespace NovaCare.Modals.PatientModals
         public int VisitId { get; set; }
 
         [ForeignKey(nameof(Room))]
-        public int RoomId { get; set; }
+        public int? RoomId { get; set; }
 
         [ForeignKey(nameof(Doctor))]
         public int? DoctorId { get; set; }

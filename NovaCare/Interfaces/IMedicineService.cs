@@ -13,7 +13,7 @@ namespace NovaCare.Interfaces
         Task<List<MedicineTypeDto>> GetAllMedicineTypesAsync();
         Task<List<MedicineGenreDto>> GetAllMedicineGenresAsync();
         Task<bool> AddMedicineAsync(MedicineDto dto);
-        Task<MedicineDto> GetMedicineIdByNameAsync(string name);
+        Task<MedicineDto> GetMedicineIdByNameAsync(string name, string type, string genre);
         Task<bool> UpdateMedicineAsync(MedicineDto dto, int medicineId);
         Task<int> AddTreatmentAsync(TreatmentDto dto);
         Task<bool> UpdateTreatmentAsync(TreatmentDto dto, int treatmentId);
@@ -21,5 +21,8 @@ namespace NovaCare.Interfaces
         Task<List<SurgeryDto>> GetAllSurgeriesAsync();
         Task<List<TherapyDto>> GetAllTherapiesAsync();
         Task<List<MedicalDepartmentDto>> GetAllMedicalDeptsAsync();
+
+        Task<int> AddPrescriptionAsync(PrescriptionDto dto);
+        Task<bool> UpdatePrescriptionAsync(PrescriptionDto dto, int prescId);
     }
 }

@@ -1,1 +1,26 @@
-﻿
+﻿/* Removes text decoration from MudNavLink, its hover states, and its text wrappers */
+.mud-nav-link,
+.mud-nav-link:hover,
+.mud-nav-link .mud-nav-link-text {
+    text-decoration: none !important;
+}
+
+    /* Faint white background for the currently active nav link */
+    .mud-nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: white !important;
+        font-weight: 500;
+    }
+
+    /* Subtle hover effect for inactive links */
+    .mud-nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        text-decoration: none !important;
+    }
+
+    /* Keeps all nav links white and without underlines */
+    .mud-nav-link,
+    .mud-nav-link .mud-nav-link-text {
+        color: white !important;
+        text-decoration: none !important;
+    }

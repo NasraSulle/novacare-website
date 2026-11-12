@@ -17,9 +17,14 @@ namespace NovaCare.Modals.PatientModals
         //properties
         [Key]
         public int Id { get; set; }
-        public string FisrtName { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
         public string MiddleName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+
+        public string PatientFullName => string.Join(" ",
+            new[] { FirstName, MiddleName, LastName }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
+
 
         public string PatientCode { get; set; } = string.Empty;
         public byte[]? PatientPhoto { get; set; }

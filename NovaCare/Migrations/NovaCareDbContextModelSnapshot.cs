@@ -1180,6 +1180,10 @@ namespace NovaCare.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("BillNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("BillTypeId")
                         .HasColumnType("int");
 
@@ -1297,7 +1301,7 @@ namespace NovaCare.Migrations
                     b.Property<int?>("MedicalDepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RoomId")
+                    b.Property<int?>("RoomId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("StartDate")
@@ -1338,7 +1342,7 @@ namespace NovaCare.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FisrtName")
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1534,6 +1538,10 @@ namespace NovaCare.Migrations
 
                     b.Property<DateTime?>("DischargedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
@@ -3407,9 +3415,7 @@ namespace NovaCare.Migrations
 
                     b.HasOne("NovaCare.Modals.RoomModals.Room", "Room")
                         .WithMany("Consultation")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RoomId");
 
                     b.HasOne("NovaCare.Modals.PatientModals.Visit", "Visit")
                         .WithMany("Consultations")

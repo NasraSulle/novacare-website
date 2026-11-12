@@ -14,7 +14,7 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public decimal ConsultationCost { get; set; } = 0m;
 
         // Foreign keys
-        public int RoomId { get; set; }
+        public int? RoomId { get; set; }
         public int VisitId { get; set; }
         public int? DoctorId { get; set; }
         public int? MedicalDepartmentId { get; set; }

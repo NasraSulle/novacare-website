@@ -30,7 +30,7 @@ namespace NovaCare.Services
                 .Select(patient => new PatientDto
                 {
                     Id = patient.Id,
-                    FisrtName = patient.FisrtName,
+                    FisrtName = patient.FirstName,
                     MiddleName = patient.MiddleName,
                     LastName = patient.LastName,
                     PhoneNumber = patient.PhoneNumber,
@@ -138,7 +138,7 @@ namespace NovaCare.Services
 
                 var patient = new Patient
                 {
-                    FisrtName = dto.FisrtName,
+                    FirstName = dto.FisrtName,
                     MiddleName = dto.MiddleName,
                     LastName = dto.LastName,
                     Age = dto.Age,
@@ -176,7 +176,7 @@ namespace NovaCare.Services
                 .Select(patient => new PatientDto
                 {
                     Id = patient.Id,
-                    FisrtName = patient.FisrtName,
+                    FisrtName = patient.FirstName,
                     MiddleName = patient.MiddleName,
                     LastName = patient.LastName,
                     PhoneNumber = patient.PhoneNumber,
@@ -212,7 +212,7 @@ namespace NovaCare.Services
                 .Select(patient => new PatientDto
                 {
                     Id = patient.Id,
-                    FisrtName = patient.FisrtName,
+                    FisrtName = patient.FirstName,
                     MiddleName = patient.MiddleName,
                     LastName = patient.LastName,
                     PhoneNumber = patient.PhoneNumber,
@@ -233,6 +233,119 @@ namespace NovaCare.Services
             return patient ?? new();
         }
 
+        /*
+         ===========================
+        public async Task<VisitDto?> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName)
+{
+    if (string.IsNullOrWhiteSpace(pCodeOrFullName))
+        return null;
+
+    await using var context = await _contextFactory.CreateDbContextAsync();
+
+    var visit = await context.Visits
+        .AsNoTracking()
+        .AsSplitQuery() // CRITICAL: Prevents massive SQL Cartesian explosion when loading 5 collections!
+        .Where(v => v.Patient != null &&
+                   (v.Patient.PatientCode == pCodeOrFullName || v.Patient.PatientFullName.Contains(pCodeOrFullName)))
+        .OrderByDescending(v => v.VisitDate)
+        .Select(visit => new VisitDto
+        {
+            Id = visit.Id,
+            VisitDate = visit.VisitDate,
+            DischargedDate = visit.DischargedDate,
+            VisitTypeId = visit.VisitTypeId,
+            PatientId = visit.PatientId,
+            VisitStatusId = visit.VisitStatusId,
+            PreliminaryTestId = visit.PreliminaryTestId,
+
+            // UI Helpers on VisitDto
+            VisitTypeName = visit.VisitType != null ? visit.VisitType.VisitTypeName : string.Empty,
+            PatientFullName = visit.Patient != null ? visit.Patient.PatientFullName : string.Empty,
+            VisitStatusName = visit.VisitStatus != null ? visit.VisitStatus.VisitStatusName : string.Empty,
+
+            Patient = visit.Patient == null ? null : new PatientDto
+            {
+                Id = visit.Patient.Id,
+                PatientCode = visit.Patient.PatientCode,
+                PatientFullName = visit.Patient.PatientFullName,
+                PatientTypeName = visit.Patient.PatientType != null ? visit.Patient.PatientType.PatientTypeName : string.Empty,
+                PatientStatusName = visit.Patient.PatientStatus != null ? visit.Patient.PatientStatus.PatientStatusName : string.Empty
+            },
+
+            Bills = visit.Bills.Select(bill => new BillDto
+            {
+                Id = bill.Id,
+                BillDate = bill.BillDate,
+                BillDescription = bill.BillDescription,
+                VisitId = bill.VisitId,
+                TotalAmount = bill.TotalAmount
+            }).ToList(),
+
+            // 1. CONSULTATIONS (Complete mapping matching your ConsultationDto)
+            Consultations = visit.Consultations.Select(c => new ConsultationDto
+            {
+                Id = c.Id,
+                Diagnosis = c.Diagnosis,
+                StartDate = c.StartDate,
+                FinishDate = c.FinishDate,
+                ConsultationCost = c.ConsultationCost,
+                RoomId = c.RoomId,
+                VisitId = c.VisitId,
+                DoctorId = c.DoctorId,
+                MedicalDepartmentId = c.MedicalDepartmentId,
+                BillItemId = c.BillItemId, // Needed for TotalUnbilledCharges
+
+                // UI Helpers
+                MedicalDepartmentName = c.MedicalDepartment != null ? c.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                DoctorFullName = c.Doctor != null ? c.Doctor.DoctorFullName : string.Empty,
+                VisitTypeName = visit.VisitType != null ? visit.VisitType.VisitTypeName : string.Empty,
+                RoomName = c.Room != null ? c.Room.RoomName : string.Empty,
+                PaymentStatusName = c.BillItem != null && c.BillItem.Bill != null && c.BillItem.Bill.PaymentStatus != null
+                    ? c.BillItem.Bill.PaymentStatus.PaymentStatusName
+                    : "Not Billed"
+            }).ToList(),
+
+            // 2. LAB TESTS (Adjust property names to match your LabTest entity/DTO)
+            LabTests = visit.LabTests.Select(l => new LabTestDto
+            {
+                Id = l.Id,
+                VisitId = l.VisitId,
+                BillItemId = l.BillItemId,   // Needed for TotalUnbilledCharges
+                LabTestCost = l.LabTestCost, // Needed for TotalUnbilledCharges
+                // Add TestName, Result, LabTestDate, PaymentStatusName, etc. here
+            }).ToList(),
+
+            // 3. PRESCRIPTIONS (Adjust property names to match your Prescription entity/DTO)
+            Prescriptions = visit.Prescriptions.Select(p => new PrescriptionDto
+            {
+                Id = p.Id,
+                VisitId = p.VisitId,
+                BillItemId = p.BillItemId, // Needed for TotalUnbilledCharges
+                Quantity = p.Quantity,     // Needed for TotalUnbilledCharges
+                UnitPrice = p.UnitPrice,   // Needed for TotalUnbilledCharges
+                // Add MedicineName, Dosage, Frequency, Duration, PaymentStatusName, etc. here
+            }).ToList(),
+
+            // 4. TREATMENTS (Adjust property names to match your Treatment entity/DTO)
+            Treatments = visit.Treatments.Select(t => new TreatmentDto
+            {
+                Id = t.Id,
+                VisitId = t.VisitId,
+                BillItemId = t.BillItemId,       // Needed for TotalUnbilledCharges
+                TreatmentQty = t.TreatmentQty,   // Needed for TotalUnbilledCharges
+                TreatmentCost = t.TreatmentCost, // Needed for TotalUnbilledCharges
+                // Add TreatmentName, TreatmentDate, Notes, PaymentStatusName, etc. here
+            }).ToList()
+        })
+        .FirstOrDefaultAsync();
+
+    return visit;
+}
+
+
+        =========================
+         */
+
         public async Task<bool> UpdatePatientAsync(PatientDto dto, int patientId)
         {
             try
@@ -243,7 +356,7 @@ namespace NovaCare.Services
 
                 if (existingPatient != null)
                 {
-                    existingPatient.FisrtName = dto.FisrtName;
+                    existingPatient.FirstName = dto.FisrtName;
                     existingPatient.MiddleName = dto.MiddleName;
                     existingPatient.LastName = dto.LastName;
                     existingPatient.PatientCode = dto.PatientCode;
@@ -461,7 +574,7 @@ namespace NovaCare.Services
                 .Select(patient => new PatientDto
                 {
                     Id = patient.Id,
-                    FisrtName = patient.FisrtName,
+                    FisrtName = patient.FirstName,
                     MiddleName = patient.MiddleName,
                     LastName = patient.LastName,
                     PhoneNumber = patient.PhoneNumber,
@@ -572,5 +685,45 @@ namespace NovaCare.Services
                 return false;
             }
         }
+
+        public async Task<VisitDto?> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName)
+        {
+            if (string.IsNullOrWhiteSpace(pCodeOrFullName))
+                return null;
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var visit = await context.Visits
+                .AsNoTracking()
+                .Where(v => v.Patient != null &&
+                           (v.Patient.PatientCode == pCodeOrFullName || v.Patient.PatientFullName.Contains(pCodeOrFullName))) 
+                .OrderByDescending(v => v.VisitDate)
+                .Select(visit => new VisitDto
+                {
+                    Id = visit.Id,
+                    VisitDate = visit.VisitDate,
+                    VisitTypeId = visit.VisitTypeId,
+                    PatientId = visit.PatientId,
+                    DischargedDate = visit.DischargedDate,
+                    Bills = visit.Bills.Select(bill => new BillDto
+                    {
+                        Id = bill.Id,
+                        BillDate = bill.BillDate,
+                        BillDescription = bill.BillDescription,
+                        VisitId = bill.VisitId,
+                        TotalAmount = bill.TotalAmount
+                    }).ToList(),
+                    Patient = visit.Patient == null ? null : new PatientDto
+                    {
+                        Id = visit.Patient.Id,
+                        PatientTypeName = visit.Patient.PatientType != null ? visit.Patient.PatientType.PatientTypeName : string.Empty,
+                        PatientStatusName = visit.Patient.PatientStatus != null ? visit.Patient.PatientStatus.PatientStatusName : string.Empty
+                    }
+                })
+                .FirstOrDefaultAsync();
+
+            return visit;
+        }
+
     }
 }

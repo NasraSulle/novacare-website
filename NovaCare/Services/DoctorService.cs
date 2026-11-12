@@ -123,6 +123,7 @@ namespace NovaCare.Services
                     Id = title.Id,
                     DoctorTypeName = title.DoctorTypeName,
                     DeptConsultationFee = title.DeptConsultationFee,
+                    MedicalDeptId = title.MedicalDeptId,
 
                 })
                 .ToListAsync();

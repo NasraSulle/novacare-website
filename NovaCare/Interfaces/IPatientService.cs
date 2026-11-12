@@ -30,5 +30,8 @@ namespace NovaCare.Interfaces
         Task<int> AddConsultationAsync(ConsultationDto dto);
         Task<bool> UpdateConsultationAsync(ConsultationDto dto, int conslId);
 
+        Task<VisitDto> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName);
+
+
     }
 }

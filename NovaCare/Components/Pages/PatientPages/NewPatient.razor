@@ -90,26 +90,26 @@
                                                 <MudItem md="2">
                                                     <MudSelect For="@(() => CurrentPatient.PatientTypeId)"
                                                                @bind-Value="CurrentPatient.PatientTypeId"
-                                                               Label="Patient Type" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient Type"
+                                                               Label="Patient State" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient Type"
                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
                                                         <MudSelectItem Value="0" Disabled>Patient Type</MudSelectItem>
 
                                                         @foreach (var item in PatientTypes)
                                                         {
-                                                            <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
+                                                            <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
                                                         }
                                                     </MudSelect>
                                                 </MudItem>
                                                 <MudItem md="2">
                                                     <MudSelect For="@(() => CurrentPatient.PatientStatusId)"
                                                                @bind-Value="CurrentPatient.PatientStatusId"
-                                                               Label="Patient State" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient State"
+                                                               Label="Patient Type" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient State"
                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
                                                         <MudSelectItem Value="0" Disabled>Patient State</MudSelectItem>
 
                                                         @foreach (var item in PatientStatus)
                                                         {
-                                                            <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
+                                                            <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
                                                         }
                                                     </MudSelect>
                                                 </MudItem>
@@ -549,10 +549,14 @@
                                                                 <MudItem md="5">
                                                                     <MudSelect For="@(() => CurrentPrescription.MedicineId)"
                                                                                @bind-Value="CurrentPrescription.MedicineId"
+                                                                               @bind-Value:after="@(() => {
+                                                                                   CurrentPrescription.MedicineName = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.MedicineName ?? string.Empty;
+                                                                                   CurrentPrescription.UnitPrice = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.BuyingPrice ?? 0m;
+                                                                                            })"
                                                                                Disabled="@(CurrentVisit.VisitTypeId == 0)"
-                                                                               Label="Select Type" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                               Label="Select Medicine" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                                        <MudSelectItem Value="0" Disabled>Select Type</MudSelectItem>
+                                                                        <MudSelectItem Value="0" Disabled>Select Medicine</MudSelectItem>
 
                                                                         @foreach (var item in FilteredMedicines)
                                                                         {
@@ -570,41 +574,45 @@
                                                                 <MudItem md="12">
                                                                     <MudGrid Spacing="1" Justify="Justify.FlexEnd">
                                                                         <MudItem md="3">
-                                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddTreatmentToBatch" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
+                                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddPrescriptionToBatch" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
                                                                         </MudItem>
                                                                         <MudItem md="3">
-                                                                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetTreatments" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
+                                                                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetPrescriptions" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
                                                                         </MudItem>
                                                                     </MudGrid>
                                                                 </MudItem>
 
                                                             </MudGrid>
                                                             <MudItem md="12">
-                                                                @if (!TreatmentsBatch!.Any())
+                                                                @if (!PrescriptionsBatch!.Any())
                                                                 {
                                                                     <NoDataNotice NoDataMessage="No Doctor in Batch" />
                                                                 }
                                                                 else
                                                                 {
 
-                                                                    <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@TreatmentsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
+                                                                    <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@PrescriptionsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
                                                                         <HeaderContent>
                                                                             <MudTh>Name</MudTh>
-                                                                            <MudTh>Cost</MudTh>
+                                                                            <MudTh>Price</MudTh>
+                                                                            <MudTh>Qty</MudTh>
+                                                                            <MudTh>Amount</MudTh>
                                                                             <MudTh Class="text-end">
                                                                                 @* <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.FolderDelete" OnClick="ResetTests" /> *@
                                                                             </MudTh>
                                                                         </HeaderContent>
                                                                         <RowTemplate>
-                                                                            <MudTd DataLabel="Name">@docContext.TreatmentTypeName</MudTd>
-                                                                            <MudTd DataLabel="Consultation Cost">@docContext.TreatmentCost</MudTd>
+                                                                            <MudTd DataLabel="Prescription">@docContext.MedicineName</MudTd>
+                                                                            <MudTd DataLabel="Quantity">@docContext.UnitPrice</MudTd>
+                                                                            <MudTd DataLabel="Quantity">@docContext.Quantity</MudTd>
+                                                                            <MudTd DataLabel="Quantity">@docContext.TotalPrice</MudTd>
                                                                             <MudTd DataLabel="" Class="text-end">
-                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveTreatmentFromBatch(docContext))" />
+                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemovePrescriptionFromBatch(docContext))" />
                                                                             </MudTd>
                                                                         </RowTemplate>
                                                                         <FooterContent>
                                                                             <MudTh>Total Cost</MudTh>
-                                                                            <MudTh>@TreatmentsBatch?.Sum(x => x.TreatmentCost)</MudTh>
+                                                                            <MudTh>@PrescriptionsBatch?.Sum(x => x.TotalPrice)</MudTh>
                                                                             <MudTh></MudTh>
                                                                         </FooterContent>
                                                                     </MudTable>
@@ -782,8 +790,8 @@
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
 
-    List<PatientTypeDto> PatientTypes = new();
-    List<PatientStatusDto> PatientStatus = new();
+    List<PatientStatusDto> PatientTypes = new();
+    List<PatientTypeDto> PatientStatus = new();
     List<PaymentModeDto> PaymentModes = new();
     List<InsuaranceDto> InsuaranceCompanies = new();
     List<VisitTypeDto> allVisitTypes = new();
@@ -794,6 +802,7 @@
     List<ConsultationDto>? ConsultationsBatch = new();
     List<LabTestDto>? LabTestsBatch = new();
     List<TreatmentDto>? TreatmentsBatch = new();
+    List<PrescriptionDto>? PrescriptionsBatch = new();
     List<TreatmentTypeDto>? AllTreatmentTypes = new();
     List<SurgeryDto>? AllSurgeries = new();
     List<TherapyDto>? AllTherapies = new();
@@ -843,8 +852,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        PatientStatus = await patientService.GetAllPatientTypesAsync();
-        PatientTypes = await patientService.GetAllPatientStatusesAsync();
+        PatientTypes = await patientService.GetAllPatientTypesAsync();
+        PatientStatus = await patientService.GetAllPatientStatusesAsync();
         PaymentModes = await paymentService.GetAllPaymentModesAsync();
         InsuaranceCompanies = await paymentService.GetAllInsuranceCompaniesAsync();
         allVisitTypes = await patientService.GetAllVisitTypesAsync();
@@ -905,6 +914,7 @@
     public async Task OnDoctorSelect()
     {
         CurrentConsultation.DoctorId = AllDoctors.FirstOrDefault(doc => doc.Id == selectedDocTypeId)?.Id;
+        CurrentConsultation.MedicalDepartmentId = AllDoctorTypes.FirstOrDefault(doc => doc.Id == selectedDocTypeId)?.MedicalDeptId;
         var deptConsultFee = AllDoctorTypes.FirstOrDefault(x => x.Id == selectedDocTypeId)?.DeptConsultationFee ?? 0m;
         var currentDoc = await doctorService.GetDoctorByStaffId(selectedDocStaffId);
         var docConsultFee = currentDoc?.DoctorConsultationFee ?? 0m;
@@ -945,6 +955,8 @@
                     var savedpatient = await patientService.GetPatientByCodeAsync(patientCode);
 
                     await patientService.UpdatePatientCodeAsync(savedpatient.Id, code);
+                    CurrentPatient.Id = savedpatient.Id;
+
                     saveMessage = $"{CurrentPatient.FisrtName} registered sucessfully";
                     Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
                         { "Text", $"{saveMessage}" },
@@ -1001,9 +1013,15 @@
                     //isCreatedSuccessfully = true;
 
                     int addedVisitId = 0;
-                    PreliminaryTestDto? result;
-                    if (CurrentVisit.Id == 0 && CurrentVisit.VisitTypeId > 0)
+                    //PreliminaryTestDto? result;
+
+
+                    if (CurrentVisit.Id == 0 && CurrentVisit.VisitTypeId > 0){
+                        CurrentVisit.VisitDate = DateTime.Now;
+                        CurrentVisit.PatientId = CurrentPatient.Id;
+                        CurrentVisit.VisitStatusId = 1;
                         addedVisitId = await patientService.AddVisitAsync(CurrentVisit);
+                    }
 
                     CurrentVisit.Id = addedVisitId;
 
@@ -1011,6 +1029,11 @@
                     {
                         if (LabTestsBatch != null && LabTestsBatch.Any())
                         {
+                            foreach (var test in LabTestsBatch)
+                            {
+                                test.VisitId = CurrentVisit.Id;
+                            }
+
                             await SaveLabTestAsync();
 
                             CurrentVisit.LabTests = LabTestsBatch;
@@ -1018,6 +1041,11 @@
 
                         if (ConsultationsBatch != null && ConsultationsBatch.Any())
                         {
+                            foreach (var test in ConsultationsBatch)
+                            {
+                                test.VisitId = CurrentVisit.Id;
+                            }
+
                             await SaveConsultationsAsync();
 
                             CurrentVisit.Consultations = ConsultationsBatch;
@@ -1025,9 +1053,27 @@
 
                         if (TreatmentsBatch != null && TreatmentsBatch.Any())
                         {
+                            
+                            foreach (var test in TreatmentsBatch)
+                            {
+                                test.VisitId = CurrentVisit.Id;
+                            }
+
                             await SaveTreatmentsAsync();
 
                             CurrentVisit.Treatments = TreatmentsBatch;
+                        }
+
+                        if (PrescriptionsBatch != null && PrescriptionsBatch.Any())
+                        {
+                            
+                            foreach (var test in PrescriptionsBatch)
+                            {
+                                test.VisitId = CurrentVisit.Id;
+                            }
+
+                            await SavePrescriptionsAsync();
+                            CurrentVisit.Prescriptions = PrescriptionsBatch;
                         }
 
                         await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
@@ -1265,7 +1311,7 @@
         notaddedSuccessfully = "Not Added:";
         isSaving = true;
 
-        if (LabTestsBatch!.Count == 0)
+        if (ConsultationsBatch!.Count == 0)
         {
             isSaving = false;
             return;
@@ -1385,7 +1431,7 @@
         notaddedSuccessfully = "Not Added:";
         isSaving = true;
 
-        if (LabTestsBatch!.Count == 0)
+        if (TreatmentsBatch!.Count == 0)
         {
             isSaving = false;
             return;
@@ -1441,4 +1487,113 @@
         }
     }
 
+
+    //pre
+    public async Task AddPrescriptionToBatch()
+    {
+        //var patient = await patientService.GetPatientByIdAsync(treatmentDto.PatientId);
+        //var disease = await diseaseService.GetDiseaseByNameAsync(treatmentDto.DiseaseName);
+        CurrentPrescription.VisitId = CurrentVisit.Id;
+
+        var newPrescription = new PrescriptionDto
+        {
+            PrescribedDate = DateTime.Now,
+            Quantity = CurrentPrescription.Quantity,
+            Dosage = CurrentPrescription.Dosage,
+            Notes = CurrentPrescription.Notes,
+
+            UnitPrice = CurrentPrescription.UnitPrice,
+            VisitId = CurrentPrescription.VisitId,
+            ConsultationId = CurrentPrescription.ConsultationId,
+            MedicineId = CurrentPrescription.MedicineId,
+            DoctorId = CurrentPrescription.DoctorId,
+            BillItemId = CurrentPrescription.BillItemId,
+
+            MedicineName = CurrentPrescription.MedicineName,
+            PaymentStatusName = CurrentPrescription.PaymentStatusName,
+            DoctorFullName = CurrentPrescription.DoctorFullName
+        };
+
+        if (!string.IsNullOrWhiteSpace(newPrescription.MedicineName))
+            PrescriptionsBatch!.Add(newPrescription);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task RemovePrescriptionFromBatch(PrescriptionDto prescriptionDto)
+    {
+        if (PrescriptionsBatch != null)
+            PrescriptionsBatch.Remove(prescriptionDto);
+    }
+
+    public async Task ResetPrescriptions()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isCreatedSuccessfully = false;
+        PrescriptionsBatch?.Clear();
+
+    }
+
+    public async Task SavePrescriptionsAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        if (PrescriptionsBatch!.Count == 0)
+        {
+            isSaving = false;
+            return;
+        }
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            foreach (var prescription in PrescriptionsBatch)
+            {
+                if (prescription.Id > 0)
+                {
+                    var isSucess = await medicineService.UpdatePrescriptionAsync(prescription, prescription.Id);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"Prescription updated sucessfully";
+                        Console.WriteLine(saveMessage);
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: Prescription not updated sucessfully!";
+                        Console.WriteLine(saveMessage);
+                    }
+                }
+                else
+                {
+
+                    var isSucess = await medicineService.AddPrescriptionAsync(prescription);
+
+                    if (isSucess > 0)
+                    {
+                        saveMessage = $"Prescription added sucessfully";
+                        Console.WriteLine(saveMessage);
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: Prescription not added sucessfully! Please read labTest to batch and save";
+                        Console.WriteLine(saveMessage);
+                    }
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
 }

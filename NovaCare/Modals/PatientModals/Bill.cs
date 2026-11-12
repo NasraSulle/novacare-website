@@ -11,9 +11,10 @@ namespace NovaCare.Modals.PatientModals
         [Key]
         public int Id { get; set; }
         public DateTime BillDate { get; set; }
+        public string BillNumber { get; set; } =  $"NCMH-BN-{DateTime.Now.ToString("yyMMdd")}";
+
         public string BillDescription { get; set; } = string.Empty;
 
-        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; } = 0m;
 
         // Foreign keys
@@ -26,7 +27,8 @@ namespace NovaCare.Modals.PatientModals
         // Navigation properties
         public BillType? BillType { get; set; }
         public Visit? Visit { get; set; }
-        public List<Payment>? Payments { get; set; }
-        public List<BillItem>? BillItems { get; set; }
+        public List<Payment> Payments { get; set; } = new();
+        public List<BillItem> BillItems { get; set; } = new();
+
     }
 }

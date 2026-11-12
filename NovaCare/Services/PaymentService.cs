@@ -27,8 +27,46 @@ namespace NovaCare.Services
 
         public async Task<List<BillDto>> GetAllBillsAsync()
         {
-            throw new NotImplementedException();
+            using var context = _contextFactory.CreateDbContext();
+
+            var bills = await context.Bills
+                .AsNoTracking()
+                .Select(bill => new BillDto
+                {
+                    Id = bill.Id,
+                    BillNumber = bill.BillNumber,
+                    BillDate = bill.BillDate,
+                    BillDescription = bill.BillDescription,
+                    TotalAmount = bill.TotalAmount,
+                    VisitId = bill.VisitId,
+
+                    // Access Visit -> VisitType directly since Visit is a single object
+                    VisitName = (bill.Visit != null && bill.Visit.VisitType != null)
+                        ? bill.Visit.VisitType.TypeName
+                        : string.Empty,
+
+                    BillTypeId = bill.BillTypeId,
+                    BillTypeName = bill.BillType != null ? bill.BillType.TypeNme : string.Empty,
+
+                    // Map Payments so PaidAmount, BalanceDue, PaymentStatusId, and PaymentStatusName auto-calculate
+                    Payments = bill.Payments != null
+                        ? bill.Payments.Select(p => new PaymentDto
+                        {
+                            Id = p.Id,
+                            PaymentDate = p.PaymentDate,
+                            Amount = p.Amount,
+                            BillId = p.BillId,
+                            PaymentStatusId = p.PaymentStatusId,
+                            PaymentModeId = p.PaymentModeId
+                        }).ToList()
+                        : new List<PaymentDto>()
+                })
+                .ToListAsync();
+
+            return bills;
         }
+
+
 
         public async Task<List<InsuaranceDto>> GetAllInsuranceCompaniesAsync()
         {

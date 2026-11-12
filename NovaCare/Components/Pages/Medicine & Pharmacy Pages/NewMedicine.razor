@@ -203,7 +203,7 @@
         {
             foreach (var medicine in MedicinesBatch)
             {
-                var existingMed = await medicineService.GetMedicineIdByNameAsync(medicine.MedicineName);
+                var existingMed = await medicineService.GetMedicineIdByNameAsync(medicine.MedicineName, medicine.MedicineType, medicine.MedicineGenre);
 
                 if (existingMed.Id == 0)
                 {

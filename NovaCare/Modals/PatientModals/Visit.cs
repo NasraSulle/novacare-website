@@ -11,6 +11,7 @@ namespace NovaCare.Modals.PatientModals
         public int Id { get; set; }
         public DateTime VisitDate { get; set; } = DateTime.UtcNow;
         public DateTime? DischargedDate { get; set; } // Nullable until the patient is discharged
+        public string FullName { get; set; } = string.Empty;
 
         // Foreign Keys
         [ForeignKey(nameof(VisitType))]
