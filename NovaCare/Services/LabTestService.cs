@@ -28,7 +28,6 @@ namespace NovaCare.Services
                     TestResult = dto.TestResult,
                     ResultAttachment = dto.ResultAttachment,
                     CreatedDate = dto.CreatedDate,
-                    //PatientId = dto.PatientId,
                     ConsultationId = dto.ConsultationId,
                     LabTestCost = dto.LabTestCost,
                     RequesteeDoctor = dto.RequesteeDoctor,
@@ -61,8 +60,8 @@ namespace NovaCare.Services
                     LabTestCost = labTest.LabTestCost,
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
-                    //PatientId = labTest.PatientId,
-                    //PatientFullName = $" {labTest.Patient!.FisrtName} {labTest.Patient!.MiddleName} {labTest.Patient!.LastName}",
+                    PatientId = labTest.Visit!.PatientId,
+                    PatientFullName = $" {labTest.Visit!.FullName}",
                     ConsultationId = labTest.ConsultationId,
                     RequesteeDoctor = labTest.RequesteeDoctor,
                     UpdaterLabTechnician = labTest.UpdaterLabTechnician
@@ -87,8 +86,8 @@ namespace NovaCare.Services
                     LabTestCost = labTest.LabTestCost,
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
-                    //PatientId = labTest.PatientId,
-                    //PatientFullName = $" {labTest.Patient!.FisrtName} {labTest.Patient!.MiddleName} {labTest.Patient!.LastName}",
+                    PatientId = labTest.Visit!.PatientId,
+                    PatientFullName = $" {labTest.Visit!.FullName}",
                     ConsultationId = labTest.ConsultationId,
                     RequesteeDoctor = labTest.RequesteeDoctor,
                     UpdaterLabTechnician = labTest.UpdaterLabTechnician
@@ -224,8 +223,8 @@ namespace NovaCare.Services
                     LabTestCost = labTest.LabTestCost,
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
-                    //PatientId = labTest.PatientId,
-                    //PatientFullName = $" {labTest.Patient!.FisrtName} {labTest.Patient!.MiddleName} {labTest.Patient!.LastName}",
+                    PatientId = labTest.Visit!.PatientId,
+                    PatientFullName = $" {labTest.Visit!.FullName}",
                     ConsultationId = labTest.ConsultationId,
                     RequesteeDoctor = labTest.RequesteeDoctor,
                     UpdaterLabTechnician = labTest.UpdaterLabTechnician,
@@ -239,7 +238,7 @@ namespace NovaCare.Services
                 })
                 .FirstOrDefaultAsync(x => x.Id == testId);
 
-            return labTests;
+            return labTests ?? new();
         }
     }
 }

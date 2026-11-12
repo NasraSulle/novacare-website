@@ -13,6 +13,7 @@
                                 <MudItem md="12">
                                     <MudSelect For="@(() => CurrentLabTest.PatientId)"
                                                @bind-Value="CurrentLabTest.PatientId"
+                                               @bind-Value:after="RetrieveActiveVisitItemsAsync"
                                                Label="Choose Patient" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
                                         <MudSelectItem Value="0" Disabled>Choose Patient</MudSelectItem>
@@ -140,7 +141,8 @@
             CreatedDate = DateTime.Now,
             UpdaterLabTechnician = $"{CurrentUser.FisrtName} {CurrentUser.MiddleName} {CurrentUser.LastName}",
             PatientFullName = $"{patient.FisrtName} {patient.MiddleName} {patient.LastName}",
-            PatientId = labTestDto.PatientId
+            PatientId = labTestDto.PatientId,
+            VisitId = labTestDto.VisitId
         };
 
         if (newLabTest != null)

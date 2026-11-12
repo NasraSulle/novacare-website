@@ -250,7 +250,7 @@ namespace NovaCare.Services
 
                 var visit = await context.Visits
                     .AsNoTracking()
-                    .AsSplitQuery() // Prevents Cartesian explosion when loading multiple collections
+                    .AsSplitQuery()
                     .Where(v => v.Patient != null &&
                                (v.Patient.PatientCode == pCodeOrFullName ||
                                 v.Patient.PatientFullName.Contains(pCodeOrFullName)))
@@ -464,8 +464,9 @@ namespace NovaCare.Services
                     }).FirstOrDefaultAsync();
                 return visit;
             }
-            catch
+            catch(Exception ex)
             {
+                var message = $"{ex.Message}";
                 return new();
             }
         }
