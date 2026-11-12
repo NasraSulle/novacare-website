@@ -155,6 +155,14 @@
             LabTestsBatch.Remove(labTestDto);
     }
 
+    public async Task RetrieveActiveVisitItemsAsync()
+    {
+        //CurrentLabTest.PatientId
+        var patientFound = await patientService.GetPatientByIdAsync(CurrentLabTest.PatientId);
+        var visit = await patientService.GetVisitByPCodeOrFullNameAsync(patientFound.PatientCode);
+        CurrentLabTest.VisitId = visit.Id;
+    }
+
     public async Task SaveLabTestAsync()
     {
         addedSuccessfully = "Added:";

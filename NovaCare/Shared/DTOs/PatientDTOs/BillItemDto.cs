@@ -15,5 +15,6 @@
 
         // UI Helpers
         public string BillTypeName { get; set; } = string.Empty;
+
     }
 }

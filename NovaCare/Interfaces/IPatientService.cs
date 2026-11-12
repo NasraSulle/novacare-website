@@ -32,6 +32,5 @@ namespace NovaCare.Interfaces
 
         Task<VisitDto> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName);
 
-
     }
 }

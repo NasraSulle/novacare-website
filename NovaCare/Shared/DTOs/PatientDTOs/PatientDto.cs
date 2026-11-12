@@ -46,5 +46,6 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         //for display
         public string PatientStatusName { get; set; } = string.Empty;
         public string PatientTypeName { get; set; } = string.Empty;
+        public string PatientFullName { get; set; } = string.Empty;
     }
 }

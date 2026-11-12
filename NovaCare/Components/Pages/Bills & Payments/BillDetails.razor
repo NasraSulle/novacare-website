@@ -19,28 +19,55 @@
                                     <MudItem md="12">
                                         <MudText Typo="Typo.subtitle2">Patient & Bill Details</MudText>
                                     </MudItem>
+
                                     <MudItem md="12">
                                         <MudGrid Spacing="1">
                                             <MudItem md="12">
                                                 <MudTextField @bind-Value="patientSearcher" @bind-Value:after="RetrieveActiveVisitItemsAsync" Margin="Margin.Dense"
-                                                                 Label="Search by Patient Code Number or Full name" Variant="Variant.Outlined" Placeholder="Enter Patient Id" />
+                                                              Label="Search by Patient Code Number or Full name" Variant="Variant.Outlined" Placeholder="Search by Patient Code Number or Full name" />
                                             </MudItem>
-                                            <MudItem md="8">
-                                                <MudText Typo="Typo.subtitle2">@CurrentBill.PatientFullName</MudText>
-                                            </MudItem>
-                                            <MudItem md="12"></MudItem>
-                                            <MudItem md="12"></MudItem>
-                                            <MudItem md="12"></MudItem>
                                         </MudGrid>
                                     </MudItem>
                                 </MudGrid>
                             </MudPaper>
                         </MudItem>
                         <MudItem xs="12">
-                            <MudPaper Class="pa-3 ma-2" Outlined="true"></MudPaper>
+                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                <MudGrid Spacing="1">
+                                    <MudItem md="12">
+                                        <MudText Typo="Typo.subtitle2">Billing Items (Select for current invoice)</MudText>
+                                    </MudItem>
+
+                                    <MudItem md="12">
+                                        <MudGrid Spacing="1">
+                                            <MudItem md="12">
+                                                <MudTextField @bind-Value="patientSearcher" @bind-Value:after="RetrieveActiveVisitItemsAsync" Margin="Margin.Dense"
+                                                              Label="Search by Patient Code Number or Full name" Variant="Variant.Outlined" Placeholder="Enter Patient Id" />
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudPaper>
                         </MudItem>
                         <MudItem xs="12">
-                            <MudPaper Class="pa-3 ma-2" Outlined="true"></MudPaper>
+                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                    <MudGrid Spacing="1">
+                                        <MudItem md="12">
+                                            <MudText Typo="Typo.subtitle2">Notes</MudText>
+                                        </MudItem>
+
+                                        <MudItem md="12">
+                                            <MudGrid Spacing="1">
+                                                <MudItem md="12">
+                                                <MudTextField @bind-Value="CurrentBill.BillDescription" Margin="Margin.Dense" T="string"
+                                                              Lines="5" Sizing="InputSizing.Fixed" Text="@CurrentBill.BillDescription"
+                                                              Label="Description" Variant="Variant.Outlined" Placeholder="Additional billing notes" />
+
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudItem>
+                                    </MudGrid>
+                            </MudPaper>
                         </MudItem>
                     </MudGrid>
                 </MudItem>
@@ -72,14 +99,91 @@
     public string icon = Icons.Material.Filled.Payments;
     public string title = "Bill Details";
 
+    List<BillItemDto> billItems = new();
+
     BillDto CurrentBill = new();
     string patientSearcher = string.Empty;
 
     public async Task RetrieveActiveVisitItemsAsync()
     {
-        //loop v.cons/v.test/v.trt/v.med  : add billItems to bill from v for each v.cons/v.test/v.trt/v.med whose payFlag is not paid
-        //var transformed = Conver
-    
+        var visit = await patientService.GetVisitByPCodeOrFullNameAsync(patientSearcher);
+
+        //1. CONSULTATION
+        if (visit.Consultations.Any())
+        {
+            var Consultations = visit.Consultations;
+
+            foreach (var cons in Consultations.Where(bi => bi.BillItemId != null))
+            {
+                var newBillItem = new BillItemDto
+                {
+                    ItemName = $"{cons.MedicalDepartmentName} with Dct. {cons.DoctorFullName} on {cons.StartDate}",
+                    SourceType = "Consultation",
+                    SourceItemId = cons.Id,
+                    UnitPrice = cons.ConsultationCost
+                };
+
+                billItems.Add(newBillItem);
+            }
+        }
+
+        //2. CHECK-UP
+        if (visit.LabTests.Any())
+        {
+            var LabTests = visit.LabTests;
+
+            foreach (var cons in LabTests.Where(bi => bi.BillItemId != null))
+            {
+                var newBillItem = new BillItemDto
+                {
+                    ItemName = $"{cons.DiseaseName}",
+                    SourceType = "LabTest",
+                    SourceItemId = cons.Id,
+                    UnitPrice = cons.LabTestCost
+                };
+
+                billItems.Add(newBillItem);
+            }
+        }
+
+        //1. TREATMENT
+        if (visit.Treatments.Any())
+        {
+            var Treatments = visit.Treatments;
+
+            foreach (var cons in Treatments.Where(bi => bi.BillItemId != null))
+            {
+                var newBillItem = new BillItemDto
+                {
+                    ItemName = $"{cons.SurgeryName} {cons.TherapyName} {cons.MedicalDeptName} {cons.WardName}",
+                    SourceType = "Treatment",
+                    SourceItemId = cons.Id,
+                    UnitPrice = cons.TotalCost
+                };
+
+                billItems.Add(newBillItem);
+            }
+        }
+
+        //1. PRESCRIPTION
+        if (visit.Prescriptions.Any())
+        {
+            var Prescriptions = visit.Prescriptions;
+
+            foreach (var cons in Prescriptions.Where(bi => bi.BillItemId != null))
+            {
+                var newBillItem = new BillItemDto
+                {
+                    ItemName = $"{cons.Quantity}{cons.MedicineName}",
+                    SourceType = "Prescription",
+                    SourceItemId = cons.Id,
+                    UnitPrice = cons.TotalPrice
+                };
+
+                billItems.Add(newBillItem);
+            }
+        }
+
     }
     public async Task SaveBillAsync() { }
 }

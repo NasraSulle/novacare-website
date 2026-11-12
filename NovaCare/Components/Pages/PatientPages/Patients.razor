@@ -70,16 +70,18 @@
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="x => x.PatientTypeName" Title="Patient Type" />
+                    <PropertyColumn Property="x => x.PatientCode" Title="Patient Number" />
                     <PropertyColumn Property="x => x.PhoneNumber" Title="Phone Number" />
-                    <TemplateColumn>
+                    <TemplateColumn Title="Status">
                         <CellTemplate>
-                            <MudItem Style="text-align: center;">
-                                <MudChip Color="@(context.Item.PatientStatusName != "Emergency" ? Color.Success : Color.Error)" Size="Size.Small">
+                            @* <MudItem Style="text-align: center;"> *@
+                            <MudChip T="string" Variant="Variant.Text" Icon="@(context.Item.PatientStatusName != "Emergency" ? Icons.Material.Outlined.DoDisturbOn : Icons.Material.Outlined.Warning)" Color="@(context.Item.PatientStatusName != "Emergency" ? Color.Warning : Color.Error)" Size="Size.Small">
                                     @(context.Item.PatientStatusName)
-                                </MudChip>
-                            </MudItem>
+                                </MudChip >
+                            @* </MudItem> *@
                         </CellTemplate>
                     </TemplateColumn>
+                    <PropertyColumn Property="x => x.RegisteredDate.ToShortDateString()" Title="Registered Date" />
                 </Columns>
                 <PagerContent>
                     <MudDataGridPager T="PatientDto" />
@@ -210,7 +212,7 @@
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            FilteredPatients = AllPatients?.Where(x => x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            FilteredPatients = AllPatients?.Where(x => x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientCode.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
             messageStaff = "Staffs are not avalible!";
             firstPart = "Staff";
         }
@@ -222,7 +224,7 @@
 
             if (FilterBy != null)
             {
-                FilteredPatients = AllPatients?.Where(x => x.PatientTypeName == FilterBy && x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+                FilteredPatients = AllPatients?.Where(x => x.PatientTypeName == FilterBy && x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PhoneNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientCode.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
             }
             else
             {
