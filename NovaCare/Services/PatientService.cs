@@ -154,6 +154,7 @@ namespace NovaCare.Services
                     KinFullName = dto.KinFullName,
                     PatientCode = patientCodeNumber,
                     KinPhoneNumber = dto.KinPhoneNumber,
+                    PatientFullName = $"{dto.FisrtName} {dto.MiddleName} {dto.LastName}",
                     KinHomeAddress = dto.KinHomeAddress,
                     PatientStatusId = dto.PatientStatusId,
                     PatientTypeId = dto.PatientTypeId
@@ -186,6 +187,7 @@ namespace NovaCare.Services
                     PatientCode = patient.PatientCode,
                     PhoneNumber = patient.PhoneNumber,
                     RegisteredDate = patient.RegisteredDate,
+                    PatientFullName = patient.PatientFullName,
                     PatientStatusName = patient.PatientStatus!.PatientStatusName,
                     PatientTypeName = patient.PatientType!.PatientTypeName,
                     Gender = patient.Gender,
@@ -220,6 +222,7 @@ namespace NovaCare.Services
                     FisrtName = patient.FirstName,
                     MiddleName = patient.MiddleName,
                     LastName = patient.LastName,
+                    PatientFullName = patient.PatientFullName,
                     PhoneNumber = patient.PhoneNumber,
                     PatientCode = patient.PatientCode,
                     RegisteredDate = patient.RegisteredDate,
@@ -240,6 +243,231 @@ namespace NovaCare.Services
         }
 
         public async Task<VisitDto?> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName)
+        {
+            if (string.IsNullOrWhiteSpace(pCodeOrFullName))
+                return null;
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var visit = await context.Visits
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(v => v.Patient != null &&
+                           (v.Patient.PatientCode == pCodeOrFullName ||
+                            v.Patient.PatientFullName.Contains(pCodeOrFullName)))
+                .OrderByDescending(v => v.VisitDate)
+                .Select(v => new VisitDto
+                {
+                    Id = v.Id,
+                    VisitDate = v.VisitDate,
+                    DischargedDate = v.DischargedDate,
+                    VisitTypeId = v.VisitTypeId,
+                    PatientId = v.PatientId,
+                    VisitStatusId = v.VisitStatusId,
+
+
+                    // UI Helpers on VisitDto
+                    VisitTypeName = v.VisitType != null ? v.VisitType.TypeName : string.Empty,
+                    PatientFullName = v.Patient != null ? v.Patient.PatientFullName : string.Empty,
+                    VisitStatusName = v.VisitStatus != null ? v.VisitStatus.VisitStatusName : string.Empty,
+
+                    // 1. Patient Details
+                    Patient = v.Patient == null ? null : new PatientDto
+                    {
+                        Id = v.Patient.Id,
+                        PatientCode = v.Patient.PatientCode,
+                        PatientFullName = v.Patient.PatientFullName,
+                        PatientTypeName = v.Patient.PatientType != null ? v.Patient.PatientType.PatientTypeName : string.Empty,
+                        PatientStatusName = v.Patient.PatientStatus != null ? v.Patient.PatientStatus.PatientStatusName : string.Empty
+                    },
+
+                    // 2. Preliminary Test
+                    PreliminaryTestId = v.PreliminaryTest != null ? v.PreliminaryTest.Id : null,
+                    PreliminaryTest = v.PreliminaryTest == null ? null : new PreliminaryTestDto
+                    {
+                        Id = v.PreliminaryTest.Id,
+                        VisitId = v.PreliminaryTest.VisitId,
+                        PreliminaryWeight = v.PreliminaryTest.PreliminaryWeight,
+                        PreliminaryHeight = v.PreliminaryTest.PreliminaryHeight,
+                        PreliminaryPressure = v.PreliminaryTest.PreliminaryPressure
+                    },
+
+                    // 3. Bills & Payments
+                    Bills = v.Bills.Select(bill => new BillDto
+                    {
+                        Id = bill.Id,
+                        BillDate = bill.BillDate,
+                        BillDescription = bill.BillDescription,
+                        VisitId = bill.VisitId,
+                        BillTypeId = bill.BillTypeId,
+                        BillTypeName = bill.BillType != null ? bill.BillType.TypeNme : string.Empty,
+                        TotalAmount = bill.TotalAmount,
+                        Payments = bill.Payments.Select(pay => new PaymentDto
+                        {
+                            Id = pay.Id,
+                            Amount = pay.Amount, // Verify property name matches your PaymentDto
+                            PaymentDate = pay.PaymentDate
+                        }).ToList()
+                    }).ToList(),
+
+                    // 4. Consultations
+                    Consultations = v.Consultations.Select(c => new ConsultationDto
+                    {
+                        Id = c.Id,
+                        Diagnosis = c.Diagnosis,
+                        StartDate = c.StartDate,
+                        FinishDate = c.FinishDate,
+                        ConsultationCost = c.ConsultationCost,
+
+                        // Foreign keys
+                        RoomId = c.RoomId,
+                        VisitId = c.VisitId,
+                        DoctorId = c.DoctorId,
+                        MedicalDepartmentId = c.MedicalDepartmentId,
+                        BillItemId = c.BillItemId,
+
+                        // UI Helpers
+                        MedicalDepartmentName = c.MedicalDepartment != null ? c.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                        //DoctorFullName = c.Doctor != null ? c.Doctor.DoctorFullName : string.Empty,
+                        VisitTypeName = v.VisitType != null ? v.VisitType.TypeName : string.Empty,
+                        RoomName = c.Room != null ? c.Room.RoomName : string.Empty,
+                        PaymentStatusName = c.BillItem == null || c.BillItem.Bill == null
+                            ? "Not Billed"
+                            : (c.BillItem.Bill.Payments.Sum(pay => pay.Amount) <= 0m
+                                ? "Unpaid"
+                                : (c.BillItem.Bill.Payments.Sum(pay => pay.Amount) < c.BillItem.Bill.TotalAmount
+                                    ? "Partial"
+                                    : "Fully Paid"))
+                    }).ToList(),
+
+
+                    // 5. Lab Tests
+                    LabTests = v.LabTests.Select(l => new LabTestDto
+                    {
+                        Id = l.Id,
+                        DiseaseName = l.DiseaseName,
+                        LabTestStatusName = l.LabTestStatusName,
+                        CreatedDate = l.CreatedDate,
+                        TestResult = l.TestResult,
+                        ResultAttachment = l.ResultAttachment,
+
+                        RequesteeDoctor = l.RequesteeDoctor,
+                        UpdaterLabTechnician = l.UpdaterLabTechnician,
+                        RequesteeId = l.RequesteeId,
+                        UpdaterId = l.UpdaterId,
+                        LabTestCost = l.LabTestCost,
+
+                        // Foreign keys
+                        VisitId = l.VisitId,
+                        //PatientId = l.Visit.PatientId,
+                        ConsultationId = l.ConsultationId,
+                        BillItemId = l.BillItemId,
+
+                        // Nested Result Compositions
+                        LabTestResultCompositions = l.LabTestResultCompositions.Select(comp => new LabTestResultCompositionDto
+                        {
+                            Id = comp.Id
+                            // Add your LabTestResultCompositionDto properties here (e.g., ParameterName, ResultValue, NormalRange)
+                        }).ToList(),
+
+                        // UI Helpers
+                        PatientFullName = v.Patient == null ? string.Empty :
+                            (v.Patient.FirstName + " " +
+                            (string.IsNullOrEmpty(v.Patient.MiddleName) ? "" : v.Patient.MiddleName + " ") +
+                            v.Patient.LastName).Trim(),
+                        //DiseaseTypeName = l.Disease != null && l.Disease.DiseaseType != null
+                        //    ? l.Disease.DiseaseType.DiseaseTypeName
+                        //    : string.Empty,
+                        PaymentStatusName = l.BillItem == null || l.BillItem.Bill == null
+                            ? "Not Billed"
+                            : (l.BillItem.Bill.Payments.Sum(pay => pay.Amount) <= 0m
+                                ? "Unpaid"
+                                : (l.BillItem.Bill.Payments.Sum(pay => pay.Amount) < l.BillItem.Bill.TotalAmount
+                                    ? "Partial"
+                                    : "Fully Paid"))
+                    }).ToList(),
+
+
+                    // 6. Prescriptions
+                    Prescriptions = v.Prescriptions.Select(p => new PrescriptionDto
+                    {
+                        Id = p.Id,
+                        PrescribedDate = p.PrescribedDate,
+                        Quantity = p.Quantity,
+                        Dosage = p.Dosage,
+                        Notes = p.Notes,
+                        UnitPrice = p.UnitPrice,
+
+                        // Foreign keys
+                        VisitId = p.VisitId,
+                        ConsultationId = p.ConsultationId,
+                        MedicineId = p.MedicineId,
+                        DoctorId = p.DoctorId,
+                        BillItemId = p.BillItemId,
+
+                        // UI Helpers
+                        MedicineName = p.Medicine != null ? p.Medicine.MedicineName : string.Empty,
+                        //DoctorFullName = p.Doctor != null ? p.Doctor.DoctorFullName : string.Empty,
+                        PaymentStatusName = p.BillItem == null || p.BillItem.Bill == null
+                            ? "Not Billed"
+                            : (p.BillItem.Bill.Payments.Sum(pay => pay.Amount) <= 0m
+                                ? "Unpaid"
+                                : (p.BillItem.Bill.Payments.Sum(pay => pay.Amount) < p.BillItem.Bill.TotalAmount
+                                    ? "Partial"
+                                    : "Fully Paid"))
+                    }).ToList(),
+
+
+
+                    // 7. Treatments
+                    Treatments = v.Treatments.Select(t => new TreatmentDto
+                    {
+                        Id = t.Id,
+                        StartDate = t.StartDate,
+                        FinishDate = t.FinishDate,
+                        TreatmentQty = t.TreatmentQty,
+                        TreatmentCost = t.TreatmentCost,
+                        // TotalCost is computed automatically in your DTO
+
+                        // Required Foreign Keys
+                        VisitId = t.VisitId,
+                        ConsultationId = t.ConsultationId,
+                        BillItemId = t.BillItemId,
+
+                        // Clinical & Location Foreign Keys
+                        SurgeryId = t.SurgeryId,
+                        TherapyId = t.TherapyId,
+                        MedicalDeptId = t.MedicalDeptId,
+                        WardId = t.WardId,
+                        DoctorId = t.DoctorId,
+                        RoomId = t.RoomId,
+                        TreatmentStatusId = t.TreatmentStatusId,
+                        TreatmentTypeId = t.TreatmentTypeId,
+
+                        // UI Helpers
+                        TreatmentStatusName = t.TreatmentStatus != null ? t.TreatmentStatus.TreatmentStatusName : string.Empty,
+                        TreatmentTypeName = t.TreatmentType != null ? t.TreatmentType.TreatmentTypeName : string.Empty,
+                        SurgeryName = t.Surgery != null ? t.Surgery.SurgeryName : string.Empty,
+                        TherapyName = t.Therapy != null ? t.Therapy.TherapyName : string.Empty,
+                        MedicalDeptName = t.MedicalDepartment != null ? t.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                        WardName = t.Ward != null ? t.Ward.WardName : string.Empty,
+                        //DoctorName = t.Doctor != null ? t.Doctor.DoctorFullName : string.Empty,
+                        RoomName = t.Room != null ? t.Room.RoomName : string.Empty,
+                        PaymentStatusName = t.BillItem == null || t.BillItem.Bill == null
+                            ? "Not Billed"
+                            : (t.BillItem.Bill.Payments.Sum(pay => pay.Amount) <= 0m
+                                ? "Unpaid"
+                                : (t.BillItem.Bill.Payments.Sum(pay => pay.Amount) < t.BillItem.Bill.TotalAmount
+                                    ? "Partial"
+                                    : "Fully Paid"))
+                    }).ToList()
+
+                }).FirstOrDefaultAsync();
+            return visit;
+        }
+
+        /*
+                 public async Task<VisitDto?> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName)
         {
             try
             {
@@ -470,7 +698,7 @@ namespace NovaCare.Services
                 return new();
             }
         }
-
+         */
 
         public async Task<bool> UpdatePatientAsync(PatientDto dto, int patientId)
         {
@@ -492,6 +720,7 @@ namespace NovaCare.Services
                     existingPatient.EmailAddress = dto.EmailAddress;
                     existingPatient.HomeAddress = dto.HomeAddress;
                     existingPatient.RegisteredDate = dto.RegisteredDate;
+                    existingPatient.PatientFullName = $"{dto.FisrtName} {dto.MiddleName} {dto.LastName}";
                     existingPatient.Gender = dto.Gender;
                     existingPatient.KinFullName = dto.KinFullName;
                     existingPatient.KinPhoneNumber = dto.KinPhoneNumber;
@@ -567,6 +796,7 @@ namespace NovaCare.Services
                     {
                         Id = visit.Patient.Id,
                         PatientTypeName = visit.Patient.PatientType!.PatientTypeName,
+                        PatientFullName = visit.Patient.PatientFullName,
                         PatientStatusName = visit.Patient.PatientStatus!.PatientStatusName
                     }
 
@@ -705,6 +935,7 @@ namespace NovaCare.Services
                     LastName = patient.LastName,
                     PhoneNumber = patient.PhoneNumber,
                     RegisteredDate = patient.RegisteredDate,
+                    PatientFullName = patient.PatientFullName,
                     PatientStatusName = patient.PatientStatus!.PatientStatusName,
                     PatientTypeName = patient.PatientType!.PatientTypeName,
                     Gender = patient.Gender,
@@ -811,154 +1042,5 @@ namespace NovaCare.Services
                 return false;
             }
         }
-
-
-
-        //====bill
-        public async Task<BillDto> CreateBillAsync(
-    int visitId,
-    int billTypeId,
-    string billDescription,
-    List<int> consultationIds,
-    List<int> labTestIds,
-    List<int> prescriptionIds,
-    List<int> treatmentIds)
-        {
-            await using var context = await _contextFactory.CreateDbContextAsync();
-            await using var transaction = await context.Database.BeginTransactionAsync();
-
-            try
-            {
-                // 1. Fetch unbilled source items matching the cashier's selection
-                var consultations = await context.Consultations
-                    .Include(c => c.MedicalDepartment)
-                    .Where(c => c.VisitId == visitId && c.BillItemId == null && consultationIds.Contains(c.Id))
-                    .ToListAsync();
-
-                var labTests = await context.LabTests
-                    .Where(l => l.VisitId == visitId && l.BillItemId == null && labTestIds.Contains(l.Id))
-                    .ToListAsync();
-
-                var prescriptions = await context.Prescriptions
-                    .Include(p => p.Medicine)
-                    .Where(p => p.VisitId == visitId && p.BillItemId == null && prescriptionIds.Contains(p.Id))
-                    .ToListAsync();
-
-                var treatments = await context.Treatments
-                    .Where(t => t.VisitId == visitId && t.BillItemId == null && treatmentIds.Contains(t.Id))
-                    .ToListAsync();
-
-                // 2. Build BillItem entities with price snapshots
-                var billItems = new List<BillItem>();
-
-                foreach (var c in consultations)
-                {
-                    billItems.Add(new BillItem
-                    {
-                        ItemName = $"Consultation - {c.MedicalDepartment?.MedicalDepartmentName ?? "General"}",
-                        SourceType = "Consultation",
-                        SourceItemId = c.Id,
-                        Quantity = 1d,
-                        UnitPrice = c.ConsultationCost
-                    });
-                }
-
-                foreach (var l in labTests)
-                {
-                    billItems.Add(new BillItem
-                    {
-                        ItemName = l.DiseaseName, // Match your LabTest entity property name
-                        SourceType = "LabTest",
-                        SourceItemId = l.Id,
-                        Quantity = 1d,
-                        UnitPrice = l.LabTestCost
-                    });
-                }
-
-                foreach (var p in prescriptions)
-                {
-                    billItems.Add(new BillItem
-                    {
-                        ItemName = p.Medicine?.MedicineName ?? "Medicine",
-                        SourceType = "Prescription",
-                        SourceItemId = p.Id,
-                        Quantity = p.Quantity,
-                        UnitPrice = p.UnitPrice
-                    });
-                }
-
-                foreach (var t in treatments)
-                {
-                    billItems.Add(new BillItem
-                    {
-                        ItemName = t.TreatmentType.TreatmentTypeName, // Match your Treatment entity property name
-                        SourceType = "Treatment",
-                        SourceItemId = t.Id,
-                        Quantity = t.TreatmentQty,
-                        UnitPrice = t.TreatmentCost
-                    });
-                }
-
-                // 3. Create the parent Bill (Supports Advance Bills where billItems is empty)
-                var bill = new Bill
-                {
-                    BillNumber = $"INV-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
-                    BillDate = DateTime.UtcNow,
-                    BillDescription = billDescription,
-                    VisitId = visitId,
-                    BillTypeId = billTypeId,
-                    TotalAmount = billItems.Sum(i => (decimal)i.Quantity * i.UnitPrice),
-                    BillItems = billItems
-                };
-
-                context.Bills.Add(bill);
-                await context.SaveChangesAsync(); // Generates Bill.Id and all BillItem.Ids
-
-                // 4. Stamp generated BillItem.Id back onto each clinical item
-                foreach (var item in bill.BillItems)
-                {
-                    switch (item.SourceType)
-                    {
-                        case "Consultation":
-                            var c = consultations.First(x => x.Id == item.SourceItemId);
-                            c.BillItemId = item.Id;
-                            break;
-                        case "LabTest":
-                            var l = labTests.First(x => x.Id == item.SourceItemId);
-                            l.BillItemId = item.Id;
-                            break;
-                        case "Prescription":
-                            var p = prescriptions.First(x => x.Id == item.SourceItemId);
-                            p.BillItemId = item.Id;
-                            break;
-                        case "Treatment":
-                            var t = treatments.First(x => x.Id == item.SourceItemId);
-                            t.BillItemId = item.Id;
-                            break;
-                    }
-                }
-
-                await context.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return new BillDto
-                {
-                    Id = bill.Id,
-                    BillNumber = bill.BillNumber,
-                    BillDate = bill.BillDate,
-                    BillDescription = bill.BillDescription,
-                    TotalAmount = bill.TotalAmount,
-                    VisitId = bill.VisitId,
-                    BillTypeId = bill.BillTypeId
-                };
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        }
-
-
     }
 }

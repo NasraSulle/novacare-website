@@ -31,6 +31,7 @@ namespace NovaCare.Services
                     ConsultationId = dto.ConsultationId,
                     LabTestCost = dto.LabTestCost,
                     RequesteeDoctor = dto.RequesteeDoctor,
+                    VisitId = dto.VisitId,
                     UpdaterLabTechnician = dto.UpdaterLabTechnician
                 };
 
@@ -61,7 +62,7 @@ namespace NovaCare.Services
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
                     PatientId = labTest.Visit!.PatientId,
-                    PatientFullName = $" {labTest.Visit!.FullName}",
+                    PatientFullName = $" {labTest.Visit!.Patient!.PatientFullName}",
                     ConsultationId = labTest.ConsultationId,
                     RequesteeDoctor = labTest.RequesteeDoctor,
                     UpdaterLabTechnician = labTest.UpdaterLabTechnician
@@ -87,7 +88,7 @@ namespace NovaCare.Services
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
                     PatientId = labTest.Visit!.PatientId,
-                    PatientFullName = $" {labTest.Visit!.FullName}",
+                    PatientFullName = $" {labTest.Visit!.Patient!.PatientFullName}",
                     ConsultationId = labTest.ConsultationId,
                     RequesteeDoctor = labTest.RequesteeDoctor,
                     UpdaterLabTechnician = labTest.UpdaterLabTechnician
@@ -224,7 +225,7 @@ namespace NovaCare.Services
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
                     PatientId = labTest.Visit!.PatientId,
-                    PatientFullName = $" {labTest.Visit!.FullName}",
+                    PatientFullName = $" {labTest.Visit!.Patient!.PatientFullName}",
                     ConsultationId = labTest.ConsultationId,
                     RequesteeDoctor = labTest.RequesteeDoctor,
                     UpdaterLabTechnician = labTest.UpdaterLabTechnician,

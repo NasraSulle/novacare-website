@@ -1377,6 +1377,10 @@ namespace NovaCare.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PatientFullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<byte[]>("PatientPhoto")
                         .HasColumnType("varbinary(max)");
 
