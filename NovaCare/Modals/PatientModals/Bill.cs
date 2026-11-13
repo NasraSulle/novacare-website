@@ -1,4 +1,5 @@
 ﻿using NovaCare.Modals.PaymentModals;
+using NovaCare.Modals.StaffModals;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,6 +18,8 @@ namespace NovaCare.Modals.PatientModals
 
         public decimal TotalAmount { get; set; } = 0m;
 
+        public decimal PaidAmount { get; set; } = 0m;
+
         // Foreign keys
         [ForeignKey(nameof(Visit))]
         public int VisitId { get; set; }
@@ -24,11 +27,21 @@ namespace NovaCare.Modals.PatientModals
         [ForeignKey(nameof(BillType))]
         public int BillTypeId { get; set; }
 
+        [ForeignKey(nameof(Payment))]
+        public int? PaymentId { get; set; }
+
+        [ForeignKey(nameof(Staff))]
+        public string StaffId { get; set; } = string.Empty;
+
         // Navigation properties
         public BillType? BillType { get; set; }
+        public Staff? Staff { get; set; }
         public Visit? Visit { get; set; }
-        public List<Payment> Payments { get; set; } = new();
+        public Payment? Payment { get; set; } = new();
         public List<BillItem> BillItems { get; set; } = new();
+
+
+        public decimal BalanceDue => TotalAmount - PaidAmount;
 
     }
 }

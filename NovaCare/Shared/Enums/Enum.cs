@@ -9,4 +9,44 @@ namespace NovaCare.Shared.Enums
         female,
         male
     }
+
+    public enum PaymentType
+    {
+        Wire_Transfer,
+        Cash,
+        Cheque,
+        Card,
+        MNO
+    }
+
+    public enum CardType
+    {
+        MNO,
+        Bank,
+        VC
+    }
+
+    public enum MobileOperator
+    {
+        M_PESA,
+        TIGO_PESA,
+        HALOPESA,
+        AIRTEL_MONEY
+    }
+
+    public enum BankType
+    {
+        NMB,
+        CRDB,
+        PBZ,
+        NBC,
+        Stanbic_Bank,
+        Equity,
+        Exim,
+        Access,
+        Standard_Chartered,
+        KCB,
+        DTB,
+        Barter_Trade
+    }
 }

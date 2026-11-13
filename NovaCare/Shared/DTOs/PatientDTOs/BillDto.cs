@@ -1,4 +1,8 @@
-﻿using NovaCare.Shared.DTOs.PaymentDTOs;
+﻿using NovaCare.Modals.PatientModals;
+using NovaCare.Modals.PaymentModals;
+using NovaCare.Shared.DTOs.PaymentDTOs;
+using NovaCare.Shared.DTOs.StaffDTOs;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NovaCare.Shared.DTOs.PatientDTOs
 {
@@ -6,50 +10,42 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
     {
         // Properties
         public int Id { get; set; }
-        public string BillNumber { get; set; } = string.Empty;
-        public DateTime BillDate { get; set; } = DateTime.UtcNow;
+        public DateTime BillDate { get; set; }
+        public string BillNumber { get; set; } = $"NCMH-BN-{DateTime.Now.ToString("yyMMdd")}";
+
         public string BillDescription { get; set; } = string.Empty;
+
         public decimal TotalAmount { get; set; } = 0m;
 
-        // Live Payment Calculations (Null-safe)
-        public decimal PaidAmount => Payments?.Sum(p => p.Amount) ?? 0m;
-        public decimal BalanceDue => TotalAmount - PaidAmount;
-
-        // Computed Payment Status (1 = Unpaid, 2 = Partially Paid, 3 = Fully Paid)
-        public int PaymentStatusId
-        {
-            get
-            {
-                if (PaidAmount <= 0m)
-                    return 1;
-
-                if (PaidAmount < TotalAmount)
-                    return 2;
-
-                return 3;
-            }
-        }
-
-        public string PaymentStatusName => PaymentStatusId switch
-        {
-            1 => "Unpaid",
-            2 => "Partial",
-            3 => "Fully Paid",
-            _ => "Unpaid"
-        };
+        public decimal PaidAmount { get; set; } = 0m;
 
         // Foreign keys
         public int VisitId { get; set; }
         public int BillTypeId { get; set; }
+        public int? PaymentId { get; set; }
+        public string StaffId { get; set; } = string.Empty;
 
-        // Navigation properties 
+        // Navigation properties
+        //public BillTypeDto? BillType { get; set; }
+        public StaffDto? Staff { get; set; }
         public VisitDto? Visit { get; set; }
-        public List<PaymentDto> Payments { get; set; } = new();
+        public PaymentDto? Payment { get; set; } = new();
         public List<BillItemDto> BillItems { get; set; } = new();
+
+
+        public decimal BalanceDue => TotalAmount - PaidAmount;
+
 
         // UI Helpers
         public string VisitName { get; set; } = string.Empty;
         public string BillTypeName { get; set; } = string.Empty;
         public string PatientFullName { get; set; } = string.Empty;
+        public string PaymentModeName { get; set; } = "cash";
+        public string PaymentStatusName { get; set; } = string.Empty;
+        public string StaffFullName { get; set; } = string.Empty;
     }
 }
+
+
+
+

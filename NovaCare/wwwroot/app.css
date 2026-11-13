@@ -24,3 +24,406 @@
         color: white !important;
         text-decoration: none !important;
     }
+
+
+
+    /*==============================Dashboard========================*/
+.dashboard-container {
+    /* background-color: #f4f6f9; */
+    min-height: 100vh;
+}
+
+/* Header Ping Dot */
+.relative-dot-container {
+    position: relative;
+    display: flex;
+    width: 8px;
+    height: 8px;
+}
+
+.dot-solid, .dot-ping {
+    border-radius: 50%;
+    background-color: var(--mud-palette-error);
+    width: 100%;
+    height: 100%;
+}
+
+.dot-ping {
+    position: absolute;
+    display: inline-flex;
+    opacity: 0.7;
+    animation: mud-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@@keyframes mud-ping {
+    75%, 100% {
+        transform: scale(2.6);
+        opacity: 0;
+    }
+}
+
+/* Vitals Bridge Container */
+.vitals-bridge {
+    position: relative;
+    background: linear-gradient(0deg, rgba(22,35,104,1) 0%, rgba(63,81,181,1) 100%) !important;
+    /* border: 1px solid var(--mud-palette-lines-default); */
+    border-radius: 5px;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.vitals-bridge__score {
+    flex-direction: column;
+    justify-content: center;
+    padding-top: .5rem;
+    display: flex;
+}
+
+.vitals-bridge__score-label {
+    color: #9fe6c9;
+    margin-top: .15rem;
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.vitals-bridge__score-foot {
+    color: oklab(95.6268% -.0106561 .00230426 / .6);
+    align-items: center;
+    gap: .3rem;
+    margin-top: .65rem;
+    font-size: 10.5px;
+    display: flex;
+}
+
+.vitals-bridge__eyebrow {
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: oklab(95.6268% -.0106561 .00230426 / .65);
+    align-items: center;
+    gap: .4rem;
+    font-size: 10.5px;
+    font-weight: 700;
+    display: flex;
+}
+
+.vitals-bridge__score-num {
+    font-family: var(--font-display, inherit);
+    letter-spacing: -.02em;
+    color: #0000;
+    background: linear-gradient(135deg, #fff, #9fe6c9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.vitals-bridge__score-row {
+    align-items: baseline;
+    gap: .15rem;
+    margin-top: .6rem;
+    display: flex;
+}
+
+.vitals-bridge__score-unit {
+    color: oklab(95.6268% -.0106561 .00230426 / .55);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Animated Ambient ECG Trace */
+.vitals-bridge__ecg {
+    /*         position: absolute;
+        top: 0;
+        left: 0; */
+    width: 100%;
+    height: 30px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.vitals-bridge__ecg-track {
+    fill: none;
+    stroke: var(--mud-palette-success);
+    stroke-width: 1.5;
+    opacity: 0.12;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.vitals-bridge__ecg-pulse {
+    fill: none;
+    stroke: var(--mud-palette-success);
+    stroke-width: 2.5;
+    opacity: 0.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 280 1200;
+    stroke-dashoffset: 1480;
+    animation: ecg-sweep 4.5s linear infinite;
+}
+
+@@keyframes ecg-sweep {
+    0% {
+        stroke-dashoffset: 1480;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Live Glowing Status Marker */
+.vitals-bridge__dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--mud-palette-success);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px var(--mud-palette-success);
+    animation: pulse-glow 2s infinite;
+}
+
+@@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+}
+
+/* Desktop Grid Dividers */
+@@media (min-width: 960px) {
+    .border-end-md {
+        border-right: 1px solid var(--mud-palette-lines-default);
+    }
+
+    .border-start-md {
+        border-left: 1px solid var(--mud-palette-lines-default);
+    }
+}
+
+/* Vital Sign Tiles */
+.text-sm {
+    font-size: 0.8rem;
+}
+
+.text-muted {
+    color: var(--mud-palette-text-secondary);
+}
+
+.relative-tile {
+    border: 1px solid white !important;
+    color: white !important;
+    background-color: transparent !important;
+    border-radius: 8px !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    z-index: 2;
+}
+
+    .relative-tile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+.vital-tile--alert {
+    border-left: 4px solid var(--mud-palette-error) !important;
+    background-color: rgba(var(--mud-palette-error-rgb), 0.03) !important;
+}
+
+/* Clinical AI Box */
+.ai-sparkle-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.12);
+}
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+}
+
+.chip-alert {
+    background-color: rgba(var(--mud-palette-error-rgb), 0.1);
+    color: var(--mud-palette-error);
+}
+
+.chip-neutral {
+    background-color: rgba(var(--mud-palette-action-disabled-background-rgb), 0.5);
+    color: var(--mud-palette-text-secondary);
+}
+
+/* Metric & Chart Cards */
+.metric-card-wrapper {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 5px;
+}
+
+    .metric-card-wrapper:hover {
+        transform: translateY(-4px);
+    }
+
+.chart-card {
+    position: relative;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #ffffff;
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 5px;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.staff-card {
+    /*         background: linear-gradient(135deg, #3949ab 0%, #1a237e 100%) !important;
+        */
+
+    color: white !important;
+    position: relative;
+    background: linear-gradient(0deg, rgba(22,35,104,1) 0%, rgba(63,81,181,1) 100%) !important;
+    /* border: 1px solid var(--mud-palette-lines-default); */
+    border-radius: 5px;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.top-summary-avatar {
+    color: white !important;
+    position: relative;
+    /* background: linear-gradient(0deg, rgba(22,35,104,1) 0%, rgba(63,81,181,1) 100%) !important; */
+    /* border: 1px solid var(--mud-palette-lines-default); */
+    border-radius: 5px;
+    overflow: hidden;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.carousel-metric-card {
+    background: linear-gradient(135deg, #263238 0%, #101619 100%);
+    border-radius: 5px;
+    color: white;
+}
+
+/* Entrance Animation */
+.animate-rise-in {
+    animation: riseIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@@keyframes riseIn {
+    from {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Interactive card hover matching your metric cards */
+.surface-card {
+    border-radius: 5px;
+    border: 1px solid var(--mud-palette-lines-default);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .surface-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+    }
+
+/* Soft tinted funnel stage cards using MudBlazor theme variables */
+.funnel-tile {
+    border: 1px solid transparent;
+}
+
+.funnel-primary {
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.08) !important;
+}
+
+.funnel-warning {
+    background-color: rgba(var(--mud-palette-warning-rgb), 0.08) !important;
+}
+
+.funnel-info {
+    background-color: rgba(var(--mud-palette-info-rgb), 0.08) !important;
+}
+
+.funnel-success {
+    background-color: rgba(var(--mud-palette-success-rgb), 0.08) !important;
+}
+
+/* Multi-stage funnel gradient bar */
+.funnel-gradient-bar {
+    height: 8px;
+    width: 100%;
+    border-radius: 999px;
+    background: linear-gradient( 90deg, var(--mud-palette-primary) 0%, var(--mud-palette-warning) 35%, var(--mud-palette-info) 70%, var(--mud-palette-success) 100% );
+}
+
+.badge-warning-soft {
+    background-color: rgba(var(--mud-palette-warning-rgb), 0.14) !important;
+}
+
+.infect-card__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .75rem;
+    display: grid;
+}
+
+.infect-card__ward {
+    background: var(--surface-sunken);
+    border: 1px solid #0000;
+    border-radius: 12px;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem .4rem;
+    transition: transform .15s, border-color .15s;
+    display: flex;
+}
+
+.infect-card__code {
+    letter-spacing: .02em;
+    color: var(--text-tertiary);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.infect-card__ring {
+    --size: 56px;
+    width: var(--size);
+    height: var(--size);
+    background: conic-gradient(var(--clr) calc(var(--pct) * 24deg), var(--border-subtle) 0);
+    border-radius: 999px;
+    place-items: center;
+    display: grid;
+}
+
+.amb-rail__list {
+    flex-direction: column;
+    max-height: 175px;
+    display: flex;
+    overflow-y: auto;
+}

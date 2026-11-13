@@ -58,6 +58,7 @@ namespace NovaCare.Services
                     DiseaseName = labTest.DiseaseName,
                     LabTestStatusName = labTest.LabTestStatusName,
                     TestResult = labTest.TestResult,
+                    BillItemId = labTest.BillItemId,
                     LabTestCost = labTest.LabTestCost,
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
@@ -120,6 +121,7 @@ namespace NovaCare.Services
                     existingLabTest.ResultAttachment = dto.ResultAttachment;
                     existingLabTest.RequesteeDoctor = dto.RequesteeDoctor;
                     existingLabTest.UpdaterLabTechnician = dto.UpdaterLabTechnician;
+                    existingLabTest.BillItemId = dto.BillItemId;
                     existingLabTest.LabTestCost = existingLabTest.LabTestCost;
                     existingLabTest.LabTestResultCompositions = existingLabTest.LabTestResultCompositions;
 
@@ -224,6 +226,7 @@ namespace NovaCare.Services
                     LabTestCost = labTest.LabTestCost,
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
+                    BillItemId = labTest.BillItemId,
                     PatientId = labTest.Visit!.PatientId,
                     PatientFullName = $" {labTest.Visit!.Patient!.PatientFullName}",
                     ConsultationId = labTest.ConsultationId,

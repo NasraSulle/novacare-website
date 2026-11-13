@@ -251,6 +251,9 @@ namespace NovaCare.Services
                     existingTreatment.RoomId = dto.RoomId;
                     existingTreatment.TreatmentStatusId = dto.TreatmentStatusId;
                     existingTreatment.TreatmentTypeId = dto.TreatmentTypeId;
+                    existingTreatment.BillItemId = dto.BillItemId;
+                    existingTreatment.VisitId = dto.VisitId;
+                    existingTreatment.ConsultationId = dto.ConsultationId;
 
                     context.Treatments.Update(existingTreatment);
                     await context.SaveChangesAsync();
@@ -407,6 +410,68 @@ namespace NovaCare.Services
                 Console.WriteLine($"Error: {ex}");
                 return false;
             }
+        }
+
+        public async Task<PrescriptionDto> GetPrescriptionByIdAsync(int pId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var presc = await context.Prescriptions.Where(x => x.Id == pId)
+                        .Select(med => new PrescriptionDto
+                        {
+                            Id = med.Id,
+                            Quantity = med.Quantity,
+                            Dosage = med.Dosage,
+                            Notes = med.Notes,
+                            UnitPrice = med.UnitPrice,
+                            VisitId = med.VisitId,
+                            ConsultationId = med.ConsultationId,
+                            MedicineId = med.MedicineId,
+                            DoctorId = med.DoctorId,
+                            BillItemId = med.BillItemId,
+                            MedicineName = med.Medicine != null ? med.Medicine.MedicineName : string.Empty,
+                            DoctorFullName = med.Doctor != null ? $"{med.Doctor.Staff!.FisrtName} {med.Doctor.Staff!.MiddleName} {med.Doctor.Staff!.LastName}" : string.Empty,
+                            PrescribedDate = med.PrescribedDate
+                        }).FirstOrDefaultAsync();
+
+            return presc ?? new();
+        }
+
+        public async Task<TreatmentDto> GetTreatmentByIdAsync(int pId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var presc = await context.Treatments.Where(x => x.Id == pId)
+                        .Select(med => new TreatmentDto
+                        {
+                            Id = med.Id,
+                            StartDate = med.StartDate,
+                            FinishDate = med.FinishDate,
+                            TreatmentQty = med.TreatmentQty,
+                            TreatmentCost = med.TreatmentCost,
+                            VisitId = med.VisitId,
+                            ConsultationId = med.ConsultationId,
+                            BillItemId = med.BillItemId,
+                            DoctorId = med.DoctorId,
+                            SurgeryId = med.SurgeryId,
+                            TherapyId = med.TherapyId,
+                            MedicalDeptId = med.MedicalDeptId,
+                            WardId = med.WardId,
+                            RoomId = med.RoomId,
+                            TreatmentStatusId = med.TreatmentStatusId,
+                            TreatmentTypeId = med.TreatmentTypeId,
+
+
+                            TreatmentStatusName = med.TreatmentStatus != null ? med.TreatmentStatus.TreatmentStatusName : string.Empty,
+                            TreatmentTypeName = med.TreatmentType != null ? med.TreatmentType.TreatmentTypeName : string.Empty,
+                            SurgeryName = med.Surgery != null ? med.Surgery.SurgeryName : string.Empty,
+                            TherapyName = med.Therapy != null ? med.Therapy.TherapyName : string.Empty,
+                            MedicalDeptName = med.MedicalDepartment != null ? med.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                            WardName = med.Ward != null ? med.Ward.WardName : string.Empty,
+                            PaymentStatusName = med.TreatmentStatus != null ? med.TreatmentStatus.TreatmentStatusName : string.Empty,
+                            RoomName = med.Room != null ? med.Room.RoomName : string.Empty,
+                            DoctorName = med.Doctor != null ? $"{med.Doctor.Staff!.FisrtName} {med.Doctor.Staff!.MiddleName} {med.Doctor.Staff!.LastName}" : string.Empty
+                        }).FirstOrDefaultAsync();
+
+            return presc ?? new();
         }
     }
 }

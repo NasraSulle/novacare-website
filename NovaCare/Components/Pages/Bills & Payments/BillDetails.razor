@@ -1,4 +1,5 @@
 ﻿@page "/billDetails"
+@using NovaCare.Shared.DTOs.PaymentDTOs
 
 @inject IDialogService DialogService
 
@@ -23,10 +24,24 @@
 
                                                     <MudItem md="12" sm="12">
                                                         <MudGrid Spacing="1">
-                                                            <MudItem md="12" sm="12">
-                                                                <MudTextField @bind-Value="patientSearcher" @bind-Value:after="RetrieveActiveVisitItemsAsync" Margin="Margin.Dense"
-                                                                              Label="Search by Patient Code Number or Full name" Variant="Variant.Outlined" Placeholder="Search by Patient Code Number or Full name" />
-                                                            </MudItem>
+                                                            @if (CurrentBill.Id > 0)
+                                                            {
+                                                                <MudItem md="7" sm="12">
+                                                                    <MudField Label="Patient" Margin="Margin.Dense" Variant="Variant.Outlined">First Middle Last</MudField>
+                                                                </MudItem>
+                                                                <MudItem md="3" sm="12">
+                                                                    <MudField Label="Issued Date" Margin="Margin.Dense" Variant="Variant.Outlined">@DateTime.Now.ToShortDateString()</MudField>
+                                                                </MudItem>
+                                                                <MudItem md="2" sm="12">
+                                                                    <MudField Label="Invoice_No." Margin="Margin.Dense" Variant="Variant.Outlined">#######</MudField>
+                                                                </MudItem>
+                                                            }
+                                                            else{
+                                                                <MudItem md="12" sm="12">
+                                                                    <MudTextField @bind-Value="patientSearcher" @bind-Value:after="RetrieveActiveVisitItemsAsync" Margin="Margin.Dense"
+                                                                                  Label="Search by Patient Code Number or Full name" Variant="Variant.Outlined" Placeholder="Search by Patient Code Number or Full name" />
+                                                                </MudItem>
+                                                            }
                                                         </MudGrid>
                                                     </MudItem>
                                                 </MudGrid>
@@ -35,8 +50,9 @@
                                         <MudItem xs="12">
                                             <MudPaper Class="pa-3 ma-2" Outlined="true">
                                                 <MudGrid Spacing="1">
-                                                    <MudItem md="12" sm="12">
+                                                    <MudItem md="12" sm="12" Class="pt-0 d-flex justify-content-between align-items-center">
                                                         <MudText Typo="Typo.subtitle2">Billing Items (Select for current invoice)</MudText>
+                                                        <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print" title="print invoice pdf" />
                                                     </MudItem>
 
                                                     <MudItem md="12" sm="12">
@@ -163,7 +179,7 @@
                                                         <MudGrid Spacing="1">
                                                             <MudItem md="12" sm="12">
                                                                 <MudTextField Typo="Typo.caption" @bind-Value="CurrentBill.BillDescription" Margin="Margin.Dense" T="string"
-                                                                              Lines="4" Sizing="InputSizing.Fixed" Text="@CurrentBill.BillDescription"
+                                                                              Lines="6" Sizing="InputSizing.Fixed" Text="@CurrentBill.BillDescription"
                                                                               Label="Description" Variant="Variant.Outlined" Placeholder="Additional billing notes" />
 
                                                             </MudItem>
@@ -231,24 +247,196 @@
                                         <MudItem md="12" xs="12">
                                             <MudPaper Class="pa-3 ma-2" Outlined="true">
                                                 <MudGrid Spacing="1">
-                                                    <MudItem md="12" sm="12">
-                                                        <MudText Typo="Typo.subtitle2">Insurance Claim (As per payment mode registered for this visit)</MudText>
-                                                    </MudItem>
+                                                    @if (CurrentBill.PaymentModeName == "cash")
+                                                    {
+                                                        <MudItem md="12" sm="12">
+                                                            <MudText Typo="Typo.subtitle2">Payment Details</MudText>
+                                                        </MudItem>
 
-                                                    <MudItem md="12" sm="12">
-                                                        <MudGrid Spacing="1">
-                                                            <MudItem md="7" sm="12">
-                                                                <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"Company: NHIF")</MudField>
-                                                            </MudItem>
-                                                            <MudItem md="4" sm="12">
-                                                                <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"ID_NO: NH231")</MudField>
-                                                            </MudItem>
-                                                            <MudItem md="1" sm="12" Class="d-flex justify-content-end align-items-center">
-                                                                <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print" title="Preview Claim Pdf" />
-                                                                <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Email" title="Send via email" />
-                                                            </MudItem>
-                                                        </MudGrid>
-                                                    </MudItem>
+                                                        <MudItem md="12" sm="12">
+                                                            <MudGrid Spacing="1">
+                                                                <MudItem md="12" sm="12">
+                                                                    <div class="row">
+
+                                                                        <div class="col-md-12 form-floating mb-3 pt-3">
+                                                                            <div class="input-group">
+                                                                                <span class="input-group-text">Select Payment Type</span>
+                                                                                <InputSelect @bind-Value="CurrentPayment.PayType" class="form-select">
+                                                                                    @foreach (var type in Enum.GetValues(typeof(PaymentType)))
+                                                                                    {
+                                                                                        <option value="@type">@type</option>
+                                                                                    }
+                                                                                </InputSelect>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        @if (CurrentPayment.PayType.ToString() == "Wire_Transfer")
+                                                                        {
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Reference No.</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.WireReferenceNo" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Transfer Date</span>
+                                                                                    <InputDate @bind-Value="CurrentPayment.WireTransferDate" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Source Account</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.WireSourceAcc" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Source Bank</span>
+                                                                                    <InputSelect @bind-Value="CurrentPayment.WireSourceBank" class="form-select">
+                                                                                        @foreach (var type in Enum.GetValues(typeof(BankType)))
+                                                                                        {
+                                                                                            <option value="@type">@type</option>
+                                                                                        }
+                                                                                    </InputSelect>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+
+                                                                        @if (CurrentPayment.PayType.ToString() == "Cash")
+                                                                        {
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Reference No.</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.CashReferenceNumber" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Received By</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.CashReceivedBy" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+
+                                                                        @if (CurrentPayment.PayType.ToString() == "Cheque")
+                                                                        {
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Bank Name</span>
+                                                                                    <InputSelect @bind-Value="CurrentPayment.ChequeBank" class="form-select">
+                                                                                        @foreach (var type in Enum.GetValues(typeof(BankType)))
+                                                                                        {
+                                                                                            <option value="@type">@type</option>
+                                                                                        }
+                                                                                    </InputSelect>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Cheque Number</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.ChequeNumber" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Account Name</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.ChequeAccName" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Account Number</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.ChequeAccNumber" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                        @if (CurrentPayment.PayType.ToString() == "Card")
+                                                                        {
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Card Holder</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.CardHolder" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Card Type</span>
+                                                                                    <InputSelect @bind-Value="CurrentPayment.CardOfType" class="form-select">
+                                                                                        @foreach (var type in Enum.GetValues(typeof(CardType)))
+                                                                                        {
+                                                                                            <option value="@type">@type</option>
+                                                                                        }
+                                                                                    </InputSelect>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-12 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Card Number</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.CardNumber" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                        @if (CurrentPayment.PayType.ToString() == "MNO")
+                                                                        {
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Mobile Network</span>
+                                                                                    <InputSelect @bind-Value="CurrentPayment.MNOOperator" class="form-select">
+                                                                                        @foreach (var type in Enum.GetValues(typeof(MobileOperator)))
+                                                                                        {
+                                                                                            <option value="@type">@type</option>
+                                                                                        }
+                                                                                    </InputSelect>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-6 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Phone Number</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.MNONumber" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-md-12 form-floating mb-3">
+                                                                                <div class="input-group">
+                                                                                    <span class="input-group-text">Payment Reference No.</span>
+                                                                                    <InputText @bind-Value="CurrentPayment.MNOReference" class="form-control" placeholder="" />
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                        <div class="col-md-12 d-flex justify-content-between">
+                                                                            <div class="col">
+                                                                                <div class="input-group mb-3">
+                                                                                    <span class="input-group-text">Amount Payable</span>
+                                                                                    <span class="form-control">@CurrentPayment.Amount</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </MudItem>
+                                                            </MudGrid>
+                                                        </MudItem>
+                                                    }
+                                                    else
+                                                    {
+                                                        <MudItem md="12" sm="12">
+                                                            <MudText Typo="Typo.subtitle2">Insurance Claim (As per payment mode registered for this visit)</MudText>
+                                                        </MudItem>
+
+                                                        <MudItem md="12" sm="12">
+                                                            <MudGrid Spacing="1">
+                                                                <MudItem md="7" sm="12">
+                                                                    <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"Company: NHIF")</MudField>
+                                                                </MudItem>
+                                                                <MudItem md="4" sm="12">
+                                                                    <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"ID_NO: NH231")</MudField>
+                                                                </MudItem>
+                                                                <MudItem md="1" sm="12" Class="d-flex justify-content-end align-items-center">
+                                                                    <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print" title="Preview Claim Pdf" />
+                                                                    <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Email" title="Send via email" />
+                                                                </MudItem>
+                                                            </MudGrid>
+                                                        </MudItem>
+                                                    }
                                                 </MudGrid>
                                             </MudPaper>
                                         </MudItem>
@@ -271,20 +459,36 @@
                                         <MudPaper Class="pa-3 ma-2" Outlined="true">
                                             <MudGrid Spacing="1">
                                                 <MudItem md="12" sm="12">
-                                                    <MudText Typo="Typo.subtitle2">Insurance Claim (As per payment mode registered for this visit)</MudText>
+                                                    <MudText Typo="Typo.subtitle2">Closing Disclaimer</MudText>
                                                 </MudItem>
 
                                                 <MudItem md="12" sm="12">
                                                     <MudGrid Spacing="1">
-                                                        <MudItem md="7" sm="12">
-                                                            <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"Company: NHIF")</MudField>
+                                                        <MudItem md="12" sm="12">
+                                                            <MudItem md="12" sm="12" Class="d-flex flex-column mb-5">
+                                                                <MudText Typo="Typo.caption">@($"Patient: FullName -P_code") </MudText>
+                                                                <MudText Typo="Typo.caption">@($"Invoice_No: NH231") </MudText>
+                                                                <MudText Typo="Typo.caption">@($"Visit_No: NH231") </MudText>
+                                                                <MudText Typo="Typo.caption">@($"Note: Current visit still has 0 unpaid bills hence cashier can complete it upon patient's request'") </MudText>
+                                                            </MudItem>
                                                         </MudItem>
-                                                        <MudItem md="4" sm="12">
-                                                            <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"ID_NO: NH231")</MudField>
+                                                        <MudItem md="12" sm="12" Class="mt-5">
+                                                            <MudItem md="12" xs="12" Class="vitals-bridge animate-rise-in">
+                                                                <MudGrid Spacing="1" Class="pa-3" Style="position: relative; z-index: 2;">
+                                                                    <MudItem xs="12" md="12">
+                                                                        <MudText Typo="Typo.body2" Class="text-white text-opacity-75 mb-3" Style="line-height: 1.55;">
+                                                                           <em>
+                                                                            Dear Cashier always keep in mind that visits with unpaid bills are to be cleared by customer to be completed by the cashier
+                                                                            </em>
+                                                                        </MudText>
+                                                                    </MudItem>
+                                                                </MudGrid>
+                                                            </MudItem>
                                                         </MudItem>
-                                                        <MudItem md="1" sm="12" Class="d-flex justify-content-end align-items-center">
-                                                            <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print" title="Preview Claim Pdf" />
-                                                            <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Email" title="Send via email" />
+                                                        <MudItem md="12" sm="12" Class="d-flex justify-content-end align-items-center">
+                                                            <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small" StartIcon="@Icons.Material.Outlined.AssistWalker">Complete Visit</MudButton>
+                                                            @* <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print" title="Preview Claim Pdf" />
+                                                            <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Email" title="Send via email" /> *@
                                                         </MudItem>
                                                     </MudGrid>
                                                 </MudItem>
@@ -292,8 +496,19 @@
                                         </MudPaper>
                                     </MudItem>
                                 </MudItem>
-                                <MudItem md="8" xs="12">
+                                <MudItem md="8" xs="12" Class="border-0 pa-3">
                                     <!--recept-->
+                                    <MudGrid>
+                                        <MudItem md="12" xs="12" Class="d-flex justify-content-between">
+                                            <MudText>Receipt</MudText>
+                                            <MudIconButton Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print" title="print receiptf" />
+                                        </MudItem>
+                                        <MudItem md="12" xs="12" Class="pt-0" Style="">
+                                            <MudPaper Elevation="0">
+                                                <iframe src="data:application/pdf;base64,@PdfBase64" style="height:460px;"></iframe>
+                                            </MudPaper>
+                                        </MudItem>
+                                    </MudGrid>
                                 </MudItem>
                             </MudGrid>
                         </EditForm>
@@ -326,21 +541,25 @@
     BillItemDto AdHocComposition = new();
 
     BillDto CurrentBill = new();
+    PaymentDto CurrentPayment = new();
+    VisitDto? CurrentVisit;
     string patientSearcher = string.Empty;
     string[] headings = { "Description", "Price", "Qty", "Amount", "" };
     private BillItemDto _value = new();
     private IReadOnlyCollection<BillItemDto> _options = Array.Empty<BillItemDto>();
     private bool? _step1Complete = true;
     private string _step2TextInput = "text";
+    string PdfBase64 = string.Empty;
+    string message = string.Empty;
 
     public async Task RetrieveActiveVisitItemsAsync()
     {
-        var visit = await patientService.GetVisitByPCodeOrFullNameAsync(patientSearcher);
+        CurrentVisit = await patientService.GetVisitByPCodeOrFullNameAsync(patientSearcher);
 
         //1. CONSULTATION
-        if (visit != null && visit.Consultations.Any())
+        if (CurrentVisit != null && CurrentVisit.Consultations.Any())
         {
-            var Consultations = visit.Consultations;
+            var Consultations = CurrentVisit.Consultations;
 
             foreach (var cons in Consultations.Where(bi => bi.BillItemId == null))
             {
@@ -357,9 +576,9 @@
         }
 
         //2. CHECK-UP
-        if (visit != null && visit.LabTests.Any())
+        if (CurrentVisit != null && CurrentVisit.LabTests.Any())
         {
-            var LabTests = visit.LabTests;
+            var LabTests = CurrentVisit.LabTests;
 
             foreach (var cons in LabTests.Where(bi => bi.BillItemId == null))
             {
@@ -376,9 +595,9 @@
         }
 
         //1. TREATMENT
-        if (visit != null && visit.Treatments.Any())
+        if (CurrentVisit != null && CurrentVisit.Treatments.Any())
         {
-            var Treatments = visit.Treatments;
+            var Treatments = CurrentVisit.Treatments;
 
             foreach (var cons in Treatments.Where(bi => bi.BillItemId == null))
             {
@@ -395,9 +614,9 @@
         }
 
         //1. PRESCRIPTION
-        if (visit != null && visit.Prescriptions.Any())
+        if (CurrentVisit != null && CurrentVisit.Prescriptions.Any())
         {
-            var Prescriptions = visit.Prescriptions;
+            var Prescriptions = CurrentVisit.Prescriptions;
 
             foreach (var cons in Prescriptions.Where(bi => bi.BillItemId == null))
             {
@@ -448,6 +667,8 @@
         };
 
         billItemsToInvoice!.Add(newBillItem);
+
+        CurrentBill.TotalAmount = billItemsToInvoice.Sum(bi => bi.SubTotal);
     }
 
     public async Task RemoveBillItemFromBatch(BillItemDto billItemDto)
@@ -462,7 +683,90 @@
     }
 
 
-    public async Task SaveBillAsync() { }
+    public async Task SaveBillAsync()
+    {
+        if (CurrentBill.Id == 0)
+        {
+
+            var newBill = new BillDto
+            {
+                BillDate = DateTime.Now,
+                BillNumber = $"NCMH-BN-{DateTime.Now.ToString("yyMMdd")}",
+                BillDescription = CurrentBill.BillDescription,
+                TotalAmount = CurrentBill.TotalAmount,
+                BillTypeId = 1,
+                StaffId = CurrentUser.Id,
+                BillItems = billItemsToInvoice
+            };
+
+            var result = await paymentService.AddBillAsync(newBill);
+
+            if(result != null)
+            {
+                CurrentBill = result;
+                message = $"Bill added successfully";
+                CurrentVisit?.Bills.Add(result);
+
+                await UpdateBillIdOnEachInvoicedService();
+                await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
+            }
+        }
+        else
+        {
+            if (CurrentPayment.Id == 0 && CurrentPayment.ConfirmedAmount == CurrentBill.BalanceDue)
+            {
+                CurrentPayment.PaymentStatusId = 1;
+                var result = await paymentService.AddPaymentAsync(CurrentPayment);
+                CurrentBill.PaymentId = result;
+            }
+            else if (CurrentPayment.Id > 0 && CurrentPayment.ConfirmedAmount == CurrentBill.BalanceDue)
+            {
+                
+            }
+
+
+        }
+
+    }
+
+    private async Task UpdateBillIdOnEachInvoicedService()
+    {
+        //=============consultation==============
+        var cBillItems = CurrentBill.BillItems.Where(bi => bi.SourceType.Trim().ToLower() == "consultation").ToList();
+
+        foreach (var billItem in cBillItems)
+        {
+            var thisConsultation = await patientService.GetConsultationByIdAsync(billItem.SourceItemId);
+            await patientService.UpdateConsultationAsync(thisConsultation ,thisConsultation.Id);
+        }
+        
+        //=============labtest==============
+        var lBillItems = CurrentBill.BillItems.Where(bi => bi.SourceType.Trim().ToLower() == "labtest").ToList();
+
+        foreach (var billItem in lBillItems)
+        {
+            var thisLabTest = await labTestService.GetLabTestByIdAsync(billItem.SourceItemId);
+            await labTestService.UpdateLabTestAsync(thisLabTest, thisLabTest.Id);
+        }
+        
+        //=============prescription==============
+        var pBillItems = CurrentBill.BillItems.Where(bi => bi.SourceType.Trim().ToLower() == "prescription").ToList();
+
+        foreach (var billItem in pBillItems)
+        {
+            var thisPresc = await medicineService.GetPrescriptionByIdAsync(billItem.SourceItemId);
+            await medicineService.UpdatePrescriptionAsync(thisPresc, thisPresc.Id);
+        }
+
+        //=============treatment==============
+        var btBillItems = CurrentBill.BillItems.Where(bi => bi.SourceType.Trim().ToLower() == "treatment").ToList();
+
+        foreach (var billItem in btBillItems)
+        {
+            var thisTreat = await medicineService.GetTreatmentByIdAsync(billItem.SourceItemId);
+            await medicineService.UpdateTreatmentAsync(thisTreat, thisTreat.Id);
+        }
+    }
 
     private async Task OnPreviewInteraction(StepperInteractionEventArgs arg)
     {

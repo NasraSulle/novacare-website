@@ -1,7 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Humanizer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using NovaCare.Components.Pages.LabPages;
 using NovaCare.Data;
 using NovaCare.Interfaces;
+using NovaCare.Modals.LabTestModals;
+using NovaCare.Modals.PatientModals;
 using NovaCare.Shared.DTOs.PatientDTOs;
 using NovaCare.Shared.DTOs.PaymentDTOs;
 
@@ -15,10 +19,57 @@ namespace NovaCare.Services
             _contextFactory = contextFactory;
         }
 
-        public async Task<int> AddBillAsync(BillDto bill)
+        public async Task<BillDto?> AddBillAsync(BillDto bill)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var newBill = new Bill
+                {
+                    BillDate = bill.BillDate,
+                    BillNumber = bill.BillNumber,
+                    BillDescription = bill.BillDescription,
+                    TotalAmount = bill.TotalAmount,
+                    BillTypeId = bill.BillTypeId,
+                    StaffId = bill.StaffId,
+                    VisitId = bill.VisitId,
+
+                    BillItems = bill.BillItems?.Select(item => new BillItem
+                    {
+                        ItemName = item.ItemName,
+                        SourceType = item.SourceType,
+                        SourceItemId = item.SourceItemId,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    }).ToList() ?? new List<BillItem>()
+                };
+
+                context.Bills.Add(newBill);
+                await context.SaveChangesAsync();
+
+                // Populate the generated Bill ID and BillItem IDs back onto the DTO
+                bill.Id = newBill.Id;
+
+                if (bill.BillItems != null)
+                {
+                    var savedItems = newBill.BillItems.ToList();
+                    for (int i = 0; i < bill.BillItems.Count; i++)
+                    {
+                        bill.BillItems[i].Id = savedItems[i].Id;
+                        bill.BillItems[i].BillId = newBill.Id;
+                    }
+                }
+
+                return bill;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding bill: {ex.Message}");
+                return null;
+            }
         }
+
 
         public async Task<int> AddPaymentAsync(PaymentDto payment)
         {
@@ -40,7 +91,6 @@ namespace NovaCare.Services
                     TotalAmount = bill.TotalAmount,
                     VisitId = bill.VisitId,
 
-                    // Access Visit -> VisitType directly since Visit is a single object
                     VisitName = (bill.Visit != null && bill.Visit.VisitType != null)
                         ? bill.Visit.VisitType.TypeName
                         : string.Empty,
@@ -48,18 +98,20 @@ namespace NovaCare.Services
                     BillTypeId = bill.BillTypeId,
                     BillTypeName = bill.BillType != null ? bill.BillType.TypeNme : string.Empty,
 
-                    // Map Payments so PaidAmount, BalanceDue, PaymentStatusId, and PaymentStatusName auto-calculate
-                    Payments = bill.Payments != null
-                        ? bill.Payments.Select(p => new PaymentDto
-                        {
-                            Id = p.Id,
-                            PaymentDate = p.PaymentDate,
-                            Amount = p.Amount,
-                            BillId = p.BillId,
-                            PaymentStatusId = p.PaymentStatusId,
-                            PaymentModeId = p.PaymentModeId
-                        }).ToList()
-                        : new List<PaymentDto>()
+                    Payment = bill.Payment == null ? null : new PaymentDto
+                    {
+                        Id = bill.Payment.Id,
+                        Amount = bill.Payment.Amount,
+                        PaymentDate = bill.Payment.PaymentDate,
+
+                        BillId = bill.Id,
+                        PaymentStatusId = bill.Payment.PaymentStatusId,
+                        PaymentModeId = bill.Payment.PaymentModeId,
+
+                        PaymentStatusName = bill.Payment.PaymentStatus != null ? bill.Payment.PaymentStatus.PaymentStatusName : string.Empty,
+                        PaymentModeName = bill.Payment.PaymentMode != null ? bill.Payment.PaymentMode.PaymentModeName : string.Empty,
+                        BillTypeName = bill.BillType != null ? bill.BillType.TypeNme : string.Empty
+                    }
                 })
                 .ToListAsync();
 
@@ -115,12 +167,60 @@ namespace NovaCare.Services
             throw new NotImplementedException();
         }
 
-        public async Task<int> UpdateBillAsync(BillDto bill, int billId)
+        public async Task<bool> UpdateBillAsync(BillDto dto, int billId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var extBill = await context.Bills.FirstOrDefaultAsync(x => x.Id == billId);
+
+                if (extBill != null)
+                {
+                    extBill.BillDescription = dto.BillDescription;
+                    extBill.TotalAmount = dto.TotalAmount;
+                    extBill.PaidAmount = dto.PaidAmount;
+                    extBill.VisitId = dto.VisitId;
+                    extBill.BillTypeId = dto.BillTypeId;
+                    extBill.PaymentId = dto.PaymentId;
+
+                    if (dto.BillItems != null)
+                    {
+                        foreach (var biDto in dto.BillItems)
+                        {
+                            var biToAdd = new BillItem
+                            {
+                                ItemName = biDto.ItemName,
+                                SourceType = biDto.SourceType,
+                                SourceItemId = biDto.SourceItemId,
+                                Quantity = biDto.Quantity,
+                                UnitPrice = biDto.UnitPrice,
+                                BillId = extBill.Id,
+                            };
+
+                            extBill.BillItems.Add(biToAdd);
+                        }
+                    }
+                    
+
+                    context.Bills.Update(extBill);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return false;
+            }
+        }
+
+        public async Task<int> UpdatePaymentAsync(PaymentDto payment, int paymentId)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<int> UpdatePaymentAsync(PaymentDto payment, int paymentId)
+        Task<bool> IPaymentService.UpdatePaymentAsync(PaymentDto payment, int paymentId)
         {
             throw new NotImplementedException();
         }

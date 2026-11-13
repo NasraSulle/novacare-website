@@ -1187,6 +1187,17 @@ namespace NovaCare.Migrations
                     b.Property<int>("BillTypeId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("PaidAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StaffId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("TotalAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -1197,6 +1208,12 @@ namespace NovaCare.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BillTypeId");
+
+                    b.HasIndex("PaymentId")
+                        .IsUnique()
+                        .HasFilter("[PaymentId] IS NOT NULL");
+
+                    b.HasIndex("StaffId");
 
                     b.HasIndex("VisitId");
 
@@ -1716,7 +1733,43 @@ namespace NovaCare.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("BillId")
+                    b.Property<string>("CardHolder")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CardNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CardOfType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CashReceivedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CashReferenceNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ChequeAccName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ChequeAccNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ChequeBank")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ChequeNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MNONumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MNOOperator")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MNOReference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PayType")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("PaymentDate")
@@ -1728,9 +1781,19 @@ namespace NovaCare.Migrations
                     b.Property<int>("PaymentStatusId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<string>("WireReferenceNo")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("BillId");
+                    b.Property<string>("WireSourceAcc")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("WireSourceBank")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("WireTransferDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("PaymentModeId");
 
@@ -1793,12 +1856,12 @@ namespace NovaCare.Migrations
                         new
                         {
                             Id = 2,
-                            PaymentStatusName = "Partial Payment"
+                            PaymentStatusName = "Paid"
                         },
                         new
                         {
                             Id = 3,
-                            PaymentStatusName = "Full Payment"
+                            PaymentStatusName = "Insurance Review"
                         });
                 });
 
@@ -3381,6 +3444,16 @@ namespace NovaCare.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NovaCare.Modals.PaymentModals.Payment", "Payment")
+                        .WithOne("Bill")
+                        .HasForeignKey("NovaCare.Modals.PatientModals.Bill", "PaymentId");
+
+                    b.HasOne("NovaCare.Modals.StaffModals.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("NovaCare.Modals.PatientModals.Visit", "Visit")
                         .WithMany("Bills")
                         .HasForeignKey("VisitId")
@@ -3388,6 +3461,10 @@ namespace NovaCare.Migrations
                         .IsRequired();
 
                     b.Navigation("BillType");
+
+                    b.Navigation("Payment");
+
+                    b.Navigation("Staff");
 
                     b.Navigation("Visit");
                 });
@@ -3506,12 +3583,6 @@ namespace NovaCare.Migrations
 
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.Payment", b =>
                 {
-                    b.HasOne("NovaCare.Modals.PatientModals.Bill", "Bill")
-                        .WithMany("Payments")
-                        .HasForeignKey("BillId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("NovaCare.Modals.PaymentModals.PaymentMode", "PaymentMode")
                         .WithMany()
                         .HasForeignKey("PaymentModeId")
@@ -3523,8 +3594,6 @@ namespace NovaCare.Migrations
                         .HasForeignKey("PaymentStatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Bill");
 
                     b.Navigation("PaymentMode");
 
@@ -3820,8 +3889,6 @@ namespace NovaCare.Migrations
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Bill", b =>
                 {
                     b.Navigation("BillItems");
-
-                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.BillItem", b =>
@@ -3900,6 +3967,11 @@ namespace NovaCare.Migrations
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.Insuarance", b =>
                 {
                     b.Navigation("PatientInsuarances");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.PaymentModals.Payment", b =>
+                {
+                    b.Navigation("Bill");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.PaymentMode", b =>

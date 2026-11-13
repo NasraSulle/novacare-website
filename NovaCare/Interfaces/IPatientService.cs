@@ -32,5 +32,8 @@ namespace NovaCare.Interfaces
 
         Task<VisitDto> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName);
 
+        Task<List<ConsultationDto>> GetAllConsultationsAsync();
+        Task<ConsultationDto> GetConsultationByIdAsync(int conId);
+
     }
 }

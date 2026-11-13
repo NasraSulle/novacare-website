@@ -82,11 +82,16 @@ namespace NovaCare.Data
                 new RoomStatus { Id = 2, RoomStatusName = "Available" }
                 );
 
+            // builder.Entity<PaymentStatus>().HasData(
+            //    new PaymentStatus { Id = 1, PaymentStatusName = "Unpaid" },
+            //    new PaymentStatus { Id = 2, PaymentStatusName = "Partial Payment" },
+            //    new PaymentStatus { Id = 3, PaymentStatusName = "Full Payment" }
+            //);
             builder.Entity<PaymentStatus>().HasData(
-               new PaymentStatus { Id = 1, PaymentStatusName = "Unpaid" },
-               new PaymentStatus { Id = 2, PaymentStatusName = "Partial Payment" },
-               new PaymentStatus { Id = 3, PaymentStatusName = "Full Payment" }
-           );
+                new PaymentStatus { Id = 1, PaymentStatusName = "Unpaid" },
+                new PaymentStatus { Id = 2, PaymentStatusName = "Paid" },
+                new PaymentStatus { Id = 3, PaymentStatusName = "Insurance Review" }
+            );
 
 
             builder.Entity<PaymentMode>().HasData(

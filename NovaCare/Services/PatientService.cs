@@ -302,13 +302,24 @@ namespace NovaCare.Services
                         BillTypeId = bill.BillTypeId,
                         BillTypeName = bill.BillType != null ? bill.BillType.TypeNme : string.Empty,
                         TotalAmount = bill.TotalAmount,
-                        Payments = bill.Payments.Select(pay => new PaymentDto
+                        Payment = bill.Payment == null ? null : new PaymentDto
                         {
-                            Id = pay.Id,
-                            Amount = pay.Amount, // Verify property name matches your PaymentDto
-                            PaymentDate = pay.PaymentDate
-                        }).ToList()
+                            Id = bill.Payment.Id,
+                            Amount = bill.Payment.Amount,
+                            PaymentDate = bill.Payment.PaymentDate,
+
+                            // Foreign Keys
+                            BillId = bill.Id,
+                            PaymentStatusId = bill.Payment.PaymentStatusId,
+                            PaymentModeId = bill.Payment.PaymentModeId,
+
+                            // UI Helpers (check your exact property names on PaymentStatus and PaymentMode)
+                            PaymentStatusName = bill.Payment.PaymentStatus != null ? bill.Payment.PaymentStatus.PaymentStatusName : string.Empty,
+                            PaymentModeName = bill.Payment.PaymentMode != null ? bill.Payment.PaymentMode.PaymentModeName : string.Empty,
+                            BillTypeName = bill.BillType != null ? bill.BillType.TypeNme : string.Empty
+                        }
                     }).ToList(),
+
 
                     // 4. Consultations
                     Consultations = v.Consultations.Select(c => new ConsultationDto
@@ -331,13 +342,7 @@ namespace NovaCare.Services
                         //DoctorFullName = c.Doctor != null ? c.Doctor.DoctorFullName : string.Empty,
                         VisitTypeName = v.VisitType != null ? v.VisitType.TypeName : string.Empty,
                         RoomName = c.Room != null ? c.Room.RoomName : string.Empty,
-                        PaymentStatusName = c.BillItem == null || c.BillItem.Bill == null
-                            ? "Not Billed"
-                            : (c.BillItem.Bill.Payments.Sum(pay => pay.Amount) <= 0m
-                                ? "Unpaid"
-                                : (c.BillItem.Bill.Payments.Sum(pay => pay.Amount) < c.BillItem.Bill.TotalAmount
-                                    ? "Partial"
-                                    : "Fully Paid"))
+                        PaymentStatusName = c.BillItem.Bill.Payment.PaymentStatus!.PaymentStatusName ?? string.Empty
                     }).ToList(),
 
 
@@ -378,13 +383,8 @@ namespace NovaCare.Services
                         //DiseaseTypeName = l.Disease != null && l.Disease.DiseaseType != null
                         //    ? l.Disease.DiseaseType.DiseaseTypeName
                         //    : string.Empty,
-                        PaymentStatusName = l.BillItem == null || l.BillItem.Bill == null
-                            ? "Not Billed"
-                            : (l.BillItem.Bill.Payments.Sum(pay => pay.Amount) <= 0m
-                                ? "Unpaid"
-                                : (l.BillItem.Bill.Payments.Sum(pay => pay.Amount) < l.BillItem.Bill.TotalAmount
-                                    ? "Partial"
-                                    : "Fully Paid"))
+                        PaymentStatusName = l.BillItem.Bill.Payment.PaymentStatus!.PaymentStatusName ?? string.Empty
+
                     }).ToList(),
 
 
@@ -408,13 +408,8 @@ namespace NovaCare.Services
                         // UI Helpers
                         MedicineName = p.Medicine != null ? p.Medicine.MedicineName : string.Empty,
                         //DoctorFullName = p.Doctor != null ? p.Doctor.DoctorFullName : string.Empty,
-                        PaymentStatusName = p.BillItem == null || p.BillItem.Bill == null
-                            ? "Not Billed"
-                            : (p.BillItem.Bill.Payments.Sum(pay => pay.Amount) <= 0m
-                                ? "Unpaid"
-                                : (p.BillItem.Bill.Payments.Sum(pay => pay.Amount) < p.BillItem.Bill.TotalAmount
-                                    ? "Partial"
-                                    : "Fully Paid"))
+                        PaymentStatusName = p.BillItem.Bill.Payment.PaymentStatus!.PaymentStatusName ?? string.Empty
+
                     }).ToList(),
 
 
@@ -453,13 +448,8 @@ namespace NovaCare.Services
                         WardName = t.Ward != null ? t.Ward.WardName : string.Empty,
                         //DoctorName = t.Doctor != null ? t.Doctor.DoctorFullName : string.Empty,
                         RoomName = t.Room != null ? t.Room.RoomName : string.Empty,
-                        PaymentStatusName = t.BillItem == null || t.BillItem.Bill == null
-                            ? "Not Billed"
-                            : (t.BillItem.Bill.Payments.Sum(pay => pay.Amount) <= 0m
-                                ? "Unpaid"
-                                : (t.BillItem.Bill.Payments.Sum(pay => pay.Amount) < t.BillItem.Bill.TotalAmount
-                                    ? "Partial"
-                                    : "Fully Paid"))
+                        PaymentStatusName = t.BillItem.Bill.Payment.PaymentStatus!.PaymentStatusName ?? string.Empty
+
                     }).ToList()
 
                 }).FirstOrDefaultAsync();
@@ -964,16 +954,8 @@ namespace NovaCare.Services
                 var result = context.PreliminaryTests.Add(preliminaryTest);
                 await context.SaveChangesAsync();
 
-                var preliminaryTestReturned = new PreliminaryTestDto
-                {
-                    Id = dto.Id,
-                    PreliminaryWeight = dto.PreliminaryWeight,
-                    PreliminaryHeight = dto.PreliminaryHeight,
-                    VisitId = dto.VisitId,
-                    PreliminaryPressure = dto.PreliminaryPressure,
-                };
-
-                return preliminaryTestReturned;
+                dto.Id = preliminaryTest.Id;
+                return dto;
             }
             catch (Exception ex)
             {
@@ -1030,6 +1012,7 @@ namespace NovaCare.Services
                     existingConsultation.RoomId = dto.RoomId;
                     existingConsultation.DoctorId = dto.DoctorId;
                     existingConsultation.MedicalDepartmentId = dto.MedicalDepartmentId;
+                    existingConsultation.BillItemId = dto.BillItemId;
 
                     context.Consultations.Update(existingConsultation);
                     await context.SaveChangesAsync();
@@ -1041,6 +1024,65 @@ namespace NovaCare.Services
             {
                 return false;
             }
+        }
+
+        public async Task<ConsultationDto> GetConsultationByIdAsync(int conId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var cons = await context.Consultations
+                .AsNoTracking()
+                .Where(p => p.Id == conId)
+                .Select(consDto => new ConsultationDto
+                {
+                    Id = consDto.Id,
+                    Diagnosis = consDto.Diagnosis,
+                    StartDate = consDto.StartDate,
+                    FinishDate = consDto.FinishDate,
+                    ConsultationCost = consDto.ConsultationCost,
+                    VisitId = consDto.VisitId,
+                    RoomId = consDto.RoomId,
+                    BillItemId = consDto.BillItemId,
+                    DoctorId = consDto.DoctorId,
+                    MedicalDepartmentId = consDto.MedicalDepartmentId,
+                    MedicalDepartmentName = consDto.MedicalDepartment != null ? consDto.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    DoctorFullName = consDto.Doctor != null ? consDto.Doctor.Staff!.FisrtName : string.Empty,
+                    VisitTypeName = consDto.Visit != null ? consDto.Visit.VisitType!.TypeName : string.Empty,
+                    RoomName = consDto.Room != null ? consDto.Room.RoomName : string.Empty,
+                    PaymentStatusName = consDto.Visit != null ? consDto.Visit.FullName : string.Empty,
+                })
+                .FirstOrDefaultAsync();
+
+            return cons ?? new();
+        }
+
+        public async Task<List<ConsultationDto>> GetAllConsultationsAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var cons = await context.Consultations
+                .AsNoTracking()
+                .Select(consDto => new ConsultationDto
+                {
+                    Id = consDto.Id,
+                    Diagnosis = consDto.Diagnosis,
+                    StartDate = consDto.StartDate,
+                    FinishDate = consDto.FinishDate,
+                    ConsultationCost = consDto.ConsultationCost,
+                    VisitId = consDto.VisitId,
+                    RoomId = consDto.RoomId,
+                    BillItemId = consDto.BillItemId,
+                    DoctorId = consDto.DoctorId,
+                    MedicalDepartmentId = consDto.MedicalDepartmentId,
+                    MedicalDepartmentName = consDto.MedicalDepartment != null ? consDto.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    DoctorFullName = consDto.Doctor != null ? consDto.Doctor.Staff!.FisrtName : string.Empty,
+                    VisitTypeName = consDto.Visit != null ? consDto.Visit.VisitType!.TypeName : string.Empty,
+                    RoomName = consDto.Room != null ? consDto.Room.RoomName : string.Empty,
+                    PaymentStatusName = consDto.Visit != null ? consDto.Visit.FullName : string.Empty,
+                })
+                .ToListAsync();
+
+            return cons ?? new();
         }
     }
 }

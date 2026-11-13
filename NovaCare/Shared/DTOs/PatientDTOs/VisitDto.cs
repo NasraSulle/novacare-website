@@ -32,6 +32,7 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public string PatientFullName { get; set; } = string.Empty;
         public int? PreliminaryTestId { get; set; }
         public string VisitStatusName { get; set; } = string.Empty;
+        public string RegistedPaymentMode { get; set; } = "cash";
 
         // Live calculation of unbilled items for this visit
         public decimal TotalUnbilledCharges =>

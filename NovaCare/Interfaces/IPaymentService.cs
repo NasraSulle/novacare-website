@@ -15,9 +15,9 @@ namespace NovaCare.Interfaces
         Task<BillDto> GetBillByIdAsync(int billId);
 
         Task<int> AddPaymentAsync(PaymentDto payment);
-        Task<int> AddBillAsync(BillDto bill);
+        Task<BillDto> AddBillAsync(BillDto bill);
 
-        Task<int> UpdatePaymentAsync(PaymentDto payment, int paymentId);
-        Task<int> UpdateBillAsync(BillDto bill, int billId);
+        Task<bool> UpdatePaymentAsync(PaymentDto payment, int paymentId);
+        Task<bool> UpdateBillAsync(BillDto bill, int billId);
     }
 }
