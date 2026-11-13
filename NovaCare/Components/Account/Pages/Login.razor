@@ -14,60 +14,113 @@
 
 @* <MudText Typo="Typo.h3" GutterBottom="true">Log in</MudText> *@
 
-<MudGrid Class="" Style="height: 100vh;" Justify="Justify.Center">
-    <MudItem md="7" Class="pt-0">
+<MudGrid Spacing="0" Style="min-height: 100vh;">
+
+    @* Left Column: Carousel Section *@
+    <MudItem xs="12" md="7" Class="d-none d-md-flex flex-column justify-center p-0" Style="background-color: #FFFFFF;">
         <LoginCarousel />
-        <!--
-        @* <MudText GutterBottom="true" Typo="Typo.body1">Use another service to log in.</MudText>
-
-        <ExternalLoginPicker /> *@
-        -->
+        @*
+        <MudText GutterBottom="true" Typo="Typo.body1">Use another service to log in.</MudText>
+        <ExternalLoginPicker />
+        *@
     </MudItem>
-    <MudItem md="5" Style="background-color: #E8EAF6;">
-        <MudItem>
-            <MudItem>
-                <MudImage Src="Images/logo2.png" Height="100" />
-            </MudItem>
-            <MudItem Style="align-content: center; height: 70vh;">
-                <MudGrid Justify="Justify.Center">
-                    <MudItem Style="text-align: center;">
-                        <StatusMessage Message="@errorMessage" />
-                        <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
-                            <DataAnnotationsValidator />
 
-                            <MudText GutterBottom="true" Typo="Typo.h3">Welcome Back!</MudText>
-                            <MudText GutterBottom="true" Typo="Typo.body1">Please enter your login details.</MudText>
+    @* Right Column: Login Card Section *@
+    <MudItem xs="12" md="5"
+             Class="d-flex flex-column align-center justify-center pa-6"
+             Style="min-height: 100vh; background-color: #F8FAFC; background-image: radial-gradient(circle at 20% 25%, rgba(22, 35, 104, 0.08) 0%, transparent 50%), radial-gradient(circle at 85% 80%, rgba(22, 35, 104, 0.05) 0%, transparent 50%);">
 
-                            <MudGrid Justify="Justify.Center">
-                                <MudItem md="12" xs="10">
-                                    <MudStaticTextField For="@(() => Input.Email)" @bind-Value="Input.Email"
-                                                        Label="Email" Placeholder="name@example.com"
-                                                        Variant="Variant.Outlined"
-                                                        UserAttributes="@(new() { { "autocomplete", "username webauthn" }, { "aria-required", "true" } } )" />
-                                </MudItem>
-                                <MudItem md="12" xs="10">
-                                    <MudStaticTextField For="@(() => Input.Password)" @bind-Value="Input.Password"
-                                                        Label="Password" InputType="InputType.Password" Placeholder="password"
-                                                        Variant="Variant.Outlined"
-                                                        UserAttributes="@(new() { { "autocomplete", "current-password" }, { "aria-required", "true" } } )" />
-                                </MudItem>
-                                <MudItem md="12" xs="10">
-                                    <MudStaticButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" FormAction="FormAction.Submit">Log in</MudStaticButton>
-                                </MudItem>
-                            </MudGrid>
-                        </EditForm>
+        @* Top Brand Logo *@
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mb-6">
+            <MudImage Src="Images/logo2.png" Height="55" ObjectFit="ObjectFit.Contain" />
+        </MudStack>
 
-                        <MudGrid>
-                            <MudItem md="12" xs="11" Class="mt-4" Style="text-align:end;">
-                                <MudLink Href="Account/ForgotPassword">Forgot your password?</MudLink>
-                            </MudItem>
-                        </MudGrid>
+        @* Centered White Card *@
+        <MudPaper Elevation="2" Class="pa-8 rounded-lg" Style="width: 100%; max-width: 440px; background-color: #FFFFFF; border: 1px solid #F1F5F9;">
+
+            @* Soft Navy Tinted Icon Badge *@
+            <MudPaper Elevation="0" Class="d-flex align-center justify-center rounded-lg mb-5"
+                      Style="width: 44px; height: 44px; background-color: rgba(22, 35, 104, 0.08);">
+                <MudIcon Icon="@Icons.Material.Outlined.LockOpen" Style="color: rgba(22, 35, 104, 1);" Size="Size.Medium" />
+            </MudPaper>
+
+            @* Title & Subtitle *@
+            <MudText Typo="Typo.h5" Class="font-weight-bold mb-1" Style="color: #111827;">
+                Welcome Back!
+            </MudText>
+            <MudText Typo="Typo.body2" Class="mb-5" Style="color: #6B7280;">
+                Please enter your login details to access your account.
+            </MudText>
+
+            @* Status Message *@
+            <StatusMessage Message="@errorMessage" />
+
+            @* Static SSR Login Form *@
+            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
+                <DataAnnotationsValidator />
+
+                <MudGrid Spacing="3">
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption" Class="font-weight-bold d-block mb-1" Style="color: #4B5563; letter-spacing: 0.5px;">
+                            EMAIL
+                        </MudText>
+                        <MudStaticTextField For="@(() => Input.Email)"
+                                            @bind-Value="Input.Email"
+                                            Placeholder="name@example.com"
+                                            Variant="Variant.Outlined"
+                                            Margin="Margin.Dense"
+                                            Adornment="Adornment.Start"
+                                            AdornmentIcon="@Icons.Material.Outlined.Email"
+                                            UserAttributes="@(new() { { "autocomplete", "username webauthn" }, { "aria-required", "true" } })" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-1">
+                            <MudText Typo="Typo.caption" Class="font-weight-bold" Style="color: #4B5563; letter-spacing: 0.5px;">
+                                PASSWORD
+                            </MudText>
+                            <MudLink Href="Account/ForgotPassword" Underline="Underline.None" Typo="Typo.caption" Style="color: rgba(22, 35, 104, 1); font-weight: 600;">
+                                Forgot password?
+                            </MudLink>
+                        </MudStack>
+                        <MudStaticTextField For="@(() => Input.Password)"
+                                            @bind-Value="Input.Password"
+                                            InputType="InputType.Password"
+                                            Placeholder="••••••••"
+                                            Variant="Variant.Outlined"
+                                            Margin="Margin.Dense"
+                                            Adornment="Adornment.Start"
+                                            AdornmentIcon="@Icons.Material.Outlined.Lock"
+                                            UserAttributes="@(new() { { "autocomplete", "current-password" }, { "aria-required", "true" } })" />
+                    </MudItem>
+
+                    <MudItem xs="12" Class="mt-2">
+                        <MudStaticButton Variant="Variant.Filled"
+                                         FullWidth="true"
+                                         FormAction="FormAction.Submit"
+                                         EndIcon="@Icons.Material.Rounded.ArrowForward"
+                                         Class="py-2.5 rounded-lg text-none font-weight-bold"
+                                         Style="background-color: rgba(22, 35, 104, 1); color: #FFFFFF; box-shadow: 0 4px 12px rgba(22, 35, 104, 0.25);">
+                            Log in
+                        </MudStaticButton>
                     </MudItem>
                 </MudGrid>
-            </MudItem>
-        </MudItem>
+            </EditForm>
+
+        </MudPaper>
+
+        @* Footer Support Text *@
+        <MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Spacing="1" Class="mt-6">
+            <MudText Typo="Typo.caption" Style="color: #6B7280;">Need help signing in?</MudText>
+            <MudLink Href="/support" Underline="Underline.None" Typo="Typo.caption" Style="color: rgba(22, 35, 104, 1); font-weight: 600;">
+                Contact support
+            </MudLink>
+        </MudStack>
+
     </MudItem>
+
 </MudGrid>
+
 
 @code {
     private string? errorMessage;

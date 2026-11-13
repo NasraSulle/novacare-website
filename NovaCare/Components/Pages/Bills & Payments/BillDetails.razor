@@ -1,119 +1,348 @@
 ﻿@page "/billDetails"
 
+@inject IDialogService DialogService
+
 <PageTitle>BillModal</PageTitle>
 
-<MudStack Spacing="0" Style="height: calc(100vh - 64px); overflow: hidden;">
-
-        <MudStack Class="pa-1 flex-none" Row="true" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
-            <SectionTitle Icon="@icon" Title="@title" />
-        </MudStack>
-
-    <MudContainer MaxWidth="MaxWidth.False" Class="flex-grow-1 pa-2" Style="min-height: 0; overflow-y: auto; overflow-x: hidden;">
-        <EditForm Model="CurrentBill" method="post" OnValidSubmit="SaveBillAsync" FormName="newmedicine">
-            <MudGrid Spacing="1">
-                <MudItem md="9" xs="12">
-                    <MudGrid Spacing="1">
-                        <MudItem xs="12">
-                            <MudPaper Class="pa-3 ma-2" Outlined="true">
-                                <MudGrid Spacing="1">
-                                    <MudItem md="12">
-                                        <MudText Typo="Typo.subtitle2">Patient & Bill Details</MudText>
-                                    </MudItem>
-
-                                    <MudItem md="12">
-                                        <MudGrid Spacing="1">
-                                            <MudItem md="12">
-                                                <MudTextField @bind-Value="patientSearcher" @bind-Value:after="RetrieveActiveVisitItemsAsync" Margin="Margin.Dense"
-                                                              Label="Search by Patient Code Number or Full name" Variant="Variant.Outlined" Placeholder="Search by Patient Code Number or Full name" />
-                                            </MudItem>
-                                        </MudGrid>
-                                    </MudItem>
-                                </MudGrid>
-                            </MudPaper>
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudPaper Class="pa-3 ma-2" Outlined="true">
-                                <MudGrid Spacing="1">
-                                    <MudItem md="12">
-                                        <MudText Typo="Typo.subtitle2">Billing Items (Select for current invoice)</MudText>
-                                    </MudItem>
-
-                                    <MudItem md="12">
-                                        <MudGrid Spacing="1">
-                                            <MudItem md="12">
-                                                <MudTextField @bind-Value="patientSearcher" @bind-Value:after="RetrieveActiveVisitItemsAsync" Margin="Margin.Dense"
-                                                              Label="Search by Patient Code Number or Full name" Variant="Variant.Outlined" Placeholder="Enter Patient Id" />
-                                            </MudItem>
-                                        </MudGrid>
-                                    </MudItem>
-                                </MudGrid>
-                            </MudPaper>
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+<MudDialog>
+    <DialogContent>
+        <MudStepper NonLinear ShowResetButton OnPreviewInteraction="OnPreviewInteraction">
+            <MudStep Title="Invoice" HasError="@(_step1Complete == false)">
+                <MudStack Spacing="0">
+                    <MudContainer MaxWidth="MaxWidth.False" Class="flex-grow-1 pa-2">
+                        <EditForm Model="CurrentBill" method="post" OnValidSubmit="SaveBillAsync" FormName="newbill">
+                            <MudGrid Spacing="1">
+                                <MudItem md="9" xs="12">
                                     <MudGrid Spacing="1">
-                                        <MudItem md="12">
-                                            <MudText Typo="Typo.subtitle2">Notes</MudText>
+                                        <MudItem xs="12">
+                                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                                <MudGrid Spacing="1">
+                                                    <MudItem md="12" sm="12">
+                                                        <MudText Typo="Typo.subtitle2">Patient & Bill Details</MudText>
+                                                    </MudItem>
+
+                                                    <MudItem md="12" sm="12">
+                                                        <MudGrid Spacing="1">
+                                                            <MudItem md="12" sm="12">
+                                                                <MudTextField @bind-Value="patientSearcher" @bind-Value:after="RetrieveActiveVisitItemsAsync" Margin="Margin.Dense"
+                                                                              Label="Search by Patient Code Number or Full name" Variant="Variant.Outlined" Placeholder="Search by Patient Code Number or Full name" />
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
                                         </MudItem>
+                                        <MudItem xs="12">
+                                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                                <MudGrid Spacing="1">
+                                                    <MudItem md="12" sm="12">
+                                                        <MudText Typo="Typo.subtitle2">Billing Items (Select for current invoice)</MudText>
+                                                    </MudItem>
 
-                                        <MudItem md="12">
-                                            <MudGrid Spacing="1">
-                                                <MudItem md="12">
-                                                <MudTextField @bind-Value="CurrentBill.BillDescription" Margin="Margin.Dense" T="string"
-                                                              Lines="5" Sizing="InputSizing.Fixed" Text="@CurrentBill.BillDescription"
-                                                              Label="Description" Variant="Variant.Outlined" Placeholder="Additional billing notes" />
+                                                    <MudItem md="12" sm="12">
+                                                        <MudGrid Spacing="1">
+                                                            <MudItem md="12" sm="12">
+                                                                <MudSelect T="BillItemDto"
+                                                                           MultiSelection="true"
+                                                                           Variant="Variant.Outlined"
+                                                                           Margin="Margin.Dense"
+                                                                           SelectAll="true"
+                                                                           SelectAllText="Select all items"
+                                                                           HelperText="Items"
+                                                                           SelectedValues="_options"
+                                                                           SelectedValuesChanged="OnSelectedValuesChanged"
+                                                                           MultiSelectionTextFunc="GetMultiSelectionText"
+                                                                           Label="Select Billing Items"
+                                                                           AdornmentIcon="@Icons.Material.Filled.Search">
+                                                                    @foreach (var item in billItems)
+                                                                    {
+                                                                        <MudSelectItem T="BillItemDto" Value="@item">@item.ItemName</MudSelectItem>
+                                                                    }
+                                                                </MudSelect>
 
-                                                </MudItem>
-                                            </MudGrid>
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                    <MudItem md="12" sm="12">
+                                                        <MudGrid Spacing="1">
+                                                            <MudItem md="12" sm="12">
+                                                                <MudSimpleTable Hover="true" Dense="true" FixedHeader="true" Style="height:220px;">
+                                                                    <thead class="sticky-top bg-white" tabindex="1">
+                                                                        <tr class="bg-white">
+                                                                            @foreach (var h in headings)
+                                                                            {
+                                                                                <th style="background-color: rgba(63,81,181,0.05);">@h</th>
+                                                                            }
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        @foreach (var row in billItemsToInvoice)
+                                                                        {
+                                                                            <tr>
+                                                                                <td>@($"{row.SourceType} : {row.ItemName}")</td>
+                                                                                <td>@row.UnitPrice</td>
+                                                                                <td>@row.Quantity</td>
+                                                                                <td colspan="2">@row.SubTotal</td>
+
+                                                                            </tr>
+                                                                        }
+                                                                    </tbody>
+
+                                                                    <tfoot class="sticky-bottom bg-white" tabindex="1">
+                                                                        <tr style="background-color: rgba(63,81,181,0.05);">
+                                                                            <th colspan="3">
+                                                                                Total
+                                                                            </th>
+                                                                            <th class="text-start" colspan="2">
+                                                                                @(billItemsToInvoice.Sum(bi => bi.SubTotal))
+                                                                            </th>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </MudSimpleTable>
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
                                         </MudItem>
                                     </MudGrid>
-                            </MudPaper>
-                        </MudItem>
-                    </MudGrid>
-                </MudItem>
+                                </MudItem>
 
-                <MudItem md="3" xs="12">
-                    <MudGrid Spacing="1">
-                        <MudItem xs="12">
-                            <MudPaper Class="pa-3 ma-2" Outlined="true"></MudPaper>
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudPaper Class="pa-3 ma-2" Outlined="true"></MudPaper>
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudPaper Class="pa-3 ma-2" Outlined="true"></MudPaper>
-                        </MudItem>
-                    </MudGrid>
-                </MudItem>
-            </MudGrid>
-        </EditForm>
-    </MudContainer>
+                                <MudItem md="3" xs="12">
+                                    <MudGrid Spacing="1">
+                                        <MudItem xs="12">
+                                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                                <MudGrid>
+                                                    <MudItem md="12" sm="12">
+                                                        <MudSimpleTable Hover="true" Dense="true">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th colspan="3">Invoice Summary</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody class="border-0">
+                                                                <tr><td colspan="2">Subtotal</td><td>0.00</td></tr>
+                                                                <tr><td colspan="2">Tax</td><td>0.00</td></tr>
+                                                                <tr><td colspan="2">Insurance Coverage</td><td>0.00</td></tr>
+                                                            </tbody>
+                                                            <tfoot class="border-top">
+                                                                <tr><th colspan="2">Total Due</th><td>0.00</td></tr>
+                                                            </tfoot>
+                                                        </MudSimpleTable>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                        </MudItem>
+                                        <MudItem xs="12">
+                                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                                <MudGrid Spacing="1">
+                                                    <MudItem md="12" sm="12">
+                                                        <MudText Typo="Typo.subtitle2">Payment Plan</MudText>
+                                                    </MudItem>
 
-        <MudStack Class="pa-1 flex-none" Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center">
-            <SectionTitle Title="Buttons Section" />
-        </MudStack>
+                                                    <MudItem md="12" sm="12">
+                                                        <MudGrid Spacing="1">
+                                                            <MudItem md="12" sm="12" Class="d-flex flex-column">
+                                                                <MudText Typo="Typo.caption">Payment Status: UnPaid</MudText>
+                                                                <MudText Typo="Typo.caption">Payment Mode: Cash</MudText>
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                        </MudItem>
 
-</MudStack>
+                                        <MudItem xs="12">
+                                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                                <MudGrid Spacing="1">
+                                                    <MudItem md="12" sm="12">
+                                                        <MudText Typo="Typo.subtitle2">Notes</MudText>
+                                                    </MudItem>
+
+                                                    <MudItem md="12" sm="12">
+                                                        <MudGrid Spacing="1">
+                                                            <MudItem md="12" sm="12">
+                                                                <MudTextField Typo="Typo.caption" @bind-Value="CurrentBill.BillDescription" Margin="Margin.Dense" T="string"
+                                                                              Lines="4" Sizing="InputSizing.Fixed" Text="@CurrentBill.BillDescription"
+                                                                              Label="Description" Variant="Variant.Outlined" Placeholder="Additional billing notes" />
+
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                            </MudGrid>
+                        </EditForm>
+                    </MudContainer>
+
+                </MudStack>
+            </MudStep>
+            <MudStep Title="Payments" HasError="@(_step2TextInput == "")">
+                <MudStack Spacing="0">
+                    <MudContainer MaxWidth="MaxWidth.False" Class="flex-grow-1 pa-2">
+                        <EditForm Model="CurrentBill" method="post" OnValidSubmit="SaveBillAsync" FormName="newbill">
+                            <MudGrid Spacing="1">
+                                <MudItem md="12" xs="12">
+                                    <MudGrid Spacing="1">
+                                        <MudItem md="9" xs="12">
+                                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                                <MudGrid>
+                                                    <MudItem md="12" sm="12">
+                                                        <MudSimpleTable Hover="true" Dense="true">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th colspan="3">Invoice Summary</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody class="border-0">
+                                                                <tr><td colspan="2">Subtotal</td><td>0.00</td></tr>
+                                                                <tr><td colspan="2">Tax</td><td>0.00</td></tr>
+                                                                <tr><td colspan="2">Insurance Coverage</td><td>0.00</td></tr>
+                                                            </tbody>
+                                                            <tfoot class="border-top">
+                                                                <tr><th colspan="2">Total Due</th><td>0.00</td></tr>
+                                                            </tfoot>
+                                                        </MudSimpleTable>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                        </MudItem>
+                                        <MudItem md="3" xs="12">
+                                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                                <MudGrid Spacing="1">
+                                                    <MudItem md="12" sm="12">
+                                                        <MudText Typo="Typo.subtitle2">Payment Plan</MudText>
+                                                    </MudItem>
+
+                                                    <MudItem md="12" sm="12">
+                                                        <MudGrid Spacing="1">
+                                                            <MudItem md="12" sm="12" Class="d-flex flex-column">
+                                                                <MudText Typo="Typo.caption">Payment Status: UnPaid</MudText>
+                                                                <MudText Typo="Typo.caption">Payment Mode: Cash</MudText>
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                        </MudItem>
+                                        <MudItem md="12" xs="12">
+                                            <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                                <MudGrid Spacing="1">
+                                                    <MudItem md="12" sm="12">
+                                                        <MudText Typo="Typo.subtitle2">Insurance Claim (As per payment mode registered for this visit)</MudText>
+                                                    </MudItem>
+
+                                                    <MudItem md="12" sm="12">
+                                                        <MudGrid Spacing="1">
+                                                            <MudItem md="7" sm="12">
+                                                                <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"Company: NHIF")</MudField>
+                                                            </MudItem>
+                                                            <MudItem md="4" sm="12">
+                                                                <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"ID_NO: NH231")</MudField>
+                                                            </MudItem>
+                                                            <MudItem md="1" sm="12" Class="d-flex justify-content-end align-items-center">
+                                                                <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print" title="Preview Claim Pdf" />
+                                                                <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Email" title="Send via email" />
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                            </MudGrid>
+                        </EditForm>
+                    </MudContainer>
+
+                </MudStack>
+            </MudStep>
+            <MudStep Title="Closing">
+                <MudStack Spacing="0">
+                    <MudContainer MaxWidth="MaxWidth.False" Class="flex-grow-1 pa-2">
+                        <EditForm Model="CurrentBill" method="post" OnValidSubmit="SaveBillAsync" FormName="newbill">
+                            <MudGrid Spacing="1">
+                                <MudItem md="4" xs="12">
+
+                                    <MudItem md="12" xs="12">
+                                        <MudPaper Class="pa-3 ma-2" Outlined="true">
+                                            <MudGrid Spacing="1">
+                                                <MudItem md="12" sm="12">
+                                                    <MudText Typo="Typo.subtitle2">Insurance Claim (As per payment mode registered for this visit)</MudText>
+                                                </MudItem>
+
+                                                <MudItem md="12" sm="12">
+                                                    <MudGrid Spacing="1">
+                                                        <MudItem md="7" sm="12">
+                                                            <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"Company: NHIF")</MudField>
+                                                        </MudItem>
+                                                        <MudItem md="4" sm="12">
+                                                            <MudField Margin="Margin.Dense" Label="Outlined" Variant="Variant.Outlined">@($"ID_NO: NH231")</MudField>
+                                                        </MudItem>
+                                                        <MudItem md="1" sm="12" Class="d-flex justify-content-end align-items-center">
+                                                            <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print" title="Preview Claim Pdf" />
+                                                            <MudIconButton Size="Size.Medium" Color="Color.Primary" Icon="@Icons.Material.Outlined.Email" title="Send via email" />
+                                                        </MudItem>
+                                                    </MudGrid>
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudPaper>
+                                    </MudItem>
+                                </MudItem>
+                                <MudItem md="8" xs="12">
+                                    <!--recept-->
+                                </MudItem>
+                            </MudGrid>
+                        </EditForm>
+                    </MudContainer>
+
+                </MudStack>
+            </MudStep>
+        </MudStepper>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Error" Variant="Variant.Filled">Close</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="SaveBillAsync">Save</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     public string icon = Icons.Material.Filled.Payments;
     public string title = "Bill Details";
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(true));
+
+    private void Cancel() => MudDialog.Cancel();
 
     List<BillItemDto> billItems = new();
+    List<BillItemDto> billItemsToInvoice = new();
+    BillItemDto AdHocComposition = new();
 
     BillDto CurrentBill = new();
     string patientSearcher = string.Empty;
+    string[] headings = { "Description", "Price", "Qty", "Amount", "" };
+    private BillItemDto _value = new();
+    private IReadOnlyCollection<BillItemDto> _options = Array.Empty<BillItemDto>();
+    private bool? _step1Complete = true;
+    private string _step2TextInput = "text";
 
     public async Task RetrieveActiveVisitItemsAsync()
     {
         var visit = await patientService.GetVisitByPCodeOrFullNameAsync(patientSearcher);
 
         //1. CONSULTATION
-        if (visit.Consultations.Any())
+        if (visit != null && visit.Consultations.Any())
         {
             var Consultations = visit.Consultations;
 
-            foreach (var cons in Consultations.Where(bi => bi.BillItemId != null))
+            foreach (var cons in Consultations.Where(bi => bi.BillItemId == null))
             {
                 var newBillItem = new BillItemDto
                 {
@@ -128,11 +357,11 @@
         }
 
         //2. CHECK-UP
-        if (visit.LabTests.Any())
+        if (visit != null && visit.LabTests.Any())
         {
             var LabTests = visit.LabTests;
 
-            foreach (var cons in LabTests.Where(bi => bi.BillItemId != null))
+            foreach (var cons in LabTests.Where(bi => bi.BillItemId == null))
             {
                 var newBillItem = new BillItemDto
                 {
@@ -147,11 +376,11 @@
         }
 
         //1. TREATMENT
-        if (visit.Treatments.Any())
+        if (visit != null && visit.Treatments.Any())
         {
             var Treatments = visit.Treatments;
 
-            foreach (var cons in Treatments.Where(bi => bi.BillItemId != null))
+            foreach (var cons in Treatments.Where(bi => bi.BillItemId == null))
             {
                 var newBillItem = new BillItemDto
                 {
@@ -166,11 +395,11 @@
         }
 
         //1. PRESCRIPTION
-        if (visit.Prescriptions.Any())
+        if (visit != null && visit.Prescriptions.Any())
         {
             var Prescriptions = visit.Prescriptions;
 
-            foreach (var cons in Prescriptions.Where(bi => bi.BillItemId != null))
+            foreach (var cons in Prescriptions.Where(bi => bi.BillItemId == null))
             {
                 var newBillItem = new BillItemDto
                 {
@@ -185,5 +414,109 @@
         }
 
     }
+
+
+
+    private async Task OnSelectedValuesChanged(IReadOnlyCollection<BillItemDto> selectedValues)
+    {
+        _options = selectedValues;
+        billItemsToInvoice.Clear();
+
+        foreach (var dto in _options)
+        {
+            AddBillItemToInvoiceBatch(dto);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetMultiSelectionText(IReadOnlyList<string> selectedItems)
+    {
+        return $"{selectedItems.Count} item{(selectedItems.Count == 1 ? " has" : "s have")} been selected";
+    }
+
+    public void AddBillItemToInvoiceBatch(BillItemDto billItemDto)
+    {
+        var newBillItem = new BillItemDto
+        {
+            ItemName = billItemDto.ItemName,
+            SourceType = billItemDto.SourceType,
+            SourceItemId = billItemDto.SourceItemId,
+            UnitPrice = billItemDto.UnitPrice,
+            IsAdded = true,
+            Quantity = billItemDto.Quantity
+        };
+
+        billItemsToInvoice!.Add(newBillItem);
+    }
+
+    public async Task RemoveBillItemFromBatch(BillItemDto billItemDto)
+    {
+        if (billItemsToInvoice != null)
+        {
+            billItemDto.IsAdded = false;
+
+            billItemsToInvoice.Remove(billItemDto);
+            StateHasChanged();
+        }
+    }
+
+
     public async Task SaveBillAsync() { }
+
+    private async Task OnPreviewInteraction(StepperInteractionEventArgs arg)
+    {
+        if (arg.Action == StepAction.Complete)
+        {
+            // occurrs when clicking next
+            await ControlStepCompletion(arg);
+        }
+        else if (arg.Action == StepAction.Activate)
+        {
+            // occurrs when clicking a step header with the mouse
+            await ControlStepNavigation(arg);
+        }
+    }
+
+    private async Task ControlStepCompletion(StepperInteractionEventArgs arg)
+    {
+        switch (arg.StepIndex)
+        {
+            case 0:
+                if (_step1Complete != true)
+                {
+                    await DialogService.ShowMessageBoxAsync("Error", "You have not flipped the switch in step 1");
+                    arg.Cancel = true;
+                }
+                break;
+            case 1:
+                if ((_step2TextInput?.Length ?? 0) == 0)
+                {
+                    await DialogService.ShowMessageBoxAsync("Error", "You have not entered text in step 2");
+                    arg.Cancel = true;
+                }
+                break;
+        }
+    }
+
+    private async Task ControlStepNavigation(StepperInteractionEventArgs arg)
+    {
+        switch (arg.StepIndex)
+        {
+            case 1:
+                if (_step1Complete != true)
+                {
+                    await DialogService.ShowMessageBoxAsync("Error", "Finish step 1 first");
+                    arg.Cancel = true;
+                }
+                break;
+            case 2:
+                if (_step1Complete != true || (_step2TextInput?.Length ?? 0) == 0)
+                {
+                    await DialogService.ShowMessageBoxAsync("Error", "Finish step 1 and 2 first");
+                    arg.Cancel = true;
+                }
+                break;
+        }
+    }
 }

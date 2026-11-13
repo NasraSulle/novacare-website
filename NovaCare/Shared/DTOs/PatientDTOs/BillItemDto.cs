@@ -15,6 +15,7 @@
 
         // UI Helpers
         public string BillTypeName { get; set; } = string.Empty;
+        public bool IsAdded { get; set; }
 
     }
 }

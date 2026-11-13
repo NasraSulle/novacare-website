@@ -733,7 +733,7 @@
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryPressure)" @bind-Value="CurrentPreliminaryTest.PreliminaryPressure" Margin="Margin.Dense"
                                                                  Label="Pressure" Variant="Variant.Outlined" Placeholder="Pressure"
-                                                                 ReadOnly="@(!(
+                                                                 Disabled="@(!(
                                                                                 (CurrentVisit.Consultations?.Any(x => x.BillItemId != null) ?? false) ||
                                                                                 (CurrentVisit.LabTests?.Any(x => x.BillItemId != null) ?? false) ||
                                                                                 (CurrentVisit.Prescriptions?.Any(x => x.BillItemId != null) ?? false) ||
@@ -745,7 +745,7 @@
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryWeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryWeight" Margin="Margin.Dense"
                                                                  Label="Weight" Variant="Variant.Outlined" Placeholder="Weight"
-                                                                 ReadOnly="@(!(
+                                                                 Disabled="@(!(
                                                                                 (CurrentVisit.Consultations?.Any(x => x.BillItemId != null) ?? false) ||
                                                                                 (CurrentVisit.LabTests?.Any(x => x.BillItemId != null) ?? false) ||
                                                                                 (CurrentVisit.Prescriptions?.Any(x => x.BillItemId != null) ?? false) ||
@@ -756,7 +756,7 @@
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryHeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryHeight" Margin="Margin.Dense"
                                                                  Label="Height" Variant="Variant.Outlined" Placeholder="Height"
-                                                                 ReadOnly="@(!(
+                                                                 Disabled="@(!(
                                                                                 (CurrentVisit.Consultations?.Any(x => x.BillItemId != null) ?? false) ||
                                                                                 (CurrentVisit.LabTests?.Any(x => x.BillItemId != null) ?? false) ||
                                                                                 (CurrentVisit.Prescriptions?.Any(x => x.BillItemId != null) ?? false) ||

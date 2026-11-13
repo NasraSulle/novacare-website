@@ -1,23 +1,24 @@
-﻿  <MudItem xs="12">
+﻿<MudItem xs="12">
     <MudItem xs="12" Class="chart-card">
-    <MudGrid Spacing="2" Justify="Justify.Center" Class="pa-0">
-        <!-- Left Side: Texts -->
-        <MudItem xs="8" Class="d-flex flex-column justify-center">
-            <MudText Typo="Typo.caption" Color="Color.Secondary" Class="text-uppercase font-weight-bold" Style="letter-spacing: 0.05em;">
-                @Title
-            </MudText>
-            <MudText Typo="Typo.h4" Class="font-weight-bold mt-1" Style="color: #1e293b;">
-                @DataCount.ToString("N0")
-            </MudText>
-        </MudItem>
+        <MudGrid Spacing="2" Justify="Justify.Center" Class="pa-0">
+            <!-- Left Side: Texts -->
+            <MudItem xs="8" Class="d-flex flex-column justify-center">
+                <MudText Typo="Typo.subtitle1" Class="">
+                    @Title
+                </MudText>
 
-        <!-- Right Side: Icon Container -->
-        <MudItem xs="4" Class="d-flex align-center justify-end">
-            <MudAvatar Variant="Variant.Filled" Color="@AccentColor" Rounded="true" Style="width: 54px; height: 54px; border-radius: 5px;">
-                <MudIcon Icon="@Icon" Size="Size.Medium" />
-            </MudAvatar>
-        </MudItem>
-    </MudGrid>
+                <MudText Typo="Typo.h4" Class="font-weight-bold mt-1" Style="color: #1e293b;">
+                    @DataCount.ToString("N0")
+                </MudText>
+            </MudItem>
+
+            <!-- Right Side: Icon Container -->
+            <MudItem xs="4" Class="d-flex align-center justify-end">
+                <MudAvatar Variant="Variant.Filled" Color="@AccentColor" Class="top-summary-avatar" Style="@(Ztyle)">
+                    <MudIcon Icon="@Icon" Size="Size.Medium" />
+                </MudAvatar>
+            </MudItem>
+        </MudGrid>
     </MudItem>
 </MudItem>
 
@@ -26,4 +27,11 @@
     [Parameter] public string? Title { get; set; }
     [Parameter] public double DataCount { get; set; } = 0;
     [Parameter] public Color AccentColor { get; set; } = Color.Primary;
+    [Parameter] public string? Bg { get; set; } = " background: linear-gradient(0deg, rgba(22,35,104,1) 0%, rgba(63,81,181,1) 100%) !important;";
+    [Parameter] public string? Ztyle { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        Ztyle ??= $"width: 54px; height: 54px; border-radius: 5px; {Bg}";
+    }
 }
