@@ -73,7 +73,25 @@
                                 </MudTabPanel>
                             </MudTabs>
                         </MudItem>
-                    </MudTabPanel>
+                </MudTabPanel>
+                <MudTabPanel Style="text-transform: none;" Text="Vitals Requests" OnClick="@(() => { patientGenre = "Vitals Requests"; StateHasChanged(); })">
+                    <MudItem md="12" Class="">
+                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+                            <MudTabPanel Text="All Patients" Style="text-transform: none;">
+                                <Patients PatientGenre="@patientGenre" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Out Patients" Style="text-transform: none;">
+                                <Patients PatientGenre="@patientGenre" FilterBy="OutSide" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Hospitalized Patients" Style="text-transform: none;">
+                                <Patients PatientGenre="@patientGenre" FilterBy="Hospitalized" />
+                            </MudTabPanel>
+                            <MudTabPanel Text="Clinic Patients" Style="text-transform: none;">
+                                <Patients PatientGenre="@patientGenre" FilterBy="Clinic" />
+                            </MudTabPanel>
+                        </MudTabs>
+                    </MudItem>
+                </MudTabPanel>
                 }
 
             @if (CurrentUser.ClinicalTitleName.Trim().ToLower() == "nurse" || CurrentUser.AdministrativeTitleName.Trim().ToLower() == "help desk")

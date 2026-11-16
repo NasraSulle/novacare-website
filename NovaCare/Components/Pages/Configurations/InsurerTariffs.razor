@@ -90,7 +90,7 @@
 </MudGrid>
 
 <!-- ADD / EDIT TARIFF DIALOG -->
-<MudDialog @bind-Visible="showDialog">
+@* <MudDialog @bind-Visible="showDialog">
     <DialogContent>
         <MudText Typo="Typo.h6" Class="mb-3">Configure Insurer Tariff Rule</MudText>
         <MudGrid Spacing="2">
@@ -136,12 +136,77 @@
         <MudButton OnClick="@(() => showDialog = false)">Cancel</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveTariffAsync">Save Tariff</MudButton>
     </DialogActions>
+</MudDialog> *@
+
+<MudDialog @bind-Visible="showDialog" Options="_maxWidth">
+    <DialogContent>
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
+                        <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;">Configure Insurer Tariff Rule</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudGrid Spacing="2">
+                                        <MudItem xs="6">
+                                            <MudSelect T="string" Value="@editTariff.ServiceType" ValueChanged="@OnServiceTypeChanged"
+                                                       Label="Service Category" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                                <MudSelectItem Value="@("Consultation")">Consultation</MudSelectItem>
+                                                <MudSelectItem Value="@("LabTest")">LabTest</MudSelectItem>
+                                                <MudSelectItem Value="@("Prescription")">Prescription (Medicine)</MudSelectItem>
+                                                <MudSelectItem Value="@("Treatment")">Treatment (Surgery/Therapy/Ward)</MudSelectItem>
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <MudSelect T="int" @bind-Value="editTariff.ServiceItemId" Label="Hospital Item" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                                <MudSelectItem Value="0" Disabled>Select Hospital Service/Item</MudSelectItem>
+                                                @foreach (var opt in ServiceItemOptions)
+                                                {
+                                                    <MudSelectItem Value="@opt.Id">@opt.Name</MudSelectItem>
+                                                }
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem xs="4">
+                                            <MudTextField @bind-Value="editTariff.InsurerItemCode" Label="Insurer Official Code" Placeholder="e.g. NHIF-101" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                        </MudItem>
+                                        <MudItem xs="8">
+                                            <MudTextField @bind-Value="editTariff.InsurerItemName" Label="Insurer Tariff Name" Placeholder="e.g. General OPD Consultation" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <MudNumericField @bind-Value="editTariff.AgreedPrice" Label="Agreed Insurer Price (0 = Hospital Price)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <MudNumericField @bind-Value="editTariff.CoveragePercent" Label="Coverage % (e.g. 100 or 80)" Min="0" Max="100" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <MudSwitch @bind-Value="editTariff.IsCovered" Color="Color.Success" Label="Covered by Insurer" />
+                                        </MudItem>
+                                        <MudItem xs="6">
+                                            <MudSwitch @bind-Value="editTariff.RequiresPreApproval" Color="Color.Warning" Label="Requires Pre-Approval" />
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+            </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudGrid Spacing="1" Class="pe-7" Justify="Justify.FlexEnd">
+            <MudItem>
+                <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error"  OnClick="@(() => showDialog = false)">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success" OnClick="SaveTariffAsync">Save Tariff</MudButton>
+            </MudItem>
+        </MudGrid>
+    </DialogActions>
 </MudDialog>
 
 @code {
     List<InsuaranceDto> Insurers = new();
     List<InsuranceSchemeDto> Schemes = new();
     List<InsurerTariffDto> Tariffs = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
 
     int selectedInsuranceId;
     int? selectedSchemeId;

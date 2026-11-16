@@ -577,10 +577,10 @@
                                                                     <MudSelect For="@(() => CurrentPrescription.MedicineId)"
                                                                                @bind-Value="CurrentPrescription.MedicineId"
                                                                                @bind-Value:after="@(() =>
-                                                                                                                                                       {
-                                                                                                                                                           CurrentPrescription.MedicineName = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.MedicineName ?? string.Empty;
-                                                                                                                                                           CurrentPrescription.UnitPrice = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.BuyingPrice ?? 0m;
-                                                                                                                                                       })"
+                                                                                                                                                                                                                                      {
+                                                                                                                                                                                                                                          CurrentPrescription.MedicineName = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.MedicineName ?? string.Empty;
+                                                                                                                                                                                                                                          CurrentPrescription.UnitPrice = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.BuyingPrice ?? 0m;
+                                                                                                                                                                                                                                      })"
                                                                                Disabled="@(CurrentVisit.VisitTypeId == 0)"
                                                                                Label="Select Medicine" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
@@ -829,7 +829,7 @@
     List<RoomDto>? AllRooms = new();
 
     PaymentModeDto CurrentPaymentMode = new();
-    PatientDto CurrentPatient = new();
+    [Parameter] public PatientDto CurrentPatient { get; set; } = new();
     VisitDto CurrentVisit = new();
     TreatmentDto CurrentTreatment = new();
     PrescriptionDto CurrentPrescription = new();
@@ -849,7 +849,7 @@
     string selectedDocStaffId = string.Empty;
     string saveMessage = string.Empty;
     public string icon = Icons.Material.Filled.AssistWalker;
-    public string title = "New Patient Form";
+    public string title = "Patient Profile & New Visit";
     string? addedSuccessfully = "Added:";
     string? notaddedSuccessfully = "Not Added:";
 
@@ -895,19 +895,15 @@
         AllWards = await roomService.GetAllWardsAsync();
         AllRooms = await roomService.GetAllRoomsAsync();
 
-        if (PatientId > 0)
-        {
-            CurrentPatient = await patientService.GetPatientByIdAsync(PatientId);
-            _step1Complete = !string.IsNullOrWhiteSpace(CurrentPatient.PatientCode);
+        _step1Complete = !string.IsNullOrWhiteSpace(CurrentPatient.PatientCode);
 
-            // Pre-load patient's active insurance card if they have one
-            var policies = await patientService.GetPatientInsurancesAsync(PatientId);
-            var primary = policies.FirstOrDefault();
-            if (primary != null)
-            {
-                CurrentPolicy = primary;
-                AvailableSchemes = await paymentService.GetSchemesByInsuranceIdAsync(primary.InsuaranceId);
-            }
+        // Pre-load patient's active insurance card if they have one
+        var policies = await patientService.GetPatientInsurancesAsync(CurrentPatient.Id);
+        var primary = policies.FirstOrDefault();
+        if (primary != null)
+        {
+            CurrentPolicy = primary;
+            AvailableSchemes = await paymentService.GetSchemesByInsuranceIdAsync(primary.InsuaranceId);
         }
 
     }
@@ -1102,6 +1098,7 @@
 
                             CurrentPolicy.PatientInsuaranceId = policyId;
                             CurrentVisit.PatientInsuaranceId = policyId;
+                            CurrentVisit.PatientFullName = $"{CurrentPatient.FisrtName} {CurrentPatient.MiddleName} {CurrentPatient.LastName}";
                         }
 
                         addedVisitId = await patientService.AddVisitAsync(CurrentVisit);

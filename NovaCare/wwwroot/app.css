@@ -55,7 +55,7 @@
     animation: mud-ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-@@keyframes mud-ping {
+@keyframes mud-ping {
     75%, 100% {
         transform: scale(2.6);
         opacity: 0;
@@ -164,7 +164,7 @@
     animation: ecg-sweep 4.5s linear infinite;
 }
 
-@@keyframes ecg-sweep {
+@keyframes ecg-sweep {
     0% {
         stroke-dashoffset: 1480;
     }
@@ -185,7 +185,7 @@
     animation: pulse-glow 2s infinite;
 }
 
-@@keyframes pulse-glow {
+@keyframes pulse-glow {
     0%, 100% {
         opacity: 1;
         transform: scale(1);
@@ -198,7 +198,7 @@
 }
 
 /* Desktop Grid Dividers */
-@@media (min-width: 960px) {
+@media (min-width: 960px) {
     .border-end-md {
         border-right: 1px solid var(--mud-palette-lines-default);
     }
@@ -264,8 +264,11 @@
 }
 
 .chip-neutral {
-    background-color: rgba(var(--mud-palette-action-disabled-background-rgb), 0.5);
-    color: var(--mud-palette-text-secondary);
+    /*background-color: rgba(var(--mud-palette-action-disabled-background-rgb), 0.1);*/
+    background-color: rgba(244, 130, 8, 0.1);
+    /*color: var(--mud-palette-text-warning);*/
+    /* rgba(244,130,8,1)*/
+    color: rgba(244, 130, 8, 1);
 }
 
 /* Metric & Chart Cards */
@@ -329,7 +332,7 @@
     animation: riseIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@@keyframes riseIn {
+@keyframes riseIn {
     from {
         transform: translateY(12px);
         opacity: 0;

@@ -1083,6 +1083,7 @@
 
                             CurrentPolicy.PatientInsuaranceId = policyId;
                             CurrentVisit.PatientInsuaranceId = policyId;
+                            CurrentVisit.PatientFullName = $"{CurrentPatient.FisrtName} {CurrentPatient.MiddleName} {CurrentPatient.LastName}";
                         }
 
                         addedVisitId = await patientService.AddVisitAsync(CurrentVisit);

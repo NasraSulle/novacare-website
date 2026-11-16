@@ -1,5 +1,6 @@
 ﻿@using NovaCare.Shared.DTOs.PatientDTOs
 @inject IDialogService Dialog
+@inject ISnackbar Snackbar
 
 <MudGrid>
     <MudItem md="12" Class="pa-0" Style="text-align: center;">
@@ -36,7 +37,7 @@
         }
         else if (FilteredPatients != null)
         {
-            <MudDataGrid Loading="@isSearchLoading" Hover="true" RowClick="@((args) => PreviewPatientProfile(args.Item.Id))" T="PatientDto" Items="@FilteredPatients" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+            <MudDataGrid Loading="@isSearchLoading" role="button" Hover="true" RowClick="@((args) => PreviewPatientProfile(args.Item.Id))" T="PatientDto" Items="@FilteredPatients" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
                          Bordered="false" Dense="true">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
@@ -91,6 +92,48 @@
     </MudItem>
 </MudGrid>
 
+
+<MudDialog @bind-Visible="showVitalDialog" Options="_vMaxWidth">
+    <DialogContent>
+        <MudGrid Spacing="3" Class="pa-3">
+            <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-10 pe-0" Style="border:none;">
+                <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                    <MudGrid Spacing="5" Justify="Justify.Center" Class="rounded-2" Style="border:none;">
+                        <MudItem md="12" Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Preliminary Tests</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryPressure)" @bind-Value="CurrentPreliminaryTest.PreliminaryPressure" Margin="Margin.Dense"
+                                                     Label="Pressure" Variant="Variant.Outlined" Placeholder="Pressure"
+                                                     UserAttributes="@(new() { { "autocomplete", "preliminarypressure" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryWeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryWeight" Margin="Margin.Dense"
+                                                     Label="Weight" Variant="Variant.Outlined" Placeholder="Weight"
+                                                     UserAttributes="@(new() { { "autocomplete", "preliminaryweight" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryHeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryHeight" Margin="Margin.Dense"
+                                                     Label="Height" Variant="Variant.Outlined" Placeholder="Height"
+                                                     UserAttributes="@(new() { { "autocomplete", "preliminaryheight" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudGrid Spacing="1" Class="pe-7" Justify="Justify.FlexEnd">
+            <MudItem>
+                <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error" OnClick="@(() => showVitalDialog = false)">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success" OnClick="SavePreliminaryTestAsync">Save Tests</MudButton>
+            </MudItem>
+        </MudGrid>
+    </DialogActions>
+</MudDialog>
+
 @code {
     string? searchString;
     string messageStaff = string.Empty;
@@ -113,8 +156,10 @@
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     [Parameter] public string PatientGenre { get; set; } = string.Empty;
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private readonly DialogOptions _vMaxWidth = new() { MaxWidth = MaxWidth.Large, BackdropClick = false };
 
     PatientDto? CurrentPatient;
+    PreliminaryTestDto CurrentPreliminaryTest = new();
 
     string messagePatient = string.Empty;
     string firstPart = string.Empty;
@@ -122,6 +167,7 @@
 
     bool isLoading;
     bool isEdit;
+    bool showVitalDialog;
 
     protected override async Task OnInitializedAsync()
     {
@@ -131,7 +177,7 @@
         isLoading = true;
         StateHasChanged();
 
-        await Task.Delay(500);
+        // await Task.Delay(500);
 
         if (!isReport)
             AllPatients = await patientService.GetAllPatientsAsync();
@@ -145,15 +191,15 @@
             else if (PatientGenre == "Consultation Requests")
             {
                 FilteredPatients = AllPatients?.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0 
-                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.BillItemId != null) == true) == true).ToList() ?? new();
+                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.IsReadyForService == true) == true) == true).ToList() ?? new();
             }
             else if (PatientGenre == "Vitals Requests")
             {
-                FilteredPatients = AllPatients?.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId == 0 
-                    && (((av.Consultations?.Any(avc => avc.BillItemId != null)) == true) 
-                    || ((av.Prescriptions?.Any(avc => avc.BillItemId != null)) == true)
-                    || ((av.LabTests?.Any(avc => avc.BillItemId != null)) == true)
-                    || ((av.Treatments?.Any(avc => avc.BillItemId != null)) == true))) == true).ToList() ?? new();
+                FilteredPatients = AllPatients?.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId == null 
+                    && (((av.Consultations?.Any(avc => avc.IsReadyForService == true)) == true)
+                    || ((av.Prescriptions?.Any(avc => avc.IsReadyForService == true)) == true)
+                    || ((av.LabTests?.Any(avc => avc.IsReadyForService == true)) == true)
+                    || ((av.Treatments?.Any(avc => avc.IsReadyForService == true)) == true))) == true).ToList() ?? new();
 
             }
             else
@@ -179,12 +225,11 @@
             }
             else if (PatientGenre == "Vitals Requests")
             {
-                FilteredPatients = AllPatients?.Where(v => v.PatientTypeName == FilterBy && v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId == 0 
-                    &&
-                    (((av.Consultations?.Any(avc => avc.BillItemId != null)) == true)
-                    || ((av.Prescriptions?.Any(avc => avc.BillItemId != null)) == true)
-                    || ((av.LabTests?.Any(avc => avc.BillItemId != null)) == true)
-                    || ((av.Treatments?.Any(avc => avc.BillItemId != null)) == true))) == true).ToList() ?? new();
+                FilteredPatients = AllPatients?.Where(v => v.PatientTypeName == FilterBy && v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId == null
+                    && (((av.Consultations?.Any(avc => avc.IsReadyForService == true)) == true)
+                    || ((av.Prescriptions?.Any(avc => avc.IsReadyForService == true)) == true)
+                    || ((av.LabTests?.Any(avc => avc.IsReadyForService == true)) == true)
+                    || ((av.Treatments?.Any(avc => avc.IsReadyForService == true)) == true))) == true).ToList() ?? new();
             }
             else
             {
@@ -206,7 +251,7 @@
     {
         searchString = text;
         isSearchLoading = true;
-        await Task.Delay(500);
+        // await Task.Delay(500);
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
@@ -252,17 +297,51 @@
 
     private async Task PreviewPatientProfile(int patientId)
     {
-        var parameters = new DialogParameters
-        {
-            { "PatientId", patientId },
-            { "CurrentUser", CurrentUser }
-        };
+        // CurrentPatient = await patientService.GetPatientByIdAsync(patientId);
 
-        var dialog = await Dialog.ShowAsync<EditPatient>("Patient Profile & New Visit", parameters, _maxWidth);
-        var result = await dialog.Result;
-        if (result != null && !result.Canceled)
+
+        if (PatientGenre == "Vitals Requests")
         {
-            await OnInitializedAsync();
+            var currentVisitlId = await patientService.GetVisitIdByPatientIdAsync(patientId);
+            CurrentPreliminaryTest.VisitId = currentVisitlId;
+
+            showVitalDialog = true;
+            StateHasChanged();
+        }
+        else if (PatientGenre == "Consultation Requests")
+        {
+
+            CurrentPatient = await patientService.GetPatientByIdAsync(patientId);
+
+            var parameters = new DialogParameters
+            {
+                { "CurrentPatient", CurrentPatient },
+                { "CurrentUser", CurrentUser }
+            };
+
+            var dialog = await Dialog.ShowAsync<PatientConsultation>("Patient Consultation", parameters, _maxWidth);
+            var result = await dialog.Result;
+            if (result != null && !result.Canceled)
+            {
+                await OnInitializedAsync();
+            }
+        }
+        else
+        {
+            CurrentPatient = await patientService.GetPatientByIdAsync(patientId);
+
+            var parameters = new DialogParameters
+            {
+                { "CurrentPatient", CurrentPatient },
+                { "CurrentUser", CurrentUser }
+            };
+
+            var dialog = await Dialog.ShowAsync<EditPatient>("Patient Profile & New Visit", parameters, _maxWidth);
+            var result = await dialog.Result;
+            if (result != null && !result.Canceled)
+            {
+                await OnInitializedAsync();
+            }
         }
     }
 
@@ -284,5 +363,29 @@
         };
 
         await Dialog.ShowAsync<PdfPreview>($"Report Pdf", Parameters, _maxWidth);
+    }
+
+    private async Task SavePreliminaryTestAsync()
+    {
+        if (CurrentPreliminaryTest.Id == 0)
+        {
+            var ptest =await patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
+            Snackbar.Add("Vitals saved successfully!", Severity.Success);
+            CurrentPreliminaryTest.Id = ptest.Id;
+            StateHasChanged();
+
+            var currentVisit = await patientService.GetVisitByPCodeOrFullNameAsync(CurrentPatient?.PatientCode ?? string.Empty);
+            currentVisit.PreliminaryTestId = ptest.Id;
+            await patientService.UpdateVisitAsync(currentVisit, currentVisit.Id);
+        }
+        else
+        {
+
+            await patientService.UpdatePreliminaryTestAsync(CurrentPreliminaryTest, CurrentPreliminaryTest.Id);
+            var currentVisit = await patientService.GetVisitByPCodeOrFullNameAsync(CurrentPatient?.PatientCode ?? string.Empty);
+            currentVisit.PreliminaryTestId = CurrentPreliminaryTest.Id;
+            await patientService.UpdateVisitAsync(currentVisit, currentVisit.Id);
+            Snackbar.Add("Vitals updated successfully!", Severity.Success);
+        }
     }
 }

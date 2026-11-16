@@ -33,10 +33,13 @@ namespace NovaCare.Interfaces
         Task<bool> UpdateVisitTypeAsync(VisitTypeDto dto, int visitTypeId);
 
         Task<PreliminaryTestDto> AddPreliminaryTestAsync(PreliminaryTestDto dto);
+        Task<bool> UpdatePreliminaryTestAsync(PreliminaryTestDto dto, int Id);
+
         Task<int> AddConsultationAsync(ConsultationDto dto);
         Task<bool> UpdateConsultationAsync(ConsultationDto dto, int conslId);
 
         Task<VisitDto> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName);
+        Task<int> GetVisitIdByPatientIdAsync(int pId);
 
         Task<List<ConsultationDto>> GetAllConsultationsAsync();
         Task<ConsultationDto> GetConsultationByIdAsync(int conId);
