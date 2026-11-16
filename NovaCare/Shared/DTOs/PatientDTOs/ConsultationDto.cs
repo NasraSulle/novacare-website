@@ -1,4 +1,6 @@
-﻿using NovaCare.Shared.DTOs.DoctorDTOs;
+﻿using MudBlazor;
+using Newtonsoft.Json.Linq;
+using NovaCare.Shared.DTOs.DoctorDTOs;
 using NovaCare.Shared.DTOs.LabTestDTOs;
 using NovaCare.Shared.DTOs.RoomDTOs;
 using NovaCare.Shared.DTOs.TreatmentDTOs;
@@ -38,6 +40,12 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public string RoomName { get; set; } = string.Empty;
         public string PaymentStatusName { get; set; } = string.Empty; // Populated from BillItem?.Bill?.PaymentStatusName ?? "Not Billed"
         public bool IsReadyForService { get; set; }
+
+        //<MudTextField @bind-Value = "CurrentConsultation.Icd10Code" Margin="Margin.Dense"
+        //      Label="ICD-10 Diagnosis Code (Required for Insurance Claims)"
+        //      Variant="Variant.Outlined" Placeholder="e.g. B50.9 (Malaria), J06.9 (URTI), I10 (Hypertension)"
+        //      Class="mb-2" />
+
 
     }
 }
