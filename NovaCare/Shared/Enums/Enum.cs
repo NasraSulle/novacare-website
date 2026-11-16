@@ -16,7 +16,8 @@ namespace NovaCare.Shared.Enums
         Cash,
         Cheque,
         Card,
-        MNO
+        MNO,
+        Insurance // Used when recording an insurance claim payout against a Bill
     }
 
     public enum CardType
@@ -48,5 +49,24 @@ namespace NovaCare.Shared.Enums
         KCB,
         DTB,
         Barter_Trade
+    }
+
+    public enum ClaimStatus
+    {
+        Not_Applicable = 0,     // Pure cash items/bills
+        Draft = 1,              // Claim created in hospital system, not yet sent
+        Submitted = 2,          // Sent to NHIF/ZHIF API or Smart/LCT TPA portal
+        Queried = 3,            // Insurer requested additional clinical notes/documents
+        Approved = 4,           // 100% of claimed amount approved
+        Partially_Approved = 5, // Some items approved, some rejected
+        Rejected = 6,           // Entire claim denied
+        Settled = 7             // Insurer has paid the money to the hospital
+    }
+
+    public enum InsuranceIntegrationType
+    {
+        Direct_API = 1, // e.g., NHIF, ZHIF direct integration
+        TPA_Portal = 2, // e.g., Smart Applications / LCT (Jubilee, Strategis, AAR, Britam)
+        Manual = 3      // Printable claim forms / manual batch submission
     }
 }

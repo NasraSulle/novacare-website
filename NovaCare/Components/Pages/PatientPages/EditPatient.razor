@@ -10,7 +10,9 @@
 <MudSnackbarProvider /> *@
 
 @using NovaCare.Shared.DTOs.DiseaseDTOs
+@using NovaCare.Shared.DTOs.InsuranceDTOs
 @using NovaCare.Shared.DTOs.JoinDTOs
+@using NovaCare.Shared.DTOs.JoinDto
 @using NovaCare.Shared.DTOs.PatientDTOs
 @using NovaCare.Shared.DTOs.PaymentDTOs
 @using NovaCare.Shared.DTOs.RoomDTOs
@@ -180,41 +182,66 @@
                                                 </MudSelect>
                                             </MudItem>
                                             <MudItem md="12">
-                                                <MudSelect For="@(() => CurrentPaymentMode.Id)"
-                                                           @bind-Value="CurrentPaymentMode.Id"
+                                                <MudSelect For="@(() => CurrentVisit.PaymentModeId)"
+                                                           @bind-Value="CurrentVisit.PaymentModeId"
                                                            @bind-Value:after="OnPaymentModeChange"
                                                            Immediate="true"
                                                            Label="Patient Payment Option" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                            UserAttributes="@(new() { { "aria-required", "true" } } )">
                                                     <MudSelectItem Value="0" Disabled>Payment Option</MudSelectItem>
-
                                                     @foreach (var item in PaymentModes)
                                                     {
                                                         <MudSelectItem Value="@item.Id">@item.PaymentModeName</MudSelectItem>
                                                     }
                                                 </MudSelect>
                                             </MudItem>
-                                            @if (CurrentPaymentMode.PaymentModeName.ToLower() == "insurance")
+
+                                            @if (CurrentVisit.PaymentModeId == 2)
                                             {
                                                 <MudItem md="12">
-                                                    <MudSelect For="@(() => CurrentInsuaranceCompany.Id)"
-                                                               @bind-Value="CurrentInsuaranceCompany.Id"
-                                                               Label="Insuarance Company" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                    <MudSelect T="int"
+                                                               @bind-Value="CurrentPolicy.InsuaranceId"
+                                                               @bind-Value:after="OnInsuranceCompanyChanged"
+                                                               Label="Insurance Company" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                        <MudSelectItem Value="0" Disabled>Insuarance Company</MudSelectItem>
-
+                                                        <MudSelectItem Value="0" Disabled>Select Insurance</MudSelectItem>
                                                         @foreach (var item in InsuaranceCompanies)
                                                         {
                                                             <MudSelectItem Value="@item.Id">@item.InsuaranceName</MudSelectItem>
                                                         }
                                                     </MudSelect>
                                                 </MudItem>
+
+                                                @if (AvailableSchemes.Any())
+                                                {
+                                                    <MudItem md="12">
+                                                        <MudSelect T="int?"
+                                                                   @bind-Value="CurrentPolicy.InsuranceSchemeId"
+                                                                   Label="Insurance Scheme / Plan" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                                            <MudSelectItem T="int?" Value="@((int?)null)">Standard / Default Scheme</MudSelectItem>
+                                                            @foreach (var scheme in AvailableSchemes)
+                                                            {
+                                                                <MudSelectItem T="int?" Value="@((int?)scheme.Id)">
+                                                                    @($"{scheme.SchemeName} ({scheme.DefaultCoveragePercent:0}%)")
+                                                                </MudSelectItem>
+                                                            }
+                                                        </MudSelect>
+                                                    </MudItem>
+                                                }
+
                                                 <MudItem md="12">
-                                                    <MudStaticTextField For="@(() => CurrentInsuaranceCompany.InsuranceNumber)" @bind-Value="CurrentInsuaranceCompany.InsuranceNumber" Margin="Margin.Dense"
-                                                                        Label="Insurance Number" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Insurance Number"
-                                                                        UserAttributes="@(new() { { "autocomplete", "fisrtName" }, { "aria-required", "true" } } )" />
+                                                    <MudStaticTextField @bind-Value="CurrentPolicy.MemberCardNumber" Margin="Margin.Dense"
+                                                                        Label="Member Card Number" Variant="Variant.Outlined" InputType="InputType.Text"
+                                                                        Placeholder="e.g. NHIF / Jubilee Card No." />
+                                                </MudItem>
+
+                                                <MudItem md="12">
+                                                    <MudStaticTextField @bind-Value="CurrentVisitAuth.AuthorizationNumber" Margin="Margin.Dense"
+                                                                        Label="Pre-Auth / Approval Number" Variant="Variant.Outlined" InputType="InputType.Text"
+                                                                        Placeholder="NHIF / ZHIF / TPA Auth Code" />
                                                 </MudItem>
                                             }
+
                                         </MudGrid>
                                     </MudItem>
                                     @if (CurrentVisit.VisitTypeId == 2)
@@ -550,10 +577,10 @@
                                                                     <MudSelect For="@(() => CurrentPrescription.MedicineId)"
                                                                                @bind-Value="CurrentPrescription.MedicineId"
                                                                                @bind-Value:after="@(() =>
-                                                                               {
-                                                                                   CurrentPrescription.MedicineName = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.MedicineName ?? string.Empty;
-                                                                                   CurrentPrescription.UnitPrice = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.BuyingPrice ?? 0m;
-                                                                               })"
+                                                                                                                                                       {
+                                                                                                                                                           CurrentPrescription.MedicineName = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.MedicineName ?? string.Empty;
+                                                                                                                                                           CurrentPrescription.UnitPrice = FilteredMedicines.FirstOrDefault(x => x.Id == CurrentPrescription.MedicineId)?.BuyingPrice ?? 0m;
+                                                                                                                                                       })"
                                                                                Disabled="@(CurrentVisit.VisitTypeId == 0)"
                                                                                Label="Select Medicine" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
@@ -724,50 +751,35 @@
                                         <MudCheckBox @bind-Value="_step3Complete" ReadOnly="true" Dense="true" Color="Color.Success">Preliminary Test</MudCheckBox>
                                     </MudItem>
                                     <MudItem md="10">
-                                        <MudText Color="Color.Error" Align="Align.End">Patient should proceed to the cashier to make payment for any of the requested service before proceeding with preliminary tests</MudText>
+                                        <MudText Color="@(CanTakePreliminaryTest ? Color.Success : Color.Error)" Align="Align.End">@(CanTakePreliminaryTest ? "" : "Patient should proceed to the cashier to make payment for any of the requested service before proceeding with preliminary tests")</MudText>
                                     </MudItem>
                                 </MudGrid>
-                                <MudGrid Spacing="5" Justify="Justify.Center" Class="rounded-2" Style="border:none; background-color: rgba(0,0,0,0.5)">
+                                <MudGrid Spacing="5" Justify="Justify.Center" Class="rounded-2" Style="@(CanTakePreliminaryTest ? "" : " border:none; background-color: rgba(0,0,0,0.5)")">
                                     <MudItem md="12" Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
                                         <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Preliminary Tests</MudText>
                                         <MudGrid Class="pa-3">
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryPressure)" @bind-Value="CurrentPreliminaryTest.PreliminaryPressure" Margin="Margin.Dense"
                                                                  Label="Pressure" Variant="Variant.Outlined" Placeholder="Pressure"
-                                                                 ReadOnly="@(!(
-                                                                                                                                                 (CurrentVisit.Consultations?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.LabTests?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.Prescriptions?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.Treatments?.Any(x => x.BillItemId != null) ?? false)
-                                                                                                                                             ))"
+                                                                 Disabled="@(!CanTakePreliminaryTest)"
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminarypressure" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryWeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryWeight" Margin="Margin.Dense"
                                                                  Label="Weight" Variant="Variant.Outlined" Placeholder="Weight"
-                                                                 ReadOnly="@(!(
-                                                                                                                                                 (CurrentVisit.Consultations?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.LabTests?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.Prescriptions?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.Treatments?.Any(x => x.BillItemId != null) ?? false)
-                                                                                                                                             ))"
+                                                                 Disabled="@(!CanTakePreliminaryTest)"
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminaryweight" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                             <MudItem md="4">
                                                 <MudNumericField For="@(() => CurrentPreliminaryTest.PreliminaryHeight)" @bind-Value="CurrentPreliminaryTest.PreliminaryHeight" Margin="Margin.Dense"
                                                                  Label="Height" Variant="Variant.Outlined" Placeholder="Height"
-                                                                 ReadOnly="@(!(
-                                                                                                                                                 (CurrentVisit.Consultations?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.LabTests?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.Prescriptions?.Any(x => x.BillItemId != null) ?? false) ||
-                                                                                                                                                 (CurrentVisit.Treatments?.Any(x => x.BillItemId != null) ?? false)
-                                                                                                                                             ))"
+                                                                 Disabled="@(!CanTakePreliminaryTest)"
                                                                  UserAttributes="@(new() { { "autocomplete", "preliminaryheight" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                         </MudGrid>
                                     </MudItem>
-
                                 </MudGrid>
+
                             </MudStep>
                         </MudStepper>
 
@@ -789,6 +801,7 @@
     [Parameter] public EventCallback<bool> OnBack { get; set; }
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public int PatientId { get; set; }
 
     List<PatientStatusDto> PatientTypes = new();
     List<PatientTypeDto> PatientStatus = new();
@@ -824,6 +837,10 @@
     ConsultationDto CurrentConsultation = new();
     LabTestDto CurrentLabTest = new();
     InsuaranceDto CurrentInsuaranceCompany = new();
+    List<InsuranceSchemeDto> AvailableSchemes = new();
+    PatientInsuaranceDto CurrentPolicy = new() { IsPrimary = true, IsActive = true };
+    VisitInsuranceAuthDto CurrentVisitAuth = new();
+
     DoctorDto CurrentDoctor = new();
 
     int selectedMedGenreId = 0;
@@ -850,6 +867,14 @@
     bool HasDoctorId;
     bool HasRoomId;
 
+    private bool CanTakePreliminaryTest =>
+        CurrentVisit.PaymentModeId == 2 ||
+        (CurrentVisit.Consultations?.Any(x => x.BillItemId != null) ?? false) ||
+        (CurrentVisit.LabTests?.Any(x => x.BillItemId != null) ?? false) ||
+        (CurrentVisit.Prescriptions?.Any(x => x.BillItemId != null) ?? false) ||
+        (CurrentVisit.Treatments?.Any(x => x.BillItemId != null) ?? false);
+
+
     protected override async Task OnInitializedAsync()
     {
         PatientTypes = await patientService.GetAllPatientTypesAsync();
@@ -869,6 +894,22 @@
         AllMedicalDepts = await medicineService.GetAllMedicalDeptsAsync();
         AllWards = await roomService.GetAllWardsAsync();
         AllRooms = await roomService.GetAllRoomsAsync();
+
+        if (PatientId > 0)
+        {
+            CurrentPatient = await patientService.GetPatientByIdAsync(PatientId);
+            _step1Complete = !string.IsNullOrWhiteSpace(CurrentPatient.PatientCode);
+
+            // Pre-load patient's active insurance card if they have one
+            var policies = await patientService.GetPatientInsurancesAsync(PatientId);
+            var primary = policies.FirstOrDefault();
+            if (primary != null)
+            {
+                CurrentPolicy = primary;
+                AvailableSchemes = await paymentService.GetSchemesByInsuranceIdAsync(primary.InsuaranceId);
+            }
+        }
+
     }
 
     public async Task OnMedicineGenreChange()
@@ -924,8 +965,37 @@
 
     public async Task OnPaymentModeChange()
     {
-        CurrentPaymentMode.PaymentModeName = PaymentModes.Where(x => x.Id == CurrentPaymentMode.Id).Select(s => s.PaymentModeName).FirstOrDefault() ?? string.Empty;
+        CurrentPaymentMode.Id = CurrentVisit.PaymentModeId;
+        CurrentPaymentMode.PaymentModeName = PaymentModes
+            .Where(x => x.Id == CurrentVisit.PaymentModeId)
+            .Select(s => s.PaymentModeName)
+            .FirstOrDefault() ?? string.Empty;
+
+        if (CurrentVisit.PaymentModeId == 2 && CurrentPatient.Id > 0)
+        {
+            var existingPolicies = await patientService.GetPatientInsurancesAsync(CurrentPatient.Id);
+            var primary = existingPolicies.FirstOrDefault();
+            if (primary != null)
+            {
+                CurrentPolicy = primary;
+                AvailableSchemes = await paymentService.GetSchemesByInsuranceIdAsync(primary.InsuaranceId);
+            }
+        }
     }
+
+    public async Task OnInsuranceCompanyChanged()
+    {
+        CurrentPolicy.InsuranceSchemeId = null;
+        if (CurrentPolicy.InsuaranceId > 0)
+        {
+            AvailableSchemes = await paymentService.GetSchemesByInsuranceIdAsync(CurrentPolicy.InsuaranceId);
+        }
+        else
+        {
+            AvailableSchemes.Clear();
+        }
+    }
+
 
     public async Task RegisterPatient()
     {
@@ -1018,11 +1088,36 @@
 
                     if (CurrentVisit.Id == 0 && CurrentVisit.VisitTypeId > 0)
                     {
-                        CurrentVisit.VisitDate = DateTime.Now;
+                        CurrentVisit.VisitDate = DateTime.UtcNow;
                         CurrentVisit.PatientId = CurrentPatient.Id;
                         CurrentVisit.VisitStatusId = 1;
+
+                        // If Visit is Insurance (2), save/link PatientInsuarance first
+                        if (CurrentVisit.PaymentModeId == 2 && CurrentPolicy.InsuaranceId > 0 && !string.IsNullOrWhiteSpace(CurrentPolicy.MemberCardNumber))
+                        {
+                            CurrentPolicy.PatientId = CurrentPatient.Id;
+                            int policyId = CurrentPolicy.PatientInsuaranceId > 0
+                                ? CurrentPolicy.PatientInsuaranceId
+                                : await patientService.AddPatientInsuranceAsync(CurrentPolicy);
+
+                            CurrentPolicy.PatientInsuaranceId = policyId;
+                            CurrentVisit.PatientInsuaranceId = policyId;
+                        }
+
                         addedVisitId = await patientService.AddVisitAsync(CurrentVisit);
+
+                        // Save NHIF / ZHIF / TPA Authorization Number if provided
+                        if (addedVisitId > 0 && CurrentVisit.PaymentModeId == 2 && CurrentVisit.PatientInsuaranceId.HasValue
+                            && !string.IsNullOrWhiteSpace(CurrentVisitAuth.AuthorizationNumber))
+                        {
+                            CurrentVisitAuth.VisitId = addedVisitId;
+                            CurrentVisitAuth.PatientInsuaranceId = CurrentVisit.PatientInsuaranceId.Value;
+                            CurrentVisitAuth.CardNumber = CurrentPolicy.MemberCardNumber;
+                            CurrentVisitAuth.IsVerified = true;
+                            await patientService.SaveVisitInsuranceAuthAsync(CurrentVisitAuth);
+                        }
                     }
+
 
                     CurrentVisit.Id = addedVisitId;
 
@@ -1078,6 +1173,10 @@
                         }
 
                         await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
+
+                        // Automatically generate Interim Bill & calculate Insurance vs. Patient split
+                        await AutoGenerateVisitBillAsync(CurrentVisit.Id);
+
                     }
 
                     // if (CurrentPreliminaryTest.Id == 0)
@@ -1207,7 +1306,6 @@
 
     public async Task AddLabTestToBatch(LabTestDto labTestDto)
     {
-        var patient = await patientService.GetPatientByIdAsync(labTestDto.PatientId);
         var disease = await diseaseService.GetDiseaseByNameAsync(labTestDto.DiseaseName);
         var newLabTest = new LabTestDto
         {
@@ -1215,11 +1313,11 @@
             LabTestStatusName = "New",
             TestResult = labTestDto.TestResult,
             ResultAttachment = labTestDto.ResultAttachment,
-            LabTestCost = disease.LabTestCost,
-            CreatedDate = DateTime.Now,
-            UpdaterLabTechnician = $"{CurrentUser.FisrtName} {CurrentUser.MiddleName} {CurrentUser.LastName}",
-            PatientFullName = $"{patient.FisrtName} {patient.MiddleName} {patient.LastName}",
-            PatientId = labTestDto.PatientId
+            LabTestCost = disease?.LabTestCost ?? 0m,
+            CreatedDate = DateTime.UtcNow,
+            UpdaterLabTechnician = $"{CurrentUser.FisrtName} {CurrentUser.MiddleName} {CurrentUser.LastName}".Replace("  ", " ").Trim(),
+            PatientFullName = $"{CurrentPatient.FisrtName} {CurrentPatient.MiddleName} {CurrentPatient.LastName}".Replace("  ", " ").Trim(),
+            PatientId = CurrentPatient.Id
         };
 
         if (!string.IsNullOrWhiteSpace(newLabTest.DiseaseName))
@@ -1227,6 +1325,7 @@
 
         await InvokeAsync(StateHasChanged);
     }
+
 
     public async Task RemoveLabTestFromBatch(LabTestDto labTestDto)
     {
@@ -1341,11 +1440,11 @@
                 }
                 else
                 {
-
                     var isSucess = await patientService.AddConsultationAsync(consultation);
 
                     if (isSucess > 0)
                     {
+                        consultation.Id = isSucess; // Capture generated DB Id
                         saveMessage = $"{consultation.VisitTypeName} for {consultation.VisitId} added sucessfully";
                         Console.WriteLine(saveMessage);
                     }
@@ -1355,6 +1454,7 @@
                         Console.WriteLine(saveMessage);
                     }
                 }
+
             }
 
         }
@@ -1400,7 +1500,8 @@
             DoctorId = CurrentTreatment.DoctorId,
             RoomId = CurrentTreatment.RoomId,
 
-            TreatmentStatusId = CurrentTreatment.TreatmentStatusId,
+            VisitId = CurrentVisit.Id,
+            TreatmentStatusId = 1,
             TreatmentTypeId = CurrentTreatment.TreatmentTypeId
         };
 
@@ -1461,11 +1562,11 @@
                 }
                 else
                 {
-
                     var isSucess = await medicineService.AddTreatmentAsync(treatment);
 
                     if (isSucess > 0)
                     {
+                        treatment.Id = isSucess; // Capture generated DB Id
                         saveMessage = $"Treatment added sucessfully";
                         Console.WriteLine(saveMessage);
                     }
@@ -1475,6 +1576,7 @@
                         Console.WriteLine(saveMessage);
                     }
                 }
+
             }
 
         }
@@ -1571,11 +1673,11 @@
                 }
                 else
                 {
-
                     var isSucess = await medicineService.AddPrescriptionAsync(prescription);
 
                     if (isSucess > 0)
                     {
+                        prescription.Id = isSucess; // Capture generated DB Id
                         saveMessage = $"Prescription added sucessfully";
                         Console.WriteLine(saveMessage);
                     }
@@ -1585,6 +1687,7 @@
                         Console.WriteLine(saveMessage);
                     }
                 }
+
             }
 
         }
@@ -1597,4 +1700,140 @@
             isSaving = false;
         }
     }
+
+    private async Task AutoGenerateVisitBillAsync(int visitId)
+    {
+        // Reload visit so every saved Consultation, LabTest, Treatment & Prescription has its database Id
+        var savedVisit = await patientService.GetVisitByPCodeOrFullNameAsync(CurrentPatient.PatientCode);
+        if (savedVisit == null)
+            return;
+
+        var itemsToBill = new List<BillItemDto>();
+
+        // 1. Unbilled Consultations
+        foreach (var c in savedVisit.Consultations.Where(x => x.BillItemId == null))
+        {
+            itemsToBill.Add(new BillItemDto
+            {
+                ItemName = $"{c.MedicalDepartmentName} Consultation - Dr. {c.DoctorFullName}".Trim(),
+                SourceType = "Consultation",
+                SourceItemId = c.Id,
+                Quantity = 1,
+                UnitPrice = c.ConsultationCost
+            });
+        }
+
+        // 2. Unbilled Lab Tests
+        foreach (var l in savedVisit.LabTests.Where(x => x.BillItemId == null))
+        {
+            itemsToBill.Add(new BillItemDto
+            {
+                ItemName = $"Lab Test: {l.DiseaseName}",
+                SourceType = "LabTest",
+                SourceItemId = l.Id,
+                Quantity = 1,
+                UnitPrice = l.LabTestCost
+            });
+        }
+
+        // 3. Unbilled Treatments
+        foreach (var t in savedVisit.Treatments.Where(x => x.BillItemId == null))
+        {
+            var desc = !string.IsNullOrWhiteSpace(t.SurgeryName) ? t.SurgeryName
+                     : !string.IsNullOrWhiteSpace(t.TherapyName) ? t.TherapyName
+                     : !string.IsNullOrWhiteSpace(t.WardName) ? t.WardName
+                     : t.TreatmentTypeName;
+
+            itemsToBill.Add(new BillItemDto
+            {
+                ItemName = $"{t.TreatmentTypeName}: {desc}".Trim(),
+                SourceType = "Treatment",
+                SourceItemId = t.Id,
+                Quantity = t.TreatmentQty > 0 ? t.TreatmentQty : 1,
+                UnitPrice = t.TreatmentCost
+            });
+        }
+
+        // 4. Unbilled Prescriptions
+        foreach (var p in savedVisit.Prescriptions.Where(x => x.BillItemId == null))
+        {
+            itemsToBill.Add(new BillItemDto
+            {
+                ItemName = $"{p.MedicineName} ({p.Quantity})",
+                SourceType = "Prescription",
+                SourceItemId = p.Id,
+                Quantity = p.Quantity > 0 ? p.Quantity : 1,
+                UnitPrice = p.UnitPrice
+            });
+        }
+
+        if (!itemsToBill.Any())
+            return;
+
+        // Create Interim Bill (BillTypeId = 2) — PaymentService automatically calculates Insurance vs. Patient Copay!
+        var newBill = new BillDto
+        {
+            BillDate = DateTime.UtcNow,
+            BillNumber = $"NCMH-BN-{DateTime.UtcNow:yyMMddHHmmss}",
+            BillDescription = $"Visit #{visitId} Initial Services",
+            VisitId = visitId,
+            BillTypeId = 2, // 2 = Interim Bill
+            PaymentModeId = CurrentVisit.PaymentModeId > 0 ? CurrentVisit.PaymentModeId : 1,
+            PatientInsuaranceId = CurrentVisit.PatientInsuaranceId,
+            StaffId = CurrentUser.Id,
+            BillItems = itemsToBill
+        };
+
+        var createdBill = await paymentService.AddBillAsync(newBill);
+
+        // Link each generated BillItem.Id back to its Consultation / LabTest / Treatment / Prescription
+        if (createdBill != null && createdBill.Id > 0)
+        {
+            foreach (var bi in createdBill.BillItems)
+            {
+                switch (bi.SourceType.Trim().ToLower())
+                {
+                    case "consultation":
+                        var cons = await patientService.GetConsultationByIdAsync(bi.SourceItemId);
+                        if (cons.Id > 0)
+                        {
+                            cons.BillItemId = bi.Id;
+                            await patientService.UpdateConsultationAsync(cons, cons.Id);
+                        }
+                        break;
+
+                    case "labtest":
+                        var lab = await labTestService.GetLabTestByIdAsync(bi.SourceItemId);
+                        if (lab.Id > 0)
+                        {
+                            lab.BillItemId = bi.Id;
+                            await labTestService.UpdateLabTestAsync(lab, lab.Id);
+                        }
+                        break;
+
+                    case "treatment":
+                        var treat = await medicineService.GetTreatmentByIdAsync(bi.SourceItemId);
+                        if (treat.Id > 0)
+                        {
+                            treat.BillItemId = bi.Id;
+                            await medicineService.UpdateTreatmentAsync(treat, treat.Id);
+                        }
+                        break;
+
+                    case "prescription":
+                        var presc = await medicineService.GetPrescriptionByIdAsync(bi.SourceItemId);
+                        if (presc.Id > 0)
+                        {
+                            presc.BillItemId = bi.Id;
+                            await medicineService.UpdatePrescriptionAsync(presc, presc.Id);
+                        }
+                        break;
+                }
+            }
+
+            // Refresh CurrentVisit so Step 3 Preliminary Tests unlocks immediately if insured/billed
+            CurrentVisit = await patientService.GetVisitByPCodeOrFullNameAsync(CurrentPatient.PatientCode) ?? CurrentVisit;
+        }
+    }
+
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NovaCare.Components.Pages.LabPages;
 using NovaCare.Data;
 using NovaCare.Interfaces;
 using NovaCare.Modals.LabTestModals;
@@ -52,6 +53,57 @@ namespace NovaCare.Services
             using var context = _contextFactory.CreateDbContext();
             var labTests = await context.LabTests
                 .AsNoTracking()
+                .OrderByDescending(l => l.CreatedDate)
+                .Select(labTest => new LabTestDto
+                {
+                    Id = labTest.Id,
+                    DiseaseName = labTest.DiseaseName,
+                    LabTestStatusName = labTest.LabTestStatusName,
+                    TestResult = labTest.TestResult,
+                    BillItemId = labTest.BillItemId,
+                    LabTestCost = labTest.LabTestCost,
+                    ResultAttachment = labTest.ResultAttachment,
+                    CreatedDate = labTest.CreatedDate,
+                    PatientId = labTest.Visit != null ? labTest.Visit.PatientId : 0,
+                    PatientFullName = labTest.Visit != null && labTest.Visit.Patient != null
+                        ? labTest.Visit.Patient.PatientFullName
+                        : string.Empty,
+                    ConsultationId = labTest.ConsultationId,
+                    RequesteeDoctor = labTest.RequesteeDoctor,
+                    UpdaterLabTechnician = labTest.UpdaterLabTechnician,
+                    PaymentStatusName = (labTest.BillItem != null && labTest.BillItem.Bill != null && labTest.BillItem.Bill.PaymentStatus != null)
+                        ? labTest.BillItem.Bill.PaymentStatus.PaymentStatusName
+                        : "Unpaid",
+                    IsReadyForService =
+                        (labTest.BillItem != null && labTest.BillItem.Bill != null && labTest.BillItem.Bill.PaymentStatusId == 3)
+                        ||
+                        (labTest.BillItem != null && labTest.BillItem.Bill != null &&
+                         labTest.BillItem.Bill.PaymentModeId == 2 &&
+                         labTest.BillItem.Bill.PatientPaidAmount >= labTest.BillItem.Bill.TotalPatientAmount)
+                })
+                .ToListAsync();
+
+            return labTests ?? new();
+        }
+
+
+        public async Task<ReportPreviewDto<LabTestDto>> GetAllLabTestsAsync(DateTime? fromDate, DateTime? toDate)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var labTests = await context.LabTests
+                .AsNoTracking()
+                .Where(labTest =>
+                    // 1. Bill is Paid (Cash or settled)
+                    ((labTest.BillItem != null && labTest.BillItem.Bill != null && labTest.BillItem.Bill.PaymentStatusId == 3)
+                    ||
+                    // 2. Insurance visit/bill where patient's copay (if any) is already paid
+                    (labTest.BillItem != null && labTest.BillItem.Bill != null &&
+                     labTest.BillItem.Bill.PaymentModeId == 2 &&
+                     labTest.BillItem.Bill.PatientPaidAmount >= labTest.BillItem.Bill.TotalPatientAmount)) &&
+
+                     // 3. Report dates
+                     labTest.CreatedDate >= fromDate && labTest.CreatedDate <= toDate
+                )
                 .Select(labTest => new LabTestDto
                 {
                     Id = labTest.Id,
@@ -63,36 +115,15 @@ namespace NovaCare.Services
                     ResultAttachment = labTest.ResultAttachment,
                     CreatedDate = labTest.CreatedDate,
                     PatientId = labTest.Visit!.PatientId,
-                    PatientFullName = $" {labTest.Visit!.Patient!.PatientFullName}",
+                    PatientFullName = labTest.Visit != null && labTest.Visit.Patient != null
+                        ? labTest.Visit.Patient.PatientFullName
+                        : string.Empty,
                     ConsultationId = labTest.ConsultationId,
                     RequesteeDoctor = labTest.RequesteeDoctor,
-                    UpdaterLabTechnician = labTest.UpdaterLabTechnician
-                    })
-                .ToListAsync();
-
-            return labTests;
-        }
-
-        public async Task<ReportPreviewDto<LabTestDto>> GetAllLabTestsAsync(DateTime? fromDate, DateTime? toDate)
-        {
-            using var context = _contextFactory.CreateDbContext();
-            var labTests = await context.LabTests
-                .Where(x => x.CreatedDate >= fromDate && x.CreatedDate <= toDate)
-                .AsNoTracking()
-                .Select(labTest => new LabTestDto
-                {
-                    Id = labTest.Id,
-                    DiseaseName = labTest.DiseaseName,
-                    LabTestStatusName = labTest.LabTestStatusName,
-                    TestResult = labTest.TestResult,
-                    LabTestCost = labTest.LabTestCost,
-                    ResultAttachment = labTest.ResultAttachment,
-                    CreatedDate = labTest.CreatedDate,
-                    PatientId = labTest.Visit!.PatientId,
-                    PatientFullName = $" {labTest.Visit!.Patient!.PatientFullName}",
-                    ConsultationId = labTest.ConsultationId,
-                    RequesteeDoctor = labTest.RequesteeDoctor,
-                    UpdaterLabTechnician = labTest.UpdaterLabTechnician
+                    UpdaterLabTechnician = labTest.UpdaterLabTechnician,
+                    PaymentStatusName = (labTest.BillItem != null && labTest.BillItem.Bill != null && labTest.BillItem.Bill.PaymentStatus != null)
+                        ? labTest.BillItem.Bill.PaymentStatus.PaymentStatusName
+                        : "Unpaid"
                 })
                 .ToListAsync();
 
@@ -121,7 +152,7 @@ namespace NovaCare.Services
                     existingLabTest.ResultAttachment = dto.ResultAttachment;
                     existingLabTest.RequesteeDoctor = dto.RequesteeDoctor;
                     existingLabTest.UpdaterLabTechnician = dto.UpdaterLabTechnician;
-                    existingLabTest.BillItemId = dto.BillItemId;
+                    existingLabTest.BillItemId = dto.BillItemId ?? existingLabTest.BillItemId;
                     existingLabTest.LabTestCost = existingLabTest.LabTestCost;
                     existingLabTest.LabTestResultCompositions = existingLabTest.LabTestResultCompositions;
 

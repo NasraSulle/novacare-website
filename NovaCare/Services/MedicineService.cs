@@ -236,26 +236,35 @@ namespace NovaCare.Services
                 using var context = _contextFactory.CreateDbContext();
                 var existingTreatment = await context.Treatments.FirstOrDefaultAsync(x => x.Id == treatmentId);
 
-
                 if (existingTreatment != null)
                 {
-                    existingTreatment.StartDate = dto.StartDate;
-                    existingTreatment.FinishDate = dto.FinishDate;
-                    existingTreatment.TreatmentQty = dto.TreatmentQty;
-                    existingTreatment.TreatmentCost = dto.TreatmentCost;
-                    existingTreatment.SurgeryId = dto.SurgeryId;
-                    existingTreatment.TherapyId = dto.TherapyId;
-                    existingTreatment.MedicalDeptId = dto.MedicalDeptId;
-                    existingTreatment.WardId = dto.WardId;
-                    existingTreatment.DoctorId = dto.DoctorId;
-                    existingTreatment.RoomId = dto.RoomId;
-                    existingTreatment.TreatmentStatusId = dto.TreatmentStatusId;
-                    existingTreatment.TreatmentTypeId = dto.TreatmentTypeId;
-                    existingTreatment.BillItemId = dto.BillItemId;
-                    existingTreatment.VisitId = dto.VisitId;
-                    existingTreatment.ConsultationId = dto.ConsultationId;
+                    existingTreatment.StartDate = dto.StartDate ?? existingTreatment.StartDate;
+                    existingTreatment.FinishDate = dto.FinishDate ?? existingTreatment.FinishDate;
 
-                    context.Treatments.Update(existingTreatment);
+                    if (dto.TreatmentQty > 0)
+                        existingTreatment.TreatmentQty = dto.TreatmentQty;
+
+                    if (dto.TreatmentCost > 0)
+                        existingTreatment.TreatmentCost = dto.TreatmentCost;
+
+                    existingTreatment.SurgeryId = dto.SurgeryId ?? existingTreatment.SurgeryId;
+                    existingTreatment.TherapyId = dto.TherapyId ?? existingTreatment.TherapyId;
+                    existingTreatment.MedicalDeptId = dto.MedicalDeptId ?? existingTreatment.MedicalDeptId;
+                    existingTreatment.WardId = dto.WardId ?? existingTreatment.WardId;
+                    existingTreatment.DoctorId = dto.DoctorId ?? existingTreatment.DoctorId;
+                    existingTreatment.RoomId = dto.RoomId ?? existingTreatment.RoomId;
+                    existingTreatment.BillItemId = dto.BillItemId ?? existingTreatment.BillItemId;
+                    existingTreatment.ConsultationId = dto.ConsultationId ?? existingTreatment.ConsultationId;
+
+                    if (dto.TreatmentStatusId > 0)
+                        existingTreatment.TreatmentStatusId = dto.TreatmentStatusId;
+
+                    if (dto.TreatmentTypeId > 0)
+                        existingTreatment.TreatmentTypeId = dto.TreatmentTypeId;
+
+                    if (dto.VisitId > 0)
+                        existingTreatment.VisitId = dto.VisitId;
+
                     await context.SaveChangesAsync();
                 }
 
@@ -268,28 +277,59 @@ namespace NovaCare.Services
             }
         }
 
-        public async Task<List<TreatmentTypeDto>> GetAllTreatmentTypeAsync()
+
+        public async Task<List<TreatmentDto>> GetAllTreatmentsAsync()
         {
             using var context = _contextFactory.CreateDbContext();
-            var treatments = await context.TreatmentTypes
-                .AsNoTracking()
-                .Select(treatment => new TreatmentTypeDto
-                {
-                    Id = treatment.Id,
-                    TreatmentTypeName = treatment.TreatmentTypeName,
-                    TreatmentTypeCode = treatment.TreatmentTypeCode,
 
-                    HasSurgeryId = treatment.HasSurgeryId,
-                    HasTherapyId = treatment.HasTherapyId,
-                    HasMedicalDeptId = treatment.HasMedicalDeptId,
-                    HasWardId = treatment.HasWardId,
-                    HasDoctorId = treatment.HasDoctorId,
-                    HasRoomId = treatment.HasRoomId
+            var treatments = await context.Treatments
+                .AsNoTracking()
+                .OrderByDescending(t => t.StartDate)
+                .Select(t => new TreatmentDto
+                {
+                    Id = t.Id,
+                    StartDate = t.StartDate,
+                    FinishDate = t.FinishDate,
+                    TreatmentQty = t.TreatmentQty,
+                    TreatmentCost = t.TreatmentCost,
+                    VisitId = t.VisitId,
+                    ConsultationId = t.ConsultationId,
+                    BillItemId = t.BillItemId,
+                    SurgeryId = t.SurgeryId,
+                    TherapyId = t.TherapyId,
+                    MedicalDeptId = t.MedicalDeptId,
+                    WardId = t.WardId,
+                    DoctorId = t.DoctorId,
+                    RoomId = t.RoomId,
+                    TreatmentStatusId = t.TreatmentStatusId,
+                    TreatmentTypeId = t.TreatmentTypeId,
+
+                    // UI Display Helpers
+                    TreatmentStatusName = t.TreatmentStatus != null ? t.TreatmentStatus.TreatmentStatusName : string.Empty,
+                    TreatmentTypeName = t.TreatmentType != null ? t.TreatmentType.TreatmentTypeName : string.Empty,
+                    SurgeryName = t.Surgery != null ? t.Surgery.SurgeryName : string.Empty,
+                    TherapyName = t.Therapy != null ? t.Therapy.TherapyName : string.Empty,
+                    MedicalDeptName = t.MedicalDepartment != null ? t.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    WardName = t.Ward != null ? t.Ward.WardName : string.Empty,
+                    DoctorName = t.Doctor != null && t.Doctor.Staff != null
+                        ? $"{t.Doctor.Staff.FisrtName} {t.Doctor.Staff.MiddleName} {t.Doctor.Staff.LastName}".Replace("  ", " ").Trim()
+                        : string.Empty,
+                    RoomName = t.Room != null ? t.Room.RoomName : string.Empty,
+                    PaymentStatusName = (t.BillItem != null && t.BillItem.Bill != null && t.BillItem.Bill.PaymentStatus != null)
+                        ? t.BillItem.Bill.PaymentStatus.PaymentStatusName
+                        : "Unpaid",
+                    IsReadyForService =
+                        (t.BillItem != null && t.BillItem.Bill != null && t.BillItem.Bill.PaymentStatusId == 3)
+                        ||
+                        (t.BillItem != null && t.BillItem.Bill != null &&
+                         t.BillItem.Bill.PaymentModeId == 2 &&
+                         t.BillItem.Bill.PatientPaidAmount >= t.BillItem.Bill.TotalPatientAmount)
                 })
                 .ToListAsync();
 
-            return treatments;
+            return treatments ?? new();
         }
+
 
         public async Task<List<SurgeryDto>> GetAllSurgeriesAsync()
         {
@@ -362,6 +402,7 @@ namespace NovaCare.Services
                     ConsultationId = dto.ConsultationId,
                     DoctorId = dto.DoctorId,
                     MedicineId = dto.MedicineId,
+                    IsDispensed = false,
                     BillItemId = dto.BillItemId,
                 };
 
@@ -384,33 +425,38 @@ namespace NovaCare.Services
                 using var context = _contextFactory.CreateDbContext();
                 var existingPresc = await context.Prescriptions.FirstOrDefaultAsync(x => x.Id == prescId);
 
+                if (existingPresc == null)
+                    return false;
 
-                if (existingPresc != null)
-                {
+                if (dto.PrescribedDate != default)
                     existingPresc.PrescribedDate = dto.PrescribedDate;
-                    existingPresc.Quantity = dto.Quantity;
-                    existingPresc.Dosage = dto.Dosage;
-                    existingPresc.Notes = dto.Notes;
 
+                existingPresc.Quantity = dto.Quantity;
+                existingPresc.Dosage = dto.Dosage;
+                existingPresc.Notes = dto.Notes;
+                existingPresc.IsDispensed = dto.IsDispensed;
+
+                if (dto.UnitPrice > 0)
                     existingPresc.UnitPrice = dto.UnitPrice;
+
+                if (dto.VisitId > 0)
                     existingPresc.VisitId = dto.VisitId;
-                    existingPresc.ConsultationId = dto.ConsultationId;
-                    existingPresc.MedicineId = dto.MedicineId;
-                    existingPresc.DoctorId = dto.DoctorId;
-                    existingPresc.BillItemId = dto.BillItemId;
 
-                    context.Prescriptions.Update(existingPresc);
-                    await context.SaveChangesAsync();
-                }
+                existingPresc.ConsultationId = dto.ConsultationId ?? existingPresc.ConsultationId;
+                existingPresc.MedicineId = dto.MedicineId > 0 ? dto.MedicineId : existingPresc.MedicineId;
+                existingPresc.DoctorId = dto.DoctorId ?? existingPresc.DoctorId;
+                existingPresc.BillItemId = dto.BillItemId ?? existingPresc.BillItemId;
 
+                await context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex}");
+                Console.WriteLine($"Error updating prescription: {ex}");
                 return false;
             }
         }
+
 
         public async Task<PrescriptionDto> GetPrescriptionByIdAsync(int pId)
         {
@@ -423,6 +469,7 @@ namespace NovaCare.Services
                             Dosage = med.Dosage,
                             Notes = med.Notes,
                             UnitPrice = med.UnitPrice,
+                            IsDispensed = med.IsDispensed,
                             VisitId = med.VisitId,
                             ConsultationId = med.ConsultationId,
                             MedicineId = med.MedicineId,
@@ -472,6 +519,123 @@ namespace NovaCare.Services
                         }).FirstOrDefaultAsync();
 
             return presc ?? new();
+        }
+
+        public async Task<List<PrescriptionDto>> GetAllPrescriptionsAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var presc = await context.Prescriptions
+                .AsNoTracking()
+                .OrderByDescending(med => med.PrescribedDate)
+                .Select(med => new PrescriptionDto
+                {
+                    Id = med.Id,
+                    Quantity = med.Quantity,
+                    Dosage = med.Dosage,
+                    IsDispensed = med.IsDispensed,
+                    Notes = med.Notes,
+                    UnitPrice = med.UnitPrice,
+                    VisitId = med.VisitId,
+                    ConsultationId = med.ConsultationId,
+                    MedicineId = med.MedicineId,
+                    DoctorId = med.DoctorId,
+                    BillItemId = med.BillItemId,
+                    MedicineName = med.Medicine != null ? med.Medicine.MedicineName : string.Empty,
+                    DoctorFullName = med.Doctor != null && med.Doctor.Staff != null
+                        ? $"{med.Doctor.Staff.FisrtName} {med.Doctor.Staff.MiddleName} {med.Doctor.Staff.LastName}".Replace("  ", " ").Trim()
+                        : string.Empty,
+                    PrescribedDate = med.PrescribedDate,
+                    PaymentStatusName = (med.BillItem != null && med.BillItem.Bill != null && med.BillItem.Bill.PaymentStatus != null)
+                        ? med.BillItem.Bill.PaymentStatus.PaymentStatusName
+                        : "Unpaid",
+                    IsReadyForService =
+                        (med.BillItem != null && med.BillItem.Bill != null && med.BillItem.Bill.PaymentStatusId == 3)
+                        ||
+                        (med.BillItem != null && med.BillItem.Bill != null &&
+                         med.BillItem.Bill.PaymentModeId == 2 &&
+                         med.BillItem.Bill.PatientPaidAmount >= med.BillItem.Bill.TotalPatientAmount)
+                }).ToListAsync();
+
+            return presc ?? new();
+        }
+
+
+
+        public async  Task<ReportPreviewDto<PrescriptionDto>> GetAllPrescriptionsAsync(DateTime? fromDate, DateTime? toDate)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var presc = await context.Prescriptions
+                        .Where(x => x.PrescribedDate >= fromDate && x.PrescribedDate <= toDate)
+                        .Select(med => new PrescriptionDto
+                        {
+                            Id = med.Id,
+                            Quantity = med.Quantity,
+                            Dosage = med.Dosage,
+                            Notes = med.Notes,
+                            UnitPrice = med.UnitPrice,
+                            VisitId = med.VisitId,
+                            ConsultationId = med.ConsultationId,
+                            MedicineId = med.MedicineId,
+                            DoctorId = med.DoctorId,
+                            BillItemId = med.BillItemId,
+                            MedicineName = med.Medicine != null ? med.Medicine.MedicineName : string.Empty,
+                            DoctorFullName = med.Doctor != null ? $"{med.Doctor.Staff!.FisrtName} {med.Doctor.Staff!.MiddleName} {med.Doctor.Staff!.LastName}" : string.Empty,
+                            PrescribedDate = med.PrescribedDate
+                        }).ToListAsync();
+
+            var result = new ReportPreviewDto<PrescriptionDto>
+            {
+                FromDate = fromDate,
+                ToDate = toDate,
+                ReportType = "Medicine",
+                Data = presc
+            };
+            return result;
+        }
+
+        public async Task<List<TreatmentTypeDto>> GetAllTreatmentTypeAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var tTypes = await context.TreatmentTypes
+                .AsNoTracking()
+                .Select(treatmentType => new TreatmentTypeDto
+                {
+                    Id = treatmentType.Id,
+                    TreatmentTypeName = treatmentType.TreatmentTypeName,
+                    HasSurgeryId = treatmentType.HasSurgeryId,
+                    HasTherapyId = treatmentType.HasTherapyId,
+                    HasMedicalDeptId = treatmentType.HasMedicalDeptId,
+                    HasWardId = treatmentType.HasWardId,
+                    HasDoctorId = treatmentType.HasDoctorId,
+                    HasRoomId = treatmentType.HasRoomId,
+                    TreatmentTypeCode = treatmentType.TreatmentTypeCode
+                })
+                .ToListAsync();
+
+            return tTypes;
+        }
+
+        public async Task<MedicineDto> GetMedicineByIdAsync(int Id)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var medicine = await context.Medicines.Where(x => x.Id == Id)
+                        .Select(medicine => new MedicineDto
+                        {
+                            Id = medicine.Id,
+                            Picture = medicine.Picture,
+                            MedicineName = medicine.MedicineName,
+                            MedicineGenre = medicine.MedicineGenre,
+                            MedicineGenreId = medicine.MedicineGenreId,
+                            MedicineType = medicine.MedicineType,
+                            MedicineTypeId = medicine.MedicineTypeId,
+                            CreatedDate = medicine.CreatedDate,
+                            MedicineQty = medicine.MedicineQty,
+                            BuyingPrice = medicine.BuyingPrice,
+                            SellingPrice = medicine.SellingPrice,
+                            MedicineStatusName = medicine.MedicineStatus!.MedicineStatusName
+                        }).FirstOrDefaultAsync();
+
+            return medicine ?? new();
         }
     }
 }

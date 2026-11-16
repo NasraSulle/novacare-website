@@ -1,6 +1,4 @@
-﻿using NovaCare.Modals.DiseaseModals;
-using NovaCare.Modals.DoctorModals;
-using NovaCare.Modals.JoinTables;
+﻿using NovaCare.Modals.DoctorModals;
 using NovaCare.Modals.PatientModals;
 using NovaCare.Modals.RoomModals;
 using System.ComponentModel.DataAnnotations;
@@ -14,8 +12,12 @@ namespace NovaCare.Modals.TreatmentModals
         public int Id { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? FinishDate { get; set; } // Nullable until treatment finishes
-        public int TreatmentQty { get; set; } = 1;
+        public int TreatmentQty { get; set; } = 1; // e.g., number of ward days or therapy sessions
         public decimal TreatmentCost { get; set; } = 0m;
+
+        // Insurance Pre-Authorization (Critical for Surgeries & Inpatient Ward Admissions)
+        public string? PreAuthNumber { get; set; }
+        public string? ClinicalNotes { get; set; }
 
         // Required to link Treatment to a Patient Visit, Consultation, and BillItem
         [ForeignKey(nameof(Visit))]

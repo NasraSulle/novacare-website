@@ -100,10 +100,8 @@
     private bool _readOnly;
     private bool _isCellEditMode;
 
-    private void PreviewPatientProfile(int patientId)
-    {
-        //GetPatientById with aaaall Details
-    }
+
+
     //=====================HERE===============================
 
     [Parameter] public List<PatientDto>? AllPatients { get; set; } = new();
@@ -247,6 +245,22 @@
         var result = await dialog.Result;
 
         if (result != null)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task PreviewPatientProfile(int patientId)
+    {
+        var parameters = new DialogParameters
+        {
+            { "PatientId", patientId },
+            { "CurrentUser", CurrentUser }
+        };
+
+        var dialog = await Dialog.ShowAsync<EditPatient>("Patient Profile & New Visit", parameters, _maxWidth);
+        var result = await dialog.Result;
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }

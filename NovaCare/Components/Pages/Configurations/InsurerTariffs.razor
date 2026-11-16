@@ -1,0 +1,267 @@
+﻿@using NovaCare.Shared.DTOs.InsuranceDTOs
+@using NovaCare.Shared.DTOs.PaymentDTOs
+
+@inject ISnackbar Snackbar
+
+<PageTitle>Insurer Tariffs - NovaCare</PageTitle>
+
+<MudGrid Class="pa-4" Spacing="3">
+    <MudItem xs="12">
+        <SectionTitle Icon="@Icons.Material.Filled.PriceChange" Title="Insurer Tariffs & Coverage Rules" />
+    </MudItem>
+
+    <!-- FILTER & ADD TARIFF CARD -->
+    <MudItem xs="12">
+        <MudPaper Class="pa-4" Outlined="true">
+            <MudGrid Spacing="2" AlignItems="Center">
+                <MudItem md="4" xs="12">
+                    <MudSelect T="int" Value="@selectedInsuranceId" ValueChanged="@OnInsuranceChanged"
+                               Label="Insurance Provider" Variant="Variant.Outlined" Margin="Margin.Dense">
+                        <MudSelectItem Value="0" Disabled>Select Insurer (NHIF, ZHIF, Jubilee...)</MudSelectItem>
+                        @foreach (var ins in Insurers)
+                        {
+                            <MudSelectItem Value="@ins.Id">@ins.InsuaranceName</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem md="4" xs="12">
+                    <MudSelect T="int?" Value="@selectedSchemeId" ValueChanged="@OnSchemeChanged"
+                               Disabled="@(selectedInsuranceId == 0)"
+                               Label="Scheme (Optional)" Variant="Variant.Outlined" Margin="Margin.Dense">
+                        <MudSelectItem T="int?" Value="@((int?)null)">All Schemes (Provider-Wide)</MudSelectItem>
+                        @foreach (var sch in Schemes)
+                        {
+                            <MudSelectItem T="int?" Value="@((int?)sch.Id)">@sch.SchemeName</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem md="4" xs="12" Class="text-end">
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add"
+                               Disabled="@(selectedInsuranceId == 0)" OnClick="OpenNewTariffModal">
+                        Add / Map Tariff Item
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </MudItem>
+
+    <!-- TARIFF LIST TABLE -->
+    <MudItem xs="12">
+        @if (isLoading)
+        {
+            <GlobalLoader />
+        }
+        else if (!Tariffs.Any())
+        {
+            <NoDataNotice NoDataMessage="No custom tariff rules configured for this insurer yet. Scheme default coverage % will apply." />
+        }
+        else
+        {
+            <MudDataGrid T="InsurerTariffDto" Items="@Tariffs" Hover="true" Dense="true" Bordered="false">
+                <Columns>
+                    <PropertyColumn Property="x => x.ServiceType" Title="Category" />
+                    <PropertyColumn Property="x => x.InsurerItemCode" Title="Insurer Code" />
+                    <PropertyColumn Property="x => x.InsurerItemName" Title="Tariff Item Name" />
+                    <PropertyColumn Property="x => x.InsuranceSchemeName" Title="Scheme" />
+                    <PropertyColumn Property="x => x.AgreedPrice" Title="Agreed Price" Format="N2" />
+                    <PropertyColumn Property="x => x.CoveragePercent" Title="Coverage %" Format="0.##" />
+                    <TemplateColumn Title="Covered?">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="@(context.Item.IsCovered ? Color.Success : Color.Error)">
+                                @(context.Item.IsCovered ? "Covered" : "Excluded (Patient Pays)")
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    <TemplateColumn Title="Edit">
+                        <CellTemplate>
+                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                                           OnClick="@(() => OpenEditTariffModal(context.Item))" />
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="InsurerTariffDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+<!-- ADD / EDIT TARIFF DIALOG -->
+<MudDialog @bind-Visible="showDialog">
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-3">Configure Insurer Tariff Rule</MudText>
+        <MudGrid Spacing="2">
+            <MudItem xs="6">
+                <MudSelect T="string" Value="@editTariff.ServiceType" ValueChanged="@OnServiceTypeChanged"
+                           Label="Service Category" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="@("Consultation")">Consultation</MudSelectItem>
+                    <MudSelectItem Value="@("LabTest")">LabTest</MudSelectItem>
+                    <MudSelectItem Value="@("Prescription")">Prescription (Medicine)</MudSelectItem>
+                    <MudSelectItem Value="@("Treatment")">Treatment (Surgery/Therapy/Ward)</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6">
+                <MudSelect T="int" @bind-Value="editTariff.ServiceItemId" Label="Hospital Item" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="0" Disabled>Select Hospital Service/Item</MudSelectItem>
+                    @foreach (var opt in ServiceItemOptions)
+                    {
+                        <MudSelectItem Value="@opt.Id">@opt.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="4">
+                <MudTextField @bind-Value="editTariff.InsurerItemCode" Label="Insurer Official Code" Placeholder="e.g. NHIF-101" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="8">
+                <MudTextField @bind-Value="editTariff.InsurerItemName" Label="Insurer Tariff Name" Placeholder="e.g. General OPD Consultation" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudNumericField @bind-Value="editTariff.AgreedPrice" Label="Agreed Insurer Price (0 = Hospital Price)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudNumericField @bind-Value="editTariff.CoveragePercent" Label="Coverage % (e.g. 100 or 80)" Min="0" Max="100" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudSwitch @bind-Value="editTariff.IsCovered" Color="Color.Success" Label="Covered by Insurer" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudSwitch @bind-Value="editTariff.RequiresPreApproval" Color="Color.Warning" Label="Requires Pre-Approval" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => showDialog = false)">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveTariffAsync">Save Tariff</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    List<InsuaranceDto> Insurers = new();
+    List<InsuranceSchemeDto> Schemes = new();
+    List<InsurerTariffDto> Tariffs = new();
+
+    int selectedInsuranceId;
+    int? selectedSchemeId;
+    bool isLoading;
+    bool showDialog;
+
+    InsurerTariffDto editTariff = new();
+    List<(int Id, string Name)> ServiceItemOptions = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Insurers = await paymentService.GetAllInsuranceCompaniesAsync();
+    }
+
+    private async Task OnInsuranceChanged(int insId)
+    {
+        selectedInsuranceId = insId;
+        selectedSchemeId = null;
+        Schemes = await paymentService.GetSchemesByInsuranceIdAsync(insId);
+        await LoadTariffsAsync();
+    }
+
+    private async Task OnSchemeChanged(int? schId)
+    {
+        selectedSchemeId = schId;
+        await LoadTariffsAsync();
+    }
+
+    private async Task LoadTariffsAsync()
+    {
+        if (selectedInsuranceId == 0)
+        {
+            Tariffs.Clear();
+            return;
+        }
+
+        isLoading = true;
+        Tariffs = await paymentService.GetTariffsByInsuranceAsync(selectedInsuranceId, selectedSchemeId);
+        isLoading = false;
+    }
+
+    private async Task OpenNewTariffModal()
+    {
+        editTariff = new InsurerTariffDto
+        {
+            InsuaranceId = selectedInsuranceId,
+            InsuranceSchemeId = selectedSchemeId,
+            ServiceType = "Consultation",
+            CoveragePercent = 100m,
+            IsCovered = true
+        };
+        await OnServiceTypeChanged("Consultation");
+        showDialog = true;
+    }
+
+    private async Task OpenEditTariffModal(InsurerTariffDto existing)
+    {
+        editTariff = new InsurerTariffDto
+        {
+            Id = existing.Id,
+            InsuaranceId = existing.InsuaranceId,
+            InsuranceSchemeId = existing.InsuranceSchemeId,
+            ServiceType = existing.ServiceType,
+            ServiceItemId = existing.ServiceItemId,
+            InsurerItemCode = existing.InsurerItemCode,
+            InsurerItemName = existing.InsurerItemName,
+            AgreedPrice = existing.AgreedPrice,
+            CoveragePercent = existing.CoveragePercent,
+            IsCovered = existing.IsCovered,
+            RequiresPreApproval = existing.RequiresPreApproval
+        };
+        await OnServiceTypeChanged(existing.ServiceType);
+        showDialog = true;
+    }
+
+    private async Task OnServiceTypeChanged(string category)
+    {
+        editTariff.ServiceType = category;
+        ServiceItemOptions.Clear();
+
+        switch (category)
+        {
+            case "Consultation":
+                var docTypes = await doctorService.GetDoctorTypesAsync();
+                ServiceItemOptions = docTypes.Select(d => (d.Id, $"{d.DoctorTypeName} ({d.DeptConsultationFee:N2})")).ToList();
+                break;
+
+            case "LabTest":
+                var diseases = await diseaseService.GetAllDiseasesAsync();
+                ServiceItemOptions = diseases.Select(d => (d.Id, $"{d.DiseaseName} ({d.LabTestCost:N2})")).ToList();
+                break;
+
+            case "Prescription":
+                var meds = await medicineService.GetAllMedicinesAsync();
+                ServiceItemOptions = meds.Select(m => (m.Id, $"{m.MedicineName} ({m.BuyingPrice:N2})")).ToList();
+                break;
+
+            case "Treatment":
+                var treats = await medicineService.GetAllTreatmentTypeAsync();
+                ServiceItemOptions = treats.Select(t => (t.Id, t.TreatmentTypeName)).ToList();
+                break;
+        }
+    }
+
+    private async Task SaveTariffAsync()
+    {
+        if (editTariff.ServiceItemId == 0 || string.IsNullOrWhiteSpace(editTariff.InsurerItemCode))
+        {
+            Snackbar.Add("Please select a hospital service/item and enter the insurer item code.", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editTariff.InsurerItemName))
+        {
+            editTariff.InsurerItemName = ServiceItemOptions.FirstOrDefault(x => x.Id == editTariff.ServiceItemId).Name ?? editTariff.ServiceType;
+        }
+
+        await paymentService.SaveInsurerTariffAsync(editTariff);
+        Snackbar.Add("Tariff rule saved successfully!", Severity.Success);
+        showDialog = false;
+        await LoadTariffsAsync();
+    }
+}

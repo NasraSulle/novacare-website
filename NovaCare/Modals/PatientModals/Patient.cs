@@ -1,20 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
-using NovaCare.Modals.DiseaseModals;
+﻿using NovaCare.Modals.DiseaseModals;
 using NovaCare.Modals.DoctorModals;
 using NovaCare.Modals.JoinTables;
-using NovaCare.Modals.TreatmentModals;
 using NovaCare.Shared.Enums;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace NovaCare.Modals.PatientModals
 {
     public class Patient
     {
-        //properties
+        // Properties
         [Key]
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
@@ -28,28 +23,27 @@ namespace NovaCare.Modals.PatientModals
         public string PhoneNumber { get; set; } = string.Empty;
         public string EmailAddress { get; set; } = string.Empty;
         public string HomeAddress { get; set; } = string.Empty;
-        public DateTime RegisteredDate { get; set; }
+        public DateTime RegisteredDate { get; set; } = DateTime.UtcNow;
         public Gender Gender { get; set; }
 
-        //===========first of Kin===============
+        // First of Kin
         public string KinFullName { get; set; } = string.Empty;
         public string KinPhoneNumber { get; set; } = string.Empty;
         public string KinHomeAddress { get; set; } = string.Empty;
 
-        //foreign keys
+        // Foreign keys
         [ForeignKey(nameof(PatientStatus))]
         public int PatientStatusId { get; set; }
+
         [ForeignKey(nameof(PatientType))]
         public int PatientTypeId { get; set; }
 
-        //navigation properties
+        // Navigation properties
         public PatientStatus? PatientStatus { get; set; }
         public PatientType? PatientType { get; set; }
-        public List<PatientDisease>? PatientDiseases { get; set; }
-        public List<DoctorPatient>? DoctorPatients { get; set; }
-        public List<PatientInsuarance>? PatientInsuarances { get; set; }
-        public List<PatientPaymentMode>? PatientPaymentModes { get; set; }
-        public List<Visit>? Visits { get; set; }
-
+        public List<PatientDisease> PatientDiseases { get; set; } = new();
+        public List<DoctorPatient> DoctorPatients { get; set; } = new();
+        public List<PatientInsuarance> PatientInsuarances { get; set; } = new();
+        public List<Visit> Visits { get; set; } = new();
     }
 }

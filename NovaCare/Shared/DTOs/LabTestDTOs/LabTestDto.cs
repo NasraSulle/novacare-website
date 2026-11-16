@@ -34,5 +34,7 @@ namespace NovaCare.Shared.DTOs.LabTestDTOs
         public string PatientFullName { get; set; } = string.Empty;
         public string DiseaseTypeName { get; set; } = string.Empty;
         public string PaymentStatusName { get; set; } = string.Empty;
+        public bool IsReadyForService { get; set; }
+
     }
 }

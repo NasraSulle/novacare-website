@@ -36,7 +36,7 @@
         }
         else if (FilteredMedicines != null)
         {
-            <MudDataGrid Loading="@isSearchLoading" Hover="true" T="MedicineDto" Items="@FilteredMedicines" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
+            <MudDataGrid Loading="@isSearchLoading" Hover="true" T="MedicineDto" Items="@FilteredMedicines" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6 ms-2 shadow-none rounded-0"
                          Bordered="false" Dense="true" RowClick="@((args) => PreviewMedicineProfile(args.Item))">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>

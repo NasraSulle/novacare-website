@@ -12,6 +12,10 @@ namespace NovaCare.Modals.PatientModals
         [Key]
         public int Id { get; set; }
         public string Diagnosis { get; set; } = string.Empty;
+        public string? Icd10Code { get; set; }          // Standard ICD-10 code required for NHIF/ZHIF/TPA claims (e.g., "B50.9")
+        public string? SecondaryIcd10Code { get; set; } // Optional secondary diagnosis code
+        public string? ClinicalNotes { get; set; }      // Helpful if insurer queries a claim
+
         public DateTime? StartDate { get; set; }
         public DateTime? FinishDate { get; set; } // Nullable until the doctor finishes the consultation
         public decimal ConsultationCost { get; set; } = 0m;

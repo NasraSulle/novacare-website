@@ -53,5 +53,7 @@ namespace NovaCare.Shared.DTOs.TreatmentDTOs
         public string DoctorName { get; set; } = string.Empty;
         public string RoomName { get; set; } = string.Empty;
         public string PaymentStatusName { get; set; } = string.Empty;
+        public bool IsReadyForService { get; set; }
+
     }
 }

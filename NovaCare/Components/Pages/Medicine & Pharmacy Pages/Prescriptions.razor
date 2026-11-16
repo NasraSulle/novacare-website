@@ -1,0 +1,186 @@
+﻿@using NovaCare.Shared.DTOs.MedicineDTOs
+@using NovaCare.Shared.DTOs.StaffDTOs
+@using NovaCare.Shared.DTOs.TreatmentDTOs
+@inject IDialogService Dialog
+
+<MudGrid Justify="Justify.Center" Class="pa-0 pt-1 ps-0 pe-0 pb-0">
+    <MudItem md="12" Class="" Style="text-align: center;">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!isLoading && !AllPrescriptions!.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudItem Class="pa-6">
+                <MudGrid>
+                    <MudItem md="12">
+                        <MudGrid Justify="Justify.SpaceBetween">
+                            <MudItem>
+                                <MudText Typo="Typo.h6">@($"All Prescriptions")</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudItem>
+
+                    <MudItem md="12">
+                        <NoDataNotice NoDataMessage="@messageMedicine" />
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        }
+        else if (AllPrescriptions != null)
+        {
+            <MudDataGrid Loading="@isSearchLoading" Hover="true" T="PrescriptionDto" Items="@AllPrescriptions" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6 shadow-none rounded-0"
+                         Bordered="false" Dense="true">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">@($"All Prescriptions")</MudText>
+                    <MudSpacer />
+
+                    <MudItem>
+                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                      Margin="Margin.Dense" Variant="Variant.Outlined"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+                    </MudItem>
+                    @if (isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
+                    }
+                </ToolBarContent>
+
+                <Columns>
+                    <PropertyColumn Property="x => x.MedicineName" Title="Medicine" />
+                    <PropertyColumn Property="x => x.Dosage" Title="Dosage" />
+                    <PropertyColumn Property="x => x.Quantity" Title="Quantity" />
+                    <TemplateColumn Title="Action">
+                        <CellTemplate>
+                            <MudItem>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send" Size="Size.Small" OnClick="@(() => DispenseAsync(context.Item))">Dispense</MudButton>
+                            </MudItem>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="PrescriptionDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private bool _readOnly;
+
+    [Parameter] public List<PrescriptionDto> AllPrescriptions { get; set; } = new();
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+    [Parameter] public bool isReport { get; set; }
+    [Parameter] public DateTime? fromDate { get; set; } = DateTime.Now.AddMonths(-3);
+    [Parameter] public DateTime? toDate { get; set; } = DateTime.Now;
+
+    PrescriptionDto? CurrentPrescription;
+
+    string messageMedicine = string.Empty;
+    string? searchString;
+    string? pdfBase64;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(500);
+
+        AllPrescriptions = await medicineService.GetAllPrescriptionsAsync();
+        AllPrescriptions = (await medicineService.GetAllPrescriptionsAsync())
+            .Where(p => p.IsReadyForService && p.IsDispensed == false)
+            .ToList();
+
+
+
+
+        if (!AllPrescriptions.Any())
+            messageMedicine = $"Prescriptions are not avalible!";
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    public async Task Back()
+    {
+        CurrentPrescription = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        await Task.Delay(500);
+
+        AllPrescriptions = AllPrescriptions?.Where(x => x.IsReadyForService && x.IsDispensed == false && x.VisitId.ToString().ToLower().Trim() == searchString).ToList() ?? new();
+
+        if (!AllPrescriptions.Any())
+            messageMedicine = $"Prescriptions are not avalible!";
+
+        isSearchLoading = false;
+    }
+
+    public async Task DispenseAsync(PrescriptionDto prescription)
+    {
+        var parameters = new DialogParameters<ConfirmationModal>
+        {
+            { x => x.ContentText, "Do you really want to dispense this prescription? This process cannot be undone." },
+            { x => x.ButtonText, "Yes" },
+            { x => x.Color, Color.Success }
+        };
+
+        var options = new DialogOptions() { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = await Dialog.ShowAsync<ConfirmationModal>("Confirmation", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            CurrentPrescription = prescription;
+            CurrentPrescription.IsDispensed = true;
+            var success = await medicineService.UpdatePrescriptionAsync(CurrentPrescription, CurrentPrescription.Id);
+
+            if (success)
+            {
+                var dispensedMed = await medicineService.GetMedicineByIdAsync(CurrentPrescription.Id);
+                dispensedMed.MedicineQty = dispensedMed.MedicineQty - CurrentPrescription.Quantity;
+                await medicineService.UpdateMedicineAsync(dispensedMed, dispensedMed.Id);
+            }
+
+            await OnInitializedAsync();
+        }
+    }
+
+    public async Task GeneratePdf()
+    {
+        var reportDto = new ReportPreviewDto<PrescriptionDto>
+        {
+            ReportType = "Prescriptions",
+            FromDate = fromDate,
+            ToDate = toDate,
+            Data = AllPrescriptions
+        };
+
+        pdfBase64 = pdfExportService.GenerateStaffPreview<PrescriptionDto>(reportDto, CurrentUser);
+
+        var Parameters = new DialogParameters
+        {
+            {"pdfBase64" , pdfBase64}
+        };
+
+        await Dialog.ShowAsync<PdfPreview>($"Report Pdf", Parameters, _maxWidth);
+    }
+}

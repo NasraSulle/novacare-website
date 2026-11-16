@@ -18,12 +18,12 @@
                             <MudItem>
                                 <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
                             </MudItem>
-                            <MudItem>
+                            @* <MudItem>
                                 @if (CurrentUser != null && CurrentUser.IsCreateNewPatient)
                                 {
                                     <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
                                 }
-                            </MudItem>
+                            </MudItem> *@
                         </MudGrid>
                     </MudItem>
 
@@ -47,10 +47,10 @@
                                       Margin="Margin.Dense" Variant="Variant.Outlined"
                                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
                     </MudItem>
-                    @if (CurrentUser.IsCreateNewMedicine && !isReport)
+                    @* @if (CurrentUser.IsCreateNewMedicine && !isReport)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                    }
+                    } *@
                     @if (isReport)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
@@ -162,7 +162,7 @@
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            FilteredBills = AllBills?.Where(x => x.BillTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.VisitId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            FilteredBills = AllBills?.Where(x => x.BillTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.VisitId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientFullName.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.VisitName.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
             messageBill = "Staffs are not avalible!";
             firstPart = "Staff";
         }
@@ -173,7 +173,7 @@
 
             if (FilterBy != null)
             {
-                FilteredBills = AllBills?.Where(x => x.BillTypeName.Contains(FilterBy, StringComparison.OrdinalIgnoreCase) && x.BillTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.VisitId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+                FilteredBills = AllBills?.Where(x => x.BillTypeName.Contains(FilterBy, StringComparison.OrdinalIgnoreCase) && x.BillTypeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.VisitId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientFullName.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.VisitName.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
             }
             else
             {
@@ -198,7 +198,8 @@
     {
         var Parameters = new DialogParameters
         {
-            {"CurrentBill" , item}
+            {"CurrentBill" , item},
+            {"CurrentUser" , CurrentUser}
         };
         var dialog = await Dialog.ShowAsync<BillDetails>("Bill Details", Parameters, _maxWidth);
         var result = await dialog.Result;

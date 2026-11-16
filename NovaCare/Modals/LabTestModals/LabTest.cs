@@ -9,8 +9,9 @@ namespace NovaCare.Modals.LabTestModals
         // Properties
         [Key]
         public int Id { get; set; }
+        public string? LabTestCode { get; set; } // Optional standard/LOINC/NHIF lab code for tariff lookup
         public string DiseaseName { get; set; } = string.Empty;
-        public string LabTestStatusName { get; set; } = string.Empty; // Fixed casing from LabTestStatusname
+        public string LabTestStatusName { get; set; } = string.Empty;
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public string TestResult { get; set; } = string.Empty;
@@ -34,7 +35,7 @@ namespace NovaCare.Modals.LabTestModals
 
         // Navigation Properties
         public Visit? Visit { get; set; }
-        public Consultation? Consultation { get; set; } // Added to match ConsultationId ForeignKey attribute
+        public Consultation? Consultation { get; set; }
         public BillItem? BillItem { get; set; }
         public List<LabTestResultComposition> LabTestResultCompositions { get; set; } = new();
     }

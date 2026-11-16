@@ -14,6 +14,10 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public int PatientId { get; set; }
         public int VisitStatusId { get; set; }
 
+        // Check-in Payment & Insurance Selection
+        public int PaymentModeId { get; set; } = 1; // 1 = Cash, 2 = Insurance
+        public int? PatientInsuaranceId { get; set; }
+
         // Core navigation contracts using pure DTOs
         public PatientDto? Patient { get; set; }
         public VisitTypeDto? VisitType { get; set; }
@@ -25,14 +29,21 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public List<ConsultationDto> Consultations { get; set; } = new();
         public List<LabTestDto> LabTests { get; set; } = new();
         public List<PrescriptionDto> Prescriptions { get; set; } = new();
-        public List<TreatmentDto> Treatments { get; set; } = new(); 
+        public List<TreatmentDto> Treatments { get; set; } = new();
 
         // UI Helpers
         public string VisitTypeName { get; set; } = string.Empty;
         public string PatientFullName { get; set; } = string.Empty;
         public int? PreliminaryTestId { get; set; }
         public string VisitStatusName { get; set; } = string.Empty;
-        public string RegistedPaymentMode { get; set; } = "cash";
+        public string RegisteredPaymentMode { get; set; } = "Cash";
+        public string RegistedPaymentMode => RegisteredPaymentMode; // Kept so existing UI bindings don't break
+
+        // Insurance UI Helpers
+        public string InsuranceProviderName { get; set; } = string.Empty;
+        public string InsuranceSchemeName { get; set; } = string.Empty;
+        public string MemberCardNumber { get; set; } = string.Empty;
+        public string AuthorizationNumber { get; set; } = string.Empty;
 
         // Live calculation of unbilled items for this visit
         public decimal TotalUnbilledCharges =>

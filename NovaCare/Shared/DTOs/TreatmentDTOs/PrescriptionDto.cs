@@ -10,6 +10,7 @@ namespace NovaCare.Shared.DTOs.TreatmentDTOs
         public DateTime PrescribedDate { get; set; }
         public double Quantity { get; set; } = 1d;
         public string Dosage { get; set; } = string.Empty;
+        public bool IsDispensed { get; set; } = false;
         public string Notes { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; } = 0m;
         public decimal TotalPrice => (decimal)Quantity * UnitPrice;
@@ -32,5 +33,7 @@ namespace NovaCare.Shared.DTOs.TreatmentDTOs
         public string MedicineName { get; set; } = string.Empty;
         public string DoctorFullName { get; set; } = string.Empty;
         public string PaymentStatusName { get; set; } = string.Empty;
+        public bool IsReadyForService { get; set; }
+
     }
 }

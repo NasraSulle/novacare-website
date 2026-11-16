@@ -241,7 +241,7 @@ namespace NovaCare.Services
                                 <h2 class='hospital-title'>NovaCare Medical Hospital</h2>
                             </div>
                             <div class='report-details'>
-                                <h3>Staff Report: {dto.FromDate?.ToShortDateString()} – {dto.ToDate?.ToShortDateString()}</h3>
+<h3>{(string.IsNullOrWhiteSpace(dto.ReportType) ? $"Staff Report: {dto.FromDate?.ToShortDateString()} – {dto.ToDate?.ToShortDateString()}" : dto.ReportType)}</h3>
                                 <span class='meta-info'>Prepared By: <strong>{preparedBy}</strong></span>
                             </div>
                         </div>
@@ -260,9 +260,14 @@ namespace NovaCare.Services
                                 { html.Append("<th class='sn-col'>Sn.</th><th>Disease Name</th><th>Patient Full Name</th><th>Date</th>"); }
                                 else if (dto.Data is IEnumerable<MedicineDto>)
                                 { html.Append("<th class='sn-col'>Sn.</th><th>Medicine Name</th><th>Quantity</th><th>Price</th>"); }
-                            }
+                                else if (dto.Data is IEnumerable<BillItemDto>)
+                                {
+                                    html.Append("<th class='sn-col'>Sn.</th><th>Insurer Code</th><th>Service / Item Description</th><th>Qty</th><th>Unit Price</th><th>Covered %</th><th>Claim Amount</th>");
+                                }
 
-                            html.Append($@" </tr>
+            }
+
+            html.Append($@" </tr>
                                 </thead>
                                 <tbody>");
 
@@ -297,9 +302,51 @@ namespace NovaCare.Services
                                         html.Append($@"<tr><td class='sn-col'>{sn++}</td><td>{med.MedicineName}</td><td>{med.MedicineQty}</td><td>${med.SellingPrice:N2}</td></tr>");
                                     }
                                 }
-                            }
+                else if (dto.Data is IEnumerable<BillItemDto> claimItems)
+                {
+                    decimal totalClaimed = 0m;
+                    foreach (BillItemDto item in claimItems)
+                    {
+                        totalClaimed += item.InsuranceCoveredAmount;
+                        html.Append($@"<tr>
+            <td class='sn-col'>{sn++}</td>
+            <td><strong>{(string.IsNullOrWhiteSpace(item.InsurerItemCode) ? "-" : item.InsurerItemCode)}</strong></td>
+            <td>{item.ItemName} <small>({item.SourceType})</small></td>
+            <td>{item.Quantity}</td>
+            <td>{item.UnitPrice:N2}</td>
+            <td>{item.InsuranceCoveragePercent:0}%</td>
+            <td><strong>{item.InsuranceCoveredAmount:N2}</strong></td>
+        </tr>");
+                    }
 
-                            html.AppendLine("</tbody></table></div></div></body></html>");
+                    html.Append($@"
+        <tr style='background-color: #eef2ff; font-weight: bold;'>
+            <td colspan='6' style='text-align: right;'>TOTAL CLAIMABLE AMOUNT:</td>
+            <td>{totalClaimed:N2}</td>
+        </tr>");
+                }
+
+            }
+
+            html.AppendLine("</tbody></table></div>");
+
+            if (dto.Data is IEnumerable<BillItemDto>)
+            {
+                html.Append($@"
+        <div style='margin-top: 35px; display: flex; justify-content: space-between; font-size: 12px; color: #334155;'>
+            <div style='width: 45%; border-top: 1px solid #94a3b8; padding-top: 6px;'>
+                <strong>Patient / Beneficiary Signature & Thumbprint</strong><br/>
+                Date: ________________________
+            </div>
+            <div style='width: 45%; border-top: 1px solid #94a3b8; padding-top: 6px;'>
+                <strong>Hospital Officer Signature & Official Stamp</strong><br/>
+                Prepared By: {preparedBy}
+            </div>
+        </div>");
+            }
+
+            html.AppendLine("</div></body></html>");
+
 
 
             return html.ToString();

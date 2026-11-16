@@ -11,10 +11,14 @@ namespace NovaCare.Modals.TreatmentModals
         [Key]
         public int Id { get; set; }
         public DateTime PrescribedDate { get; set; } = DateTime.UtcNow;
-        public double Quantity { get; set; } = 1d; // Quantity prescribed to patient
-        public string Dosage { get; set; } = string.Empty; // e.g., "1x3 for 5 days"
+        public double Quantity { get; set; } = 1d;          // Quantity prescribed by doctor
+        public double DispensedQuantity { get; set; } = 0d; // Actual quantity dispensed by pharmacy
+        public bool IsDispensed { get; set; } = false;
+        public DateTime? DispensedDate { get; set; }
+
+        public string Dosage { get; set; } = string.Empty;  // e.g., "1x3 for 5 days"
         public string Notes { get; set; } = string.Empty;
-        public decimal UnitPrice { get; set; } = 0m; // Snapshot of Medicine.SellingPrice
+        public decimal UnitPrice { get; set; } = 0m;        // Snapshot of Medicine.SellingPrice (or InsurerTariff price)
 
         // Foreign keys
         [ForeignKey(nameof(Visit))]

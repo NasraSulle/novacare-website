@@ -18,12 +18,12 @@
                             <MudItem>
                                 <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
                             </MudItem>
-                            <MudItem>
+                            @* <MudItem>
                                 @if (CurrentUser != null && CurrentUser.IsCreateNewPatient)
                                 {
                                     <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
                                 }
-                            </MudItem>
+                            </MudItem> *@
                         </MudGrid>
                     </MudItem>
 
@@ -47,10 +47,10 @@
                                       Margin="Margin.Dense" Variant="Variant.Outlined"
                                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
                     </MudItem>
-                    @if (CurrentUser.IsCreateNewMedicine && !isReport)
+                    @* @if (CurrentUser.IsCreateNewMedicine && !isReport)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                    }
+                    } *@
                     @if (isReport)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
@@ -59,7 +59,7 @@
 
                 <Columns>
                     <PropertyColumn Property="x => x.BillId" Title="BillId" />
-                    <PropertyColumn Property="x => x.PaymentModeName" Title="Payment Mode" />
+                    @* <PropertyColumn Property="x => x.PaymentModeName" Title="Payment Mode" /> *@
                     <PropertyColumn Property="x => x.PaymentDate" Title="Paid Date" />
                     <TemplateColumn>
                         <CellTemplate>
@@ -160,7 +160,7 @@
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            FilteredPayments = AllPayments?.Where(x => x.BillId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PaymentModeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+            FilteredPayments = AllPayments?.Where(x => x.BillId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) /* x.PaymentModeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) */).ToList() ?? new();
             messagePayment = "Staffs are not avalible!";
             firstPart = "Staff";
         }
@@ -171,7 +171,7 @@
 
             if (FilterBy != null)
             {
-                FilteredPayments = AllPayments?.Where(x => x.PaymentStatusName.Contains(FilterBy, StringComparison.OrdinalIgnoreCase) && x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PaymentModeName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+                FilteredPayments = AllPayments?.Where(x => x.PaymentStatusName.Contains(FilterBy, StringComparison.OrdinalIgnoreCase) && x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) /* x.PaymentModeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) */).ToList() ?? new();
             }
             else
             {

@@ -695,6 +695,329 @@ namespace NovaCare.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.InsuranceClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("AdjudicatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("ApprovedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("AuthorizationNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BillId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClaimNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("ClaimedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ExternalReferenceNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FolioNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("InsuaranceId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PatientInsuaranceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PrimaryIcd10Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("QueryOrRejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("RejectedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SettledAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("SettledDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubmissionPayloadJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SubmittedByStaffId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("SubmittedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillId")
+                        .IsUnique();
+
+                    b.HasIndex("InsuaranceId");
+
+                    b.HasIndex("PatientInsuaranceId");
+
+                    b.HasIndex("SubmittedByStaffId");
+
+                    b.ToTable("InsuranceClaims");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.InsuranceScheme", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("AnnualLimit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DefaultCopayPercent")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DefaultCoveragePercent")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("InsuaranceId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("PerVisitLimit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SchemeCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SchemeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InsuaranceId");
+
+                    b.ToTable("InsuranceSchemes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DefaultCopayPercent = 0m,
+                            DefaultCoveragePercent = 100m,
+                            InsuaranceId = 1,
+                            IsActive = true,
+                            SchemeCode = "NHIF-STD",
+                            SchemeName = "NHIF Standard"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DefaultCopayPercent = 0m,
+                            DefaultCoveragePercent = 100m,
+                            InsuaranceId = 1,
+                            IsActive = true,
+                            SchemeCode = "NHIF-TOTO",
+                            SchemeName = "NHIF Toto Afya"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DefaultCopayPercent = 0m,
+                            DefaultCoveragePercent = 100m,
+                            InsuaranceId = 2,
+                            IsActive = true,
+                            SchemeCode = "ZHIF-STD",
+                            SchemeName = "ZHIF Standard"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DefaultCopayPercent = 0m,
+                            DefaultCoveragePercent = 100m,
+                            InsuaranceId = 3,
+                            IsActive = true,
+                            SchemeCode = "JUB-100",
+                            SchemeName = "Jubilee Corporate Full"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            DefaultCopayPercent = 20m,
+                            DefaultCoveragePercent = 80m,
+                            InsuaranceId = 3,
+                            IsActive = true,
+                            SchemeCode = "JUB-80",
+                            SchemeName = "Jubilee 80/20 Copay"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            DefaultCopayPercent = 0m,
+                            DefaultCoveragePercent = 100m,
+                            InsuaranceId = 4,
+                            IsActive = true,
+                            SchemeCode = "STR-EXEC",
+                            SchemeName = "Strategis Executive"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            DefaultCopayPercent = 0m,
+                            DefaultCoveragePercent = 100m,
+                            InsuaranceId = 5,
+                            IsActive = true,
+                            SchemeCode = "AAR-STD",
+                            SchemeName = "AAR Standard"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            DefaultCopayPercent = 0m,
+                            DefaultCoveragePercent = 100m,
+                            InsuaranceId = 6,
+                            IsActive = true,
+                            SchemeCode = "BRT-CORP",
+                            SchemeName = "Britam Corporate"
+                        });
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.InsurerTariff", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AgreedPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CoveragePercent")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("InsuaranceId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("InsuranceSchemeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InsurerItemCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InsurerItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsCovered")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RequiresPreApproval")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ServiceItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ServiceType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InsuaranceId");
+
+                    b.HasIndex("InsuranceSchemeId");
+
+                    b.ToTable("InsurerTariffs");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.VisitInsuranceAuth", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("ApprovedLimit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("AuthorizationNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("AuthorizedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CardNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PatientInsuaranceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReferralNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SchemeCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VerificationRemarks")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VerificationStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("VisitId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientInsuaranceId");
+
+                    b.HasIndex("VisitId")
+                        .IsUnique();
+
+                    b.ToTable("VisitInsuranceAuths");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.JoinTables.DiseaseTreatment", b =>
                 {
                     b.Property<int>("DiseaseTreatmentId")
@@ -821,39 +1144,44 @@ namespace NovaCare.Migrations
                     b.Property<int>("InsuaranceId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("InsuranceSchemeId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MemberCardNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
+
+                    b.Property<string>("PrincipalMemberName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RelationshipToPrincipal")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ValidFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ValidTo")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("PatientInsuaranceId");
 
                     b.HasIndex("InsuaranceId");
 
+                    b.HasIndex("InsuranceSchemeId");
+
                     b.HasIndex("PatientId");
 
                     b.ToTable("PatientInsuarances");
-                });
-
-            modelBuilder.Entity("NovaCare.Modals.JoinTables.PatientPaymentMode", b =>
-                {
-                    b.Property<int>("PatientPaymentModeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientPaymentModeId"));
-
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PaymentModeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PatientPaymentModeId");
-
-                    b.HasIndex("PatientId");
-
-                    b.HasIndex("PaymentModeId");
-
-                    b.ToTable("PatientPaymentModes");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.LabTestModals.LabTest", b =>
@@ -875,6 +1203,9 @@ namespace NovaCare.Migrations
 
                     b.Property<string>("DiseaseName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LabTestCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("LabTestCost")
@@ -1187,11 +1518,21 @@ namespace NovaCare.Migrations
                     b.Property<int>("BillTypeId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("PaidAmount")
+                    b.Property<decimal>("InsurancePaidAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("PaymentId")
+                    b.Property<int?>("PatientInsuaranceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PatientPaidAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PaymentModeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaymentStatusId")
                         .HasColumnType("int");
 
                     b.Property<string>("StaffId")
@@ -1202,6 +1543,14 @@ namespace NovaCare.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("TotalInsuranceAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalPatientAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("VisitId")
                         .HasColumnType("int");
 
@@ -1209,9 +1558,11 @@ namespace NovaCare.Migrations
 
                     b.HasIndex("BillTypeId");
 
-                    b.HasIndex("PaymentId")
-                        .IsUnique()
-                        .HasFilter("[PaymentId] IS NOT NULL");
+                    b.HasIndex("PatientInsuaranceId");
+
+                    b.HasIndex("PaymentModeId");
+
+                    b.HasIndex("PaymentStatusId");
 
                     b.HasIndex("StaffId");
 
@@ -1231,12 +1582,36 @@ namespace NovaCare.Migrations
                     b.Property<int>("BillId")
                         .HasColumnType("int");
 
+                    b.Property<int>("ClaimItemStatus")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("InsuranceCoveragePercent")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("InsuranceCoveredAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("InsurerItemCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsInsuranceCovered")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ItemName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("PatientPayableAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SourceItemId")
                         .HasColumnType("int");
@@ -1301,6 +1676,9 @@ namespace NovaCare.Migrations
                     b.Property<int?>("BillItemId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ClinicalNotes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("ConsultationCost")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -1315,11 +1693,17 @@ namespace NovaCare.Migrations
                     b.Property<DateTime?>("FinishDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Icd10Code")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("MedicalDepartmentId")
                         .HasColumnType("int");
 
                     b.Property<int?>("RoomId")
                         .HasColumnType("int");
+
+                    b.Property<string>("SecondaryIcd10Code")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime2");
@@ -1567,6 +1951,12 @@ namespace NovaCare.Migrations
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PatientInsuaranceId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaymentModeId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("VisitDate")
                         .HasColumnType("datetime2");
 
@@ -1579,6 +1969,10 @@ namespace NovaCare.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PatientId");
+
+                    b.HasIndex("PatientInsuaranceId");
+
+                    b.HasIndex("PaymentModeId");
 
                     b.HasIndex("VisitStatusId");
 
@@ -1601,7 +1995,7 @@ namespace NovaCare.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VisitStatus");
+                    b.ToTable("VisitStatuses");
 
                     b.HasData(
                         new
@@ -1676,8 +2070,20 @@ namespace NovaCare.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("IntegrationType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PortalUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PrivillageCodeNumber")
                         .HasColumnType("int");
+
+                    b.Property<bool>("RequiresPreAuth")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -1689,35 +2095,80 @@ namespace NovaCare.Migrations
                             Id = 1,
                             InsuaranceName = "NHIF",
                             InsuranceNumber = "",
-                            PrivillageCodeNumber = 1
+                            IntegrationType = 1,
+                            IsActive = true,
+                            PrivillageCodeNumber = 1,
+                            RequiresPreAuth = true
                         },
                         new
                         {
                             Id = 2,
                             InsuaranceName = "ZHIF",
                             InsuranceNumber = "",
-                            PrivillageCodeNumber = 2
+                            IntegrationType = 1,
+                            IsActive = true,
+                            PrivillageCodeNumber = 2,
+                            RequiresPreAuth = true
                         },
                         new
                         {
                             Id = 3,
-                            InsuaranceName = "Jubelee",
+                            InsuaranceName = "Jubilee",
                             InsuranceNumber = "",
-                            PrivillageCodeNumber = 3
+                            IntegrationType = 2,
+                            IsActive = true,
+                            PrivillageCodeNumber = 3,
+                            RequiresPreAuth = false
                         },
                         new
                         {
                             Id = 4,
-                            InsuaranceName = "NSSF",
+                            InsuaranceName = "Strategis",
                             InsuranceNumber = "",
-                            PrivillageCodeNumber = 4
+                            IntegrationType = 2,
+                            IsActive = true,
+                            PrivillageCodeNumber = 4,
+                            RequiresPreAuth = false
                         },
                         new
                         {
                             Id = 5,
+                            InsuaranceName = "AAR",
+                            InsuranceNumber = "",
+                            IntegrationType = 2,
+                            IsActive = true,
+                            PrivillageCodeNumber = 5,
+                            RequiresPreAuth = false
+                        },
+                        new
+                        {
+                            Id = 6,
+                            InsuaranceName = "Britam",
+                            InsuranceNumber = "",
+                            IntegrationType = 2,
+                            IsActive = true,
+                            PrivillageCodeNumber = 6,
+                            RequiresPreAuth = false
+                        },
+                        new
+                        {
+                            Id = 7,
+                            InsuaranceName = "NSSF",
+                            InsuranceNumber = "",
+                            IntegrationType = 3,
+                            IsActive = true,
+                            PrivillageCodeNumber = 7,
+                            RequiresPreAuth = true
+                        },
+                        new
+                        {
+                            Id = 8,
                             InsuaranceName = "Other",
                             InsuranceNumber = "",
-                            PrivillageCodeNumber = 5
+                            IntegrationType = 3,
+                            IsActive = true,
+                            PrivillageCodeNumber = 8,
+                            RequiresPreAuth = false
                         });
                 });
 
@@ -1732,6 +2183,9 @@ namespace NovaCare.Migrations
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("BillId")
+                        .HasColumnType("int");
 
                     b.Property<string>("CardHolder")
                         .HasColumnType("nvarchar(max)");
@@ -1760,6 +2214,12 @@ namespace NovaCare.Migrations
                     b.Property<string>("ChequeNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("InsuranceClaimId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("InsurerSettlementReference")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("MNONumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -1775,11 +2235,11 @@ namespace NovaCare.Migrations
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("PaymentModeId")
-                        .HasColumnType("int");
-
                     b.Property<int>("PaymentStatusId")
                         .HasColumnType("int");
+
+                    b.Property<string>("SettlementBatchNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WireReferenceNo")
                         .HasColumnType("nvarchar(max)");
@@ -1795,7 +2255,9 @@ namespace NovaCare.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PaymentModeId");
+                    b.HasIndex("BillId");
+
+                    b.HasIndex("InsuranceClaimId");
 
                     b.HasIndex("PaymentStatusId");
 
@@ -1856,11 +2318,16 @@ namespace NovaCare.Migrations
                         new
                         {
                             Id = 2,
-                            PaymentStatusName = "Paid"
+                            PaymentStatusName = "Partial Payment"
                         },
                         new
                         {
                             Id = 3,
+                            PaymentStatusName = "Paid"
+                        },
+                        new
+                        {
+                            Id = 4,
                             PaymentStatusName = "Insurance Review"
                         });
                 });
@@ -2564,12 +3031,21 @@ namespace NovaCare.Migrations
                     b.Property<int?>("ConsultationId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("DispensedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("DispensedQuantity")
+                        .HasColumnType("float");
+
                     b.Property<int?>("DoctorId")
                         .HasColumnType("int");
 
                     b.Property<string>("Dosage")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDispensed")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MedicineId")
                         .HasColumnType("int");
@@ -2883,6 +3359,9 @@ namespace NovaCare.Migrations
                     b.Property<int?>("BillItemId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ClinicalNotes")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("ConsultationId")
                         .HasColumnType("int");
 
@@ -2894,6 +3373,9 @@ namespace NovaCare.Migrations
 
                     b.Property<int?>("MedicalDeptId")
                         .HasColumnType("int");
+
+                    b.Property<string>("PreAuthNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RoomId")
                         .HasColumnType("int");
@@ -3245,6 +3727,86 @@ namespace NovaCare.Migrations
                     b.Navigation("MedicalDepartment");
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.InsuranceClaim", b =>
+                {
+                    b.HasOne("NovaCare.Modals.PatientModals.Bill", "Bill")
+                        .WithOne("InsuranceClaim")
+                        .HasForeignKey("NovaCare.Modals.InsuranceModals.InsuranceClaim", "BillId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.PaymentModals.Insuarance", "Insuarance")
+                        .WithMany()
+                        .HasForeignKey("InsuaranceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.JoinTables.PatientInsuarance", "PatientInsuarance")
+                        .WithMany()
+                        .HasForeignKey("PatientInsuaranceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NovaCare.Modals.StaffModals.Staff", "SubmittedByStaff")
+                        .WithMany()
+                        .HasForeignKey("SubmittedByStaffId");
+
+                    b.Navigation("Bill");
+
+                    b.Navigation("Insuarance");
+
+                    b.Navigation("PatientInsuarance");
+
+                    b.Navigation("SubmittedByStaff");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.InsuranceScheme", b =>
+                {
+                    b.HasOne("NovaCare.Modals.PaymentModals.Insuarance", "Insuarance")
+                        .WithMany("Schemes")
+                        .HasForeignKey("InsuaranceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Insuarance");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.InsurerTariff", b =>
+                {
+                    b.HasOne("NovaCare.Modals.PaymentModals.Insuarance", "Insuarance")
+                        .WithMany()
+                        .HasForeignKey("InsuaranceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.InsuranceModals.InsuranceScheme", "InsuranceScheme")
+                        .WithMany("Tariffs")
+                        .HasForeignKey("InsuranceSchemeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Insuarance");
+
+                    b.Navigation("InsuranceScheme");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.VisitInsuranceAuth", b =>
+                {
+                    b.HasOne("NovaCare.Modals.JoinTables.PatientInsuarance", "PatientInsuarance")
+                        .WithMany()
+                        .HasForeignKey("PatientInsuaranceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.PatientModals.Visit", "Visit")
+                        .WithOne("VisitInsuranceAuth")
+                        .HasForeignKey("NovaCare.Modals.InsuranceModals.VisitInsuranceAuth", "VisitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PatientInsuarance");
+
+                    b.Navigation("Visit");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.JoinTables.DiseaseTreatment", b =>
                 {
                     b.HasOne("NovaCare.Modals.DiseaseModals.Disease", "Disease")
@@ -3345,8 +3907,13 @@ namespace NovaCare.Migrations
                     b.HasOne("NovaCare.Modals.PaymentModals.Insuarance", "Insuarance")
                         .WithMany("PatientInsuarances")
                         .HasForeignKey("InsuaranceId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.InsuranceModals.InsuranceScheme", "InsuranceScheme")
+                        .WithMany()
+                        .HasForeignKey("InsuranceSchemeId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("NovaCare.Modals.PatientModals.Patient", "Patient")
                         .WithMany("PatientInsuarances")
@@ -3356,26 +3923,9 @@ namespace NovaCare.Migrations
 
                     b.Navigation("Insuarance");
 
-                    b.Navigation("Patient");
-                });
-
-            modelBuilder.Entity("NovaCare.Modals.JoinTables.PatientPaymentMode", b =>
-                {
-                    b.HasOne("NovaCare.Modals.PatientModals.Patient", "Patient")
-                        .WithMany("PatientPaymentModes")
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NovaCare.Modals.PaymentModals.PaymentMode", "PaymentMode")
-                        .WithMany("PatientPaymentModes")
-                        .HasForeignKey("PaymentModeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("InsuranceScheme");
 
                     b.Navigation("Patient");
-
-                    b.Navigation("PaymentMode");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.LabTestModals.LabTest", b =>
@@ -3444,9 +3994,22 @@ namespace NovaCare.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NovaCare.Modals.PaymentModals.Payment", "Payment")
-                        .WithOne("Bill")
-                        .HasForeignKey("NovaCare.Modals.PatientModals.Bill", "PaymentId");
+                    b.HasOne("NovaCare.Modals.JoinTables.PatientInsuarance", "PatientInsuarance")
+                        .WithMany()
+                        .HasForeignKey("PatientInsuaranceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NovaCare.Modals.PaymentModals.PaymentMode", "PaymentMode")
+                        .WithMany("Bills")
+                        .HasForeignKey("PaymentModeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.PaymentModals.PaymentStatus", "PaymentStatus")
+                        .WithMany()
+                        .HasForeignKey("PaymentStatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("NovaCare.Modals.StaffModals.Staff", "Staff")
                         .WithMany()
@@ -3462,7 +4025,11 @@ namespace NovaCare.Migrations
 
                     b.Navigation("BillType");
 
-                    b.Navigation("Payment");
+                    b.Navigation("PatientInsuarance");
+
+                    b.Navigation("PaymentMode");
+
+                    b.Navigation("PaymentStatus");
 
                     b.Navigation("Staff");
 
@@ -3562,6 +4129,17 @@ namespace NovaCare.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NovaCare.Modals.JoinTables.PatientInsuarance", "PatientInsuarance")
+                        .WithMany()
+                        .HasForeignKey("PatientInsuaranceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("NovaCare.Modals.PaymentModals.PaymentMode", "PaymentMode")
+                        .WithMany("Visits")
+                        .HasForeignKey("PaymentModeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("NovaCare.Modals.PatientModals.VisitStatus", "VisitStatus")
                         .WithMany("Visits")
                         .HasForeignKey("VisitStatusId")
@@ -3576,6 +4154,10 @@ namespace NovaCare.Migrations
 
                     b.Navigation("Patient");
 
+                    b.Navigation("PatientInsuarance");
+
+                    b.Navigation("PaymentMode");
+
                     b.Navigation("VisitStatus");
 
                     b.Navigation("VisitType");
@@ -3583,19 +4165,26 @@ namespace NovaCare.Migrations
 
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.Payment", b =>
                 {
-                    b.HasOne("NovaCare.Modals.PaymentModals.PaymentMode", "PaymentMode")
-                        .WithMany()
-                        .HasForeignKey("PaymentModeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("NovaCare.Modals.PatientModals.Bill", "Bill")
+                        .WithMany("Payments")
+                        .HasForeignKey("BillId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.InsuranceModals.InsuranceClaim", "InsuranceClaim")
+                        .WithMany()
+                        .HasForeignKey("InsuranceClaimId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("NovaCare.Modals.PaymentModals.PaymentStatus", "PaymentStatus")
                         .WithMany("Payments")
                         .HasForeignKey("PaymentStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("PaymentMode");
+                    b.Navigation("Bill");
+
+                    b.Navigation("InsuranceClaim");
 
                     b.Navigation("PaymentStatus");
                 });
@@ -3861,6 +4450,11 @@ namespace NovaCare.Migrations
                     b.Navigation("DoctorTypes");
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.InsuranceModals.InsuranceScheme", b =>
+                {
+                    b.Navigation("Tariffs");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.LabTestModals.LabTest", b =>
                 {
                     b.Navigation("LabTestResultCompositions");
@@ -3889,6 +4483,10 @@ namespace NovaCare.Migrations
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Bill", b =>
                 {
                     b.Navigation("BillItems");
+
+                    b.Navigation("InsuranceClaim");
+
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.BillItem", b =>
@@ -3924,8 +4522,6 @@ namespace NovaCare.Migrations
 
                     b.Navigation("PatientInsuarances");
 
-                    b.Navigation("PatientPaymentModes");
-
                     b.Navigation("Visits");
                 });
 
@@ -3952,6 +4548,8 @@ namespace NovaCare.Migrations
                     b.Navigation("Prescriptions");
 
                     b.Navigation("Treatments");
+
+                    b.Navigation("VisitInsuranceAuth");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.VisitStatus", b =>
@@ -3967,16 +4565,15 @@ namespace NovaCare.Migrations
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.Insuarance", b =>
                 {
                     b.Navigation("PatientInsuarances");
-                });
 
-            modelBuilder.Entity("NovaCare.Modals.PaymentModals.Payment", b =>
-                {
-                    b.Navigation("Bill");
+                    b.Navigation("Schemes");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.PaymentMode", b =>
                 {
-                    b.Navigation("PatientPaymentModes");
+                    b.Navigation("Bills");
+
+                    b.Navigation("Visits");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PaymentModals.PaymentStatus", b =>

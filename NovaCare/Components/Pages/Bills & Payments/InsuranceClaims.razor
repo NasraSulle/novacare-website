@@ -1,0 +1,292 @@
+﻿@using NovaCare.Shared.DTOs.PaymentDTOs
+@using NovaCare.Shared.Enums
+@inject ISnackbar Snackbar
+@inject IDialogService Dialog
+
+<MudGrid>
+    <MudItem md="12" Class="pa-0">
+        @if (isLoading)
+        {
+            <MudItem Class="pa-6 text-center">
+                <GlobalLoader />
+            </MudItem>
+        }
+        else if (!FilteredClaims.Any() && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudItem Class="pa-6">
+                <NoDataNotice NoDataMessage="No insurance claims found." />
+            </MudItem>
+        }
+        else
+        {
+            <MudDataGrid Hover="true" T="InsuranceClaimDto" Items="@FilteredClaims" Dense="true" Class="ps-6 pe-6 pb-6">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">@($"{(StatusFilter.HasValue ? StatusFilter.Value.ToString() : "All")} Insurance Claims")</MudText>
+                    <MudSpacer />
+                    <MudTextField T="string" ValueChanged="@OnSearch" Placeholder="Search Claim #, Patient, Card..."
+                                  Adornment="Adornment.Start" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-2" />
+                </ToolBarContent>
+
+                <Columns>
+                    <PropertyColumn Property="x => x.ClaimNumber" Title="Claim #" />
+                    <PropertyColumn Property="x => x.PatientFullName" Title="Patient" />
+                    <PropertyColumn Property="x => x.InsuranceProviderName" Title="Insurer" />
+                    <PropertyColumn Property="x => x.MemberCardNumber" Title="Card No." />
+                    <PropertyColumn Property="x => x.AuthorizationNumber" Title="Auth Code" />
+                    <PropertyColumn Property="x => x.ClaimedAmount" Title="Claimed" Format="N2" />
+                    <PropertyColumn Property="x => x.ApprovedAmount" Title="Approved" Format="N2" />
+                    <PropertyColumn Property="x => x.SettledAmount" Title="Settled" Format="N2" />
+                    <TemplateColumn Title="Status">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Item.Status)">
+                                @context.Item.Status.ToString()
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                    @* <TemplateColumn Title="Actions">
+                        <CellTemplate>
+                            @if (context.Item.Status == ClaimStatus.Submitted || context.Item.Status == ClaimStatus.Queried)
+                            {
+                                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Warning" OnClick="@(() => OpenAdjudicate(context.Item))">
+                                    Adjudicate
+                                </MudButton>
+                            }
+                            @if (context.Item.Status == ClaimStatus.Approved || context.Item.Status == ClaimStatus.Partially_Approved)
+                            {
+                                <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => OpenSettle(context.Item))">
+                                    Settle Payout
+                                </MudButton>
+                            }
+                        </CellTemplate>
+                    </TemplateColumn> *@
+                    <TemplateColumn Title="Actions">
+                        <CellTemplate>
+                            <MudIconButton Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print"
+                                           title="Preview / Print Claim Folio PDF" OnClick="@(() => PreviewClaimPdfAsync(context.Item))" />
+
+                            @if (context.Item.Status == ClaimStatus.Draft)
+                            {
+                                <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Info" OnClick="@(() => MarkClaimSubmittedAsync(context.Item))">
+                                    Mark Submitted
+                                </MudButton>
+                            }
+                            @if (context.Item.Status == ClaimStatus.Submitted || context.Item.Status == ClaimStatus.Queried)
+                            {
+                                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Warning" OnClick="@(() => OpenAdjudicate(context.Item))">
+                                    Adjudicate
+                                </MudButton>
+                            }
+                            @if (context.Item.Status == ClaimStatus.Approved || context.Item.Status == ClaimStatus.Partially_Approved)
+                            {
+                                <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => OpenSettle(context.Item))">
+                                    Settle Payout
+                                </MudButton>
+                            }
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="InsuranceClaimDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+<!-- ==================== ADJUDICATION MODAL ==================== -->
+<MudDialog @bind-Visible="showAdjudicateDialog">
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-2">Adjudicate Claim: @selectedClaim?.ClaimNumber</MudText>
+        <MudGrid Spacing="2">
+            <MudItem xs="12">
+                <MudSelect T="ClaimStatus" @bind-Value="adjStatus" Label="Decision" Variant="Variant.Outlined" Margin="Margin.Dense">
+                    <MudSelectItem Value="ClaimStatus.Approved">Approved (Full)</MudSelectItem>
+                    <MudSelectItem Value="ClaimStatus.Partially_Approved">Partially Approved</MudSelectItem>
+                    <MudSelectItem Value="ClaimStatus.Queried">Queried (Needs Info)</MudSelectItem>
+                    <MudSelectItem Value="ClaimStatus.Rejected">Rejected</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6">
+                <MudNumericField @bind-Value="adjApproved" Label="Approved Amount" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudNumericField @bind-Value="adjRejected" Label="Rejected Amount" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="adjReason" Label="Insurer Query / Rejection Remarks" Lines="2" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => showAdjudicateDialog = false)">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveAdjudicationAsync">Save Decision</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- ==================== SETTLEMENT PAYOUT MODAL ==================== -->
+<MudDialog @bind-Visible="showSettleDialog">
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-2">Record Insurer Settlement: @selectedClaim?.ClaimNumber</MudText>
+        <MudGrid Spacing="2">
+            <MudItem xs="12">
+                <MudNumericField @bind-Value="settleAmount" Label="Amount Paid by Insurer" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudTextField @bind-Value="settleRef" Label="EFT / Remittance Ref #" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="6">
+                <MudTextField @bind-Value="settleBatch" Label="Batch Number (Optional)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => showSettleDialog = false)">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveSettlementAsync">Confirm Payout</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    [Parameter] public ClaimStatus? StatusFilter { get; set; }
+
+    List<InsuranceClaimDto> AllClaims = new();
+    List<InsuranceClaimDto> FilteredClaims = new();
+    string? searchString;
+    bool isLoading;
+
+    // Adjudication state
+    bool showAdjudicateDialog;
+    InsuranceClaimDto? selectedClaim;
+    ClaimStatus adjStatus = ClaimStatus.Approved;
+    decimal adjApproved;
+    decimal adjRejected;
+    string? adjReason;
+
+    // Settlement state
+    bool showSettleDialog;
+    decimal settleAmount;
+    string settleRef = string.Empty;
+    string? settleBatch;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadClaimsAsync();
+    }
+
+    private async Task LoadClaimsAsync()
+    {
+        isLoading = true;
+        AllClaims = await paymentService.GetAllInsuranceClaimsAsync(StatusFilter);
+        FilteredClaims = AllClaims;
+        isLoading = false;
+    }
+
+    private void OnSearch(string text)
+    {
+        searchString = text;
+        if (string.IsNullOrWhiteSpace(searchString))
+        {
+            FilteredClaims = AllClaims;
+            return;
+        }
+
+        FilteredClaims = AllClaims.Where(c =>
+            c.ClaimNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+            c.PatientFullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+            c.InsuranceProviderName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+            c.MemberCardNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        ).ToList();
+    }
+
+    private void OpenAdjudicate(InsuranceClaimDto claim)
+    {
+        selectedClaim = claim;
+        adjStatus = ClaimStatus.Approved;
+        adjApproved = claim.ClaimedAmount;
+        adjRejected = 0m;
+        adjReason = claim.QueryOrRejectionReason;
+        showAdjudicateDialog = true;
+    }
+
+    private async Task SaveAdjudicationAsync()
+    {
+        if (selectedClaim == null) return;
+
+        var ok = await paymentService.UpdateClaimAdjudicationAsync(
+            selectedClaim.Id, adjStatus, adjApproved, adjRejected, adjReason);
+
+        if (ok)
+        {
+            Snackbar.Add($"Claim {selectedClaim.ClaimNumber} updated to {adjStatus}.", Severity.Success);
+            showAdjudicateDialog = false;
+            await LoadClaimsAsync();
+        }
+    }
+
+    private void OpenSettle(InsuranceClaimDto claim)
+    {
+        selectedClaim = claim;
+        settleAmount = claim.ApprovedAmount > 0 ? (claim.ApprovedAmount - claim.SettledAmount) : claim.ClaimedAmount;
+        settleRef = string.Empty;
+        settleBatch = string.Empty;
+        showSettleDialog = true;
+    }
+
+    private async Task SaveSettlementAsync()
+    {
+        if (selectedClaim == null || settleAmount <= 0 || string.IsNullOrWhiteSpace(settleRef))
+            return;
+
+        var payId = await paymentService.RecordInsurerSettlementAsync(
+            selectedClaim.Id, settleAmount, settleRef, settleBatch);
+
+        if (payId > 0)
+        {
+            Snackbar.Add($"Insurer payout of {settleAmount:N2} recorded!", Severity.Success);
+            showSettleDialog = false;
+            await LoadClaimsAsync();
+        }
+    }
+
+    private static Color GetStatusColor(ClaimStatus status) => status switch
+    {
+        ClaimStatus.Draft => Color.Default,
+        ClaimStatus.Submitted => Color.Info,
+        ClaimStatus.Queried => Color.Warning,
+        ClaimStatus.Approved => Color.Primary,
+        ClaimStatus.Partially_Approved => Color.Warning,
+        ClaimStatus.Rejected => Color.Error,
+        ClaimStatus.Settled => Color.Success,
+        _ => Color.Default
+    };
+
+
+    private async Task MarkClaimSubmittedAsync(InsuranceClaimDto claim)
+    {
+        await paymentService.CreateOrSubmitClaimAsync(claim.BillId, CurrentUser.Id, submitImmediately: true);
+        Snackbar.Add($"Claim {claim.ClaimNumber} marked as Submitted!", Severity.Success);
+        await LoadClaimsAsync();
+    }
+
+    private async Task PreviewClaimPdfAsync(InsuranceClaimDto claim)
+    {
+        var fullBill = await paymentService.GetBillByIdAsync(claim.BillId);
+        var reportDto = new ReportPreviewDto<BillItemDto>
+        {
+            ReportType = $"NHIF / Insurance Claim Folio - {claim.ClaimNumber} ({claim.InsuranceProviderName}) | Patient: {claim.PatientFullName} | Card: {claim.MemberCardNumber} | Auth: {claim.AuthorizationNumber}",
+            FromDate = fullBill.BillDate,
+            ToDate = fullBill.BillDate,
+            Data = fullBill.BillItems.Where(i => i.IsInsuranceCovered).ToList()
+        };
+
+        var pdfBase64 = pdfExportService.GenerateStaffPreview<BillItemDto>(reportDto, CurrentUser);
+        var parameters = new DialogParameters { { "pdfBase64", pdfBase64 } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true };
+
+        await Dialog.ShowAsync<PdfPreview>($"Claim Folio - {claim.ClaimNumber}", parameters, options);
+    }
+
+}
