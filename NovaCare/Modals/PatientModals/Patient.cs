@@ -45,5 +45,6 @@ namespace NovaCare.Modals.PatientModals
         public List<DoctorPatient> DoctorPatients { get; set; } = new();
         public List<PatientInsuarance> PatientInsuarances { get; set; } = new();
         public List<Visit> Visits { get; set; } = new();
+        public List<Allergy> Allergies { get; set; } = new();
     }
 }

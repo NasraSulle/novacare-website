@@ -1496,6 +1496,32 @@ namespace NovaCare.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.Allergy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AllergyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("Allergies");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Bill", b =>
                 {
                     b.Property<int>("Id")
@@ -1931,6 +1957,44 @@ namespace NovaCare.Migrations
                         .IsUnique();
 
                     b.ToTable("PreliminaryTests");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.Referral", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ConsultationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DoctorFullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DoctorsNote")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("IssuedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PatientFullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReferredHospital")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsultationId")
+                        .IsUnique();
+
+                    b.ToTable("Referrals");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Visit", b =>
@@ -3986,6 +4050,17 @@ namespace NovaCare.Migrations
                     b.Navigation("MedicineGenre");
                 });
 
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.Allergy", b =>
+                {
+                    b.HasOne("NovaCare.Modals.PatientModals.Patient", "Patient")
+                        .WithMany("Allergies")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Patient");
+                });
+
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Bill", b =>
                 {
                     b.HasOne("NovaCare.Modals.PatientModals.BillType", "BillType")
@@ -4119,6 +4194,17 @@ namespace NovaCare.Migrations
                         .IsRequired();
 
                     b.Navigation("Visit");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.PatientModals.Referral", b =>
+                {
+                    b.HasOne("NovaCare.Modals.PatientModals.Consultation", "Consultation")
+                        .WithOne("Referral")
+                        .HasForeignKey("NovaCare.Modals.PatientModals.Referral", "ConsultationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Consultation");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Visit", b =>
@@ -4511,11 +4597,15 @@ namespace NovaCare.Migrations
 
                     b.Navigation("Prescriptions");
 
+                    b.Navigation("Referral");
+
                     b.Navigation("Treatments");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Patient", b =>
                 {
+                    b.Navigation("Allergies");
+
                     b.Navigation("DoctorPatients");
 
                     b.Navigation("PatientDiseases");

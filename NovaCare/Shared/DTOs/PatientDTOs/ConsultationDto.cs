@@ -37,6 +37,7 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public string MedicalDepartmentName { get; set; } = string.Empty;
         public string DoctorFullName { get; set; } = string.Empty;
         public string VisitTypeName { get; set; } = string.Empty;
+        public string DoctorStaffId { get; set; } = string.Empty;
         public string RoomName { get; set; } = string.Empty;
         public string PaymentStatusName { get; set; } = string.Empty; // Populated from BillItem?.Bill?.PaymentStatusName ?? "Not Billed"
         public bool IsReadyForService { get; set; }

@@ -1,4 +1,8 @@
-﻿/* Removes text decoration from MudNavLink, its hover states, and its text wrappers */
+﻿.mud-button {
+    text-transform: none !important;
+}
+
+/* Removes text decoration from MudNavLink, its hover states, and its text wrappers */
 .mud-nav-link,
 .mud-nav-link:hover,
 .mud-nav-link .mud-nav-link-text {

@@ -3,6 +3,9 @@
 @using NovaCare.Shared.DTOs.TreatmentDTOs
 
 @inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+
 
 <MudDialog Style="background-color: rgba(246,246,246,1) !important;">
     <DialogContent>
@@ -36,7 +39,129 @@
                     </MudGrid>
                 </MudPaper>
             </MudItem>
-            <MudItem md="12" Class="ps-0">
+            <MudItem md="12" Class="d-flex ps-0 pt-0">
+                    <MudText Typo="Typo.subtitle2" Align="Align.Center"><MudIcon Icon="@Icons.Material.Outlined.AssistWalker" /> Patient Condition -
+                        <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@CurrentPatient.PatientTypeName | @CurrentPatient.PatientStatusName</MudChip>
+                    </MudText>
+                    <MudSpacer />
+                <MudPaper Elevation="0" Class="align-content-center bg-transparent">
+                    <MudButton Variant="Variant.Outlined" OnClick="@(() => ConfirmAsync("condition"))" Size="Size.Small">Update Patient Condition</MudButton>
+                    <MudButton Variant="Variant.Outlined" OnClick="@(() => ConfirmAsync("transfer"))" Size="Size.Small">Issue Transfer</MudButton>
+                    <MudDialog @bind-Visible="showTransferDialog" Options="_maxWidthAddReferralBox">
+                        <DialogContent>
+                            <MudGrid Spacing="1" Class="pa-0">
+                                <MudGrid Spacing="5" Justify="Justify.Center" Class="pa-0" Style="border:none;">
+                                    <MudItem md="12">
+                                        <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                            <MudGrid Class="pa-3">
+                                                <MudItem md="12">
+                                                    <MudText Typo="Typo.subtitle2"
+                                                             Style="background: linear-gradient(to right, var(--bs-danger), rgba(var(--bs-danger-rgb), 0));" Class="p-2 text-white">
+
+                                                        + Transfer Referral Letter
+                                                    </MudText>
+                                                </MudItem>
+                                                <MudItem md="12">
+                                                    <MudGrid>
+                                                        <MudItem md="8">
+                                                            <ReferralLetterPrint  @ref="_referralPrintRef"
+                                                                                 Patient="@CurrentPatient"
+                                                                                 SpecialistClinicName="@CurrentReferral.ReferredHospital"
+                                                                                 Diagnosis="@CurrentReferral.DoctorsNote"
+                                                                                 ReasonForReferral="@CurrentReferral.DoctorsNote"
+                                                                                 DoctorName="@CurrentReferral.DoctorFullName" />
+
+                                                        </MudItem>
+                                                        <MudItem md="4">
+                                                            <MudGrid>
+                                                                <MudItem md="12">
+                                                                    <MudTextField @bind-Value="CurrentReferral.ReferredHospital" Margin="Margin.Dense" Immediate="true"
+                                                                                  Label="Referred Hospital" Variant="Variant.Outlined" Placeholder="Enter Hospital Name" />
+                                                                </MudItem>
+                                                                <MudItem md="12">
+                                                                    <MudTextField @bind-Value="CurrentReferral.DoctorsNote" Margin="Margin.Dense" Lines="10" Immediate="true"
+                                                                                  Label="Doctor's Note" Variant="Variant.Outlined" Placeholder="Enter Doctor Note" />
+                                                                </MudItem>
+                                                            </MudGrid>
+                                                        </MudItem>
+                                                    </MudGrid>
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudPaper>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudGrid>
+                        </DialogContent>
+                        <DialogActions>
+                            <MudGrid Spacing="1" Class="pe-7" Justify="Justify.FlexEnd">
+                                <MudItem>
+                                    <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error" OnClick="@(() => showTransferDialog = false)">Cancel</MudButton>
+                                    <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success" OnClick="SaveReferralAsync">Generate Pdf</MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </DialogActions>
+                    </MudDialog>
+                    <MudButton Variant="Variant.Outlined" OnClick="@(() => ConfirmAsync("closure"))" Size="Size.Small">Complete Consultation</MudButton>
+                    <MudDialog @bind-Visible="showConditionDialog" Options="_maxWidthAddAllergyBox">
+                        <DialogContent>
+                            <MudGrid Spacing="1" Class="pa-0">
+                                <MudGrid Spacing="5" Justify="Justify.Center" Class="pa-0" Style="border:none;">
+                                    <MudItem md="12">
+                                        <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                            <MudGrid Class="pa-3">
+                                                <MudItem md="12">
+                                                    <MudText Typo="Typo.subtitle2"
+                                                             Style="background: linear-gradient(to right, var(--bs-danger), rgba(var(--bs-danger-rgb), 0));" Class="p-2 text-white">
+
+                                                        + Patient's Condition
+                                                    </MudText>
+
+                                                    <MudItem md="12" Class="mt-3">
+                                                        <MudSelect For="@(() => CurrentPatient.PatientTypeId)"
+                                                                   @bind-Value="CurrentPatient.PatientTypeId"
+                                                                   Label="Patient State" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient Type"
+                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                            <MudSelectItem Value="0" Disabled>Patient Type</MudSelectItem>
+
+                                                            @foreach (var item in PatientTypes)
+                                                            {
+                                                                <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
+                                                            }
+                                                        </MudSelect>
+                                                    </MudItem>
+                                                    <MudItem md="12">
+                                                        <MudSelect For="@(() => CurrentPatient.PatientStatusId)"
+                                                                   @bind-Value="CurrentPatient.PatientStatusId"
+                                                                   Label="Patient Type" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient State"
+                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                            <MudSelectItem Value="0" Disabled>Patient State</MudSelectItem>
+
+                                                            @foreach (var item in PatientStatus)
+                                                            {
+                                                                <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
+                                                            }
+                                                        </MudSelect>
+                                                    </MudItem>
+                                                </MudItem>
+
+                                            </MudGrid>
+                                        </MudPaper>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudGrid>
+                        </DialogContent>
+                        <DialogActions>
+                            <MudGrid Spacing="1" Class="pe-7" Justify="Justify.FlexEnd">
+                                <MudItem>
+                                    <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error" OnClick="@(() => showConditionDialog = false)">Cancel</MudButton>
+                                    <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success" OnClick="SaveConditionAsync">Update Condition</MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </DialogActions>
+                    </MudDialog>
+                </MudPaper>
+            </MudItem>
+            <MudItem md="12" Class="ps-0 pt-0">
                 <MudGrid>
                     <MudItem md="8">
                         <MudGrid>
@@ -44,7 +169,12 @@
                                 <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
                                     <MudGrid Class="pa-3">
                                         <MudItem md="12">
-                                            <MudText Typo="Typo.subtitle2">Diagnosis</MudText>
+                                            <MudText Typo="Typo.subtitle2"
+                                                     Style="background: linear-gradient(to right, #4e3ee0ff, rgba(0, 123, 255, 0));" Class="p-2 text-white">
+                                                @* Style="background: linear-gradient(to right, var(--bs-primary), rgba(var(--bs-primary-rgb), 0));" Class="p-2 text-white"> *@
+
+                                                Diagnosis
+                                            </MudText>
                                             <MudTextField @bind-Value="CurrentConsultation.Diagnosis" Margin="Margin.Dense" Lines="7"
                                                           Label="Description" Variant="Variant.Outlined" Placeholder="Enter diagnosis" />
                                         </MudItem>
@@ -59,14 +189,17 @@
 
                                     <MudGrid Class="pa-3">
                                         <MudItem md="12">
-                                            <MudText Typo="Typo.subtitle2">Lab Tests</MudText>
+                                            <MudText Typo="Typo.subtitle2"
+                                                Style="background: linear-gradient(to right, var(--bs-primary), rgba(var(--bs-primary-rgb), 0));" Class="p-2 text-white">
+                                                Lab Tests
+                                            </MudText>
 
                                             <MudGrid Spacing="1" Justify="Justify.Center" Class="pa-0" Style="border:none;">
                                                 <MudItem md="12" Class="ps-3 pe-0 pt-3">
                                                     <MudItem Style="height:100%; border-radius:5px;" Class="pa-0 border-1 border-opacity-10  border-secondary-subtle">
                                                         <MudGrid Class="pa-3">
                                                             <MudGrid Spacing="1" Class="pa-3 ps-6 pe-0 pb-0">
-                                                                <MudItem md="7">
+                                                                <MudItem md="10">
                                                                     <MudSelect For="@(() => CurrentLabTest.DiseaseName)"
                                                                                @bind-Value="CurrentLabTest.DiseaseName"
                                                                                Label="Choose Disease" Variant="Variant.Outlined" Margin="Margin.Dense"
@@ -79,11 +212,9 @@
                                                                         }
                                                                     </MudSelect>
                                                                 </MudItem>
-                                                                <MudItem md="3">
-                                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddLabTestToBatch(CurrentLabTest))" Class="mt-2 px-0" FullWidth="true">Add To Batch</MudButton>
-                                                                </MudItem>
-                                                                <MudItem md="2">
-                                                                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetTests" Class="mt-2 px-2" FullWidth="true">Reset Batch</MudButton>
+                                                                <MudItem md="2" Class="text-end">
+                                                                    <MudIconButton OnClick="@(() => AddLabTestToBatch(CurrentLabTest))" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Add" Class="mt-2" title="Add To Batch" />
+                                                                    <MudIconButton OnClick="ResetTests" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" Class="mt-2" title="Reset Batch" />
                                                                 </MudItem>
                                                             </MudGrid>
                                                             <MudItem md="12">
@@ -131,7 +262,10 @@
                                 <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
                                     <MudGrid Class="pa-3">
                                         <MudItem md="12">
-                                            <MudText Typo="Typo.subtitle2">Prescriptions</MudText>
+                                            <MudText Typo="Typo.subtitle2"
+                                                     Style="background: linear-gradient(to right, #e03e8fff, rgba(var(--bs-primary-rgb), 0));" Class="p-2 text-white">
+                                                Prescriptions
+                                            </MudText>
 
                                             <MudGrid Spacing="1" Justify="Justify.Center" Class="pa-0" Style="border:none;">
                                                 <MudItem md="12" Class="ps-3 pe-0 pt-3">
@@ -168,7 +302,7 @@
                                                                     </MudSelect>
                                                                 </MudItem>
 
-                                                                <MudItem md="4">
+                                                                <MudItem md="8">
                                                                     <MudSelect For="@(() => CurrentPrescription.MedicineId)"
                                                                                @bind-Value="CurrentPrescription.MedicineId"
                                                                                @bind-Value:after="@(() =>
@@ -192,16 +326,9 @@
                                                                                      Label="Quantity" Variant="Variant.Outlined" Placeholder="Quantity"
                                                                                      UserAttributes="@(new() { { "autocomplete", "TreatmentQty" }, { "aria-required", "true" } } )" />
                                                                 </MudItem>
-
-                                                                <MudItem md="6">
-                                                                    <MudGrid Spacing="1" Justify="Justify.FlexEnd">
-                                                                        <MudItem md="6">
-                                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddPrescriptionToBatch" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
-                                                                        </MudItem>
-                                                                        <MudItem md="6">
-                                                                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetPrescriptions" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
-                                                                        </MudItem>
-                                                                    </MudGrid>
+                                                                <MudItem md="2" Class="text-end">
+                                                                    <MudIconButton OnClick="AddPrescriptionToBatch" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Add" Class="mt-2" title="Add To Batch" />
+                                                                    <MudIconButton OnClick="ResetPrescriptions" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" Class="mt-2" title="Reset Batch" />
                                                                 </MudItem>
                                                             </MudGrid>
                                                             <MudItem md="12">
@@ -254,7 +381,10 @@
 
                                     <MudGrid Class="pa-3">
                                         <MudItem md="12">
-                                            <MudText Typo="Typo.subtitle2">Treatments</MudText>
+                                            <MudText Typo="Typo.subtitle2"
+                                                     Style="background: linear-gradient(to right, var(--bs-warning), rgba(var(--bs-primary-rgb), 0));" Class="p-2 text-white">
+                                                Treatments
+                                            </MudText>
 
                                             <MudGrid Spacing="1" Justify="Justify.Center" Class="pa-0" Style="border:none;">
                                                 <MudItem md="12" Class="ps-3 pe-0 pt-3">
@@ -425,15 +555,10 @@
                                                                         </MudSelect>
                                                                     </MudItem>
                                                                 }
-                                                                <MudItem md="12">
-                                                                    <MudGrid Spacing="1" Justify="Justify.FlexEnd">
-                                                                        <MudItem md="3">
-                                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddTreatmentToBatch" Class="mt-2" FullWidth="true">Add To Batch</MudButton>
-                                                                        </MudItem>
-                                                                        <MudItem md="3">
-                                                                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ResetTreatments" Class="mt-2" FullWidth="true">Reset Batch</MudButton>
-                                                                        </MudItem>
-                                                                    </MudGrid>
+
+                                                                <MudItem md="12" Class="text-end">
+                                                                    <MudIconButton OnClick="AddTreatmentToBatch" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Add" Class="mt-2" title="Add To Batch" />
+                                                                    <MudIconButton OnClick="ResetTreatments" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" Class="mt-2" title="Reset Batch" />
                                                                 </MudItem>
 
                                                             </MudGrid>
@@ -481,112 +606,167 @@
                     <MudItem md="4">
                         <MudGrid>
                             <MudItem md="12">
-                                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
-
+                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
                                     <MudGrid Class="pa-3">
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
-                                        </MudItem>
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
-                                        </MudItem>
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
+                                        <MudItem md="12">
+                                            <MudGrid Class="pa-1 ps-2">
+                                                <MudItem md="12" Class="d-flex flex-column">
+                                                    <MudPaper Class="align-start d-flex" Elevation="0">
+                                                        <MudText Typo="Typo.subtitle2" Align="Align.Center" Color="Color.Error"><MudIcon Icon="@Icons.Material.Outlined.Warning" /> Known Allergies</MudText>
+                                                        <MudSpacer />
+                                                        <MudIconButton Color="Color.Success" OnClick="@(() => showAddAllergyDialog = true)" Icon="@Icons.Material.Filled.Add" Class="p-0" title="Add To Allergy" />
+                                                    </MudPaper>
+                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
+                                                        @if (AllAllergies.Any())
+                                                        {
+                                                            foreach (var presc in AllAllergies)
+                                                            {
+                                                                <MudStack Spacing="0" Class="mb-1">
+                                                                    <MudText Typo="Typo.body2"><b>@presc.AllergyName</b></MudText>
+                                                                    <MudText Typo="Typo.caption">@presc.Description</MudText>
+                                                                </MudStack>
+                                                            }
+                                                        }
+                                                    </MudListItem>
+                                                </MudItem>
+                                            </MudGrid>
+                                            <MudDialog @bind-Visible="showAddAllergyDialog" Options="_maxWidthAddAllergyBox">
+                                                <DialogContent>
+                                                    <MudGrid Spacing="1" Class="pa-0">
+                                                        <MudGrid Spacing="5" Justify="Justify.Center" Class="pa-0" Style="border:none;">
+                                                            <MudItem md="12">
+                                                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                                                    <MudGrid Class="pa-3">
+                                                                        <MudItem md="12">
+                                                                            <MudText Typo="Typo.subtitle2"
+                                                                                     Style="background: linear-gradient(to right, var(--bs-danger), rgba(var(--bs-danger-rgb), 0));" Class="p-2 text-white">
+
+                                                                                + New Allergy
+                                                                            </MudText>
+                                                                            <MudTextField @bind-Value="CurrentAllergy.AllergyName" Margin="Margin.Dense"
+                                                                                          Label="Name" Variant="Variant.Outlined" Placeholder="Enter allergy name" />
+                                                                            <MudTextField @bind-Value="CurrentAllergy.Description" Margin="Margin.Dense" Lines="7"
+                                                                                          Label="Description" Variant="Variant.Outlined" Placeholder="Enter allergy description" />
+                                                                        </MudItem>
+
+                                                                    </MudGrid>
+                                                                </MudPaper>
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudGrid>
+                                                </DialogContent>
+                                                <DialogActions>
+                                                    <MudGrid Spacing="1" Class="pe-7" Justify="Justify.FlexEnd">
+                                                        <MudItem>
+                                                            <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error" OnClick="@(() => showAddAllergyDialog = false)">Cancel</MudButton>
+                                                            <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success" OnClick="SaveAllergyAsync">Save Allergy</MudButton>
+                                                        </MudItem>
+                                                    </MudGrid>
+                                                </DialogActions>
+                                            </MudDialog>
                                         </MudItem>
                                     </MudGrid>
                                 </MudPaper>
                             </MudItem>
                             <MudItem md="12">
-                                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
-
+                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
                                     <MudGrid Class="pa-3">
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
-                                        </MudItem>
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
-                                        </MudItem>
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
+                                        <MudItem md="12">
+                                            <MudGrid Class="pa-1 ps-2">
+                                                <MudItem md="12" Class="d-flex flex-column">
+                                                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary"><MudIcon Icon="@Icons.Material.Outlined.Medication" /> Previous Prescriptions</MudText>
+                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
+                                                        @if (PreviousPrescription.Any())
+                                                        {
+                                                            foreach (var presc in PreviousPrescription)
+                                                            {
+                                                                <MudStack Spacing="0" Class="mb-1">
+                                                                    <MudText Typo="Typo.body2"><b>@presc.MedicineName</b></MudText>
+                                                                    <MudText Typo="Typo.caption">@($"Dose:{presc.Dosage} - Quantity:{presc.Quantity} - Prescribed On. {presc.PrescribedDate} - Taken:{(presc.IsDispensed ? "Yes" : "No")}")</MudText>
+                                                                    <em><b>@presc.Notes</b></em>
+                                                                </MudStack>
+                                                            }
+                                                        }
+                                                    </MudListItem>
+                                                </MudItem>
+                                            </MudGrid>
                                         </MudItem>
                                     </MudGrid>
                                 </MudPaper>
                             </MudItem>
+                            
                             <MudItem md="12">
-                                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
-
+                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
                                     <MudGrid Class="pa-3">
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
+                                        <MudItem md="12">
+                                            <MudGrid Class="pa-1 ps-2">
+                                                <MudItem md="12" Class="d-flex flex-column">
+                                                    <MudText Typo="Typo.subtitle2" Color="Color.Info"><MudIcon Icon="@Icons.Material.Outlined.Biotech" /> Previous Lab Tests</MudText>
+                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
+                                                        @if (PreviousLabTests.Any())
+                                                        {
+                                                            foreach (var presc in PreviousLabTests)
+                                                            {
+                                                                <MudStack Spacing="0" Class="mb-1">
+                                                                    <MudText Typo="Typo.body2"><b>@presc.DiseaseName</b></MudText>
+                                                                    <MudText Typo="Typo.caption">@($"Results:{presc.TestResult} - Checked On. {presc.CreatedDate}")</MudText>
+                                                                </MudStack>
+                                                            }
+                                                        }
+                                                    </MudListItem>
+                                                </MudItem>
+                                            </MudGrid>
                                         </MudItem>
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
+                                    </MudGrid>
+                                </MudPaper>
+                            </MudItem>
+
+                            <MudItem md="12">
+                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                    <MudGrid Class="pa-3">
+                                        <MudItem md="12">
+                                            <MudGrid Class="pa-1 ps-2">
+                                                <MudItem md="12" Class="d-flex flex-column">
+                                                    <MudText Typo="Typo.subtitle2" Color="Color.Warning"><MudIcon Icon="@Icons.Material.Outlined.AssistWalker" /> Previous Treatments</MudText>
+                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
+                                                        @if (PreviousTreatments.Any())
+                                                        {
+                                                            foreach (var treat in PreviousTreatments)
+                                                            {
+                                                                <MudStack Spacing="0" Class="mb-1">
+                                                                    <MudText Typo="Typo.body2"><b>@($"{(treat.TherapyName != null ? $"{treat.TherapyName} - " : "")} {(treat.SurgeryName != null ? $"{treat.SurgeryName} - " : "")} {treat.TreatmentTypeName}")</b></MudText>
+                                                                    <MudText Typo="Typo.caption">@($"From:{treat.StartDate} - To. {treat.FinishDate}")</MudText>
+                                                                </MudStack>
+                                                            }
+                                                        }
+                                                    </MudListItem>
+                                                </MudItem>
+                                            </MudGrid>
                                         </MudItem>
-                                        <MudItem md="4">
-                                            <MudText>
-                                                The text after here is:
-                                                <MudText Inline="false" Color="Color.Primary">
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Info</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Condition</MudText></MudText>
-                                                    <MudText>The text after here is: <MudText Inline="true" Color="Color.Primary">Contacts</MudText></MudText>
-                                                </MudText>
-                                            </MudText>
+                                    </MudGrid>
+                                </MudPaper>
+                            </MudItem>
+
+                            <MudItem md="12">
+                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                    <MudGrid Class="pa-3">
+                                        <MudItem md="12">
+                                            <MudGrid Class="pa-1 ps-2">
+                                                <MudItem md="12" Class="d-flex flex-column">
+                                                    <MudText Typo="Typo.subtitle2" Color="Color.Primary"><MudIcon Icon="@Icons.Material.Outlined.People" /> Other Doctors Attended</MudText>
+                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
+                                                        @if (OtherDoctor.Any())
+                                                        {
+                                                            foreach (var treat in OtherDoctor)
+                                                            {
+                                                                <MudStack Spacing="0" Class="mb-1">
+                                                                    <MudText Typo="Typo.caption">@treat.DoctorFullName</MudText>
+                                                                </MudStack>
+                                                            }
+                                                        }
+                                                    </MudListItem>
+                                                </MudItem>
+                                            </MudGrid>
                                         </MudItem>
                                     </MudGrid>
                                 </MudPaper>
@@ -608,9 +788,11 @@
 
     </MudDialog>
 
+
 @code {
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!; 
     private void Cancel() => MudDialog.Cancel();
+    private ReferralLetterPrint? _referralPrintRef;
 
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     [Parameter] public PatientDto CurrentPatient { get; set; } = new();
@@ -619,6 +801,8 @@
     [Parameter] public LabTestDto CurrentLabTest { get; set; } = new();
     [Parameter] public PrescriptionDto CurrentPrescription { get; set; } = new();
     [Parameter] public TreatmentDto CurrentTreatment { get; set; } = new();
+    AllergyDto CurrentAllergy = new();
+    ReferralDto CurrentReferral = new();
 
     List<DiseaseDto> AllDiseases = new();
     List<LabTestDto>? LabTestsBatch = new();
@@ -636,6 +820,17 @@
     List<TherapyDto>? AllTherapies = new();
     List<WardDto>? AllWards = new();
     List<RoomDto>? AllRooms = new();
+    List<PatientStatusDto> PatientTypes = new();
+    List<PatientTypeDto> PatientStatus = new();
+
+    List<PrescriptionDto> PreviousPrescription = new();
+    List<LabTestDto> PreviousLabTests = new();
+    List<TreatmentDto> PreviousTreatments = new();
+    List<DoctorDto> OtherDoctor = new();
+    List<AllergyDto> AllAllergies = new();
+
+    private readonly DialogOptions _maxWidthAddAllergyBox = new() { MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
+    private readonly DialogOptions _maxWidthAddReferralBox = new() { MaxWidth = MaxWidth.Large, Position = DialogPosition.BottomCenter, FullWidth = true, BackdropClick = false };
 
     int selectedMedGenreId = 0;
     int selectedMedTypeId = 0;
@@ -646,6 +841,9 @@
 
     bool isCreatedSuccessfully;
     bool isSaving;
+    bool showAddAllergyDialog;
+    bool showConditionDialog;
+    bool showTransferDialog;
 
     bool HasMedicineId;
     bool HasSurgeryId;
@@ -657,6 +855,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        PatientTypes = await patientService.GetAllPatientTypesAsync();
+        PatientStatus = await patientService.GetAllPatientStatusesAsync();
         AllDiseases = await diseaseService.GetAllDiseasesAsync();
         AllMedicineGenres = await medicineService.GetAllMedicineGenresAsync();
         AllMedicineTypes = await medicineService.GetAllMedicineTypesAsync();
@@ -669,6 +869,20 @@
         AllMedicalDepts = await medicineService.GetAllMedicalDeptsAsync();
         AllWards = await roomService.GetAllWardsAsync();
         AllRooms = await roomService.GetAllRoomsAsync();
+
+
+        PreviousPrescription = await patientService.GetPreviousPrescriptionsAsync(CurrentPatient.Id);
+        PreviousLabTests = await patientService.GetPreviousLabTestsAsync(CurrentPatient.Id);
+        PreviousTreatments = await patientService.GetPreviousTreatmentsAsync(CurrentPatient.Id);
+        AllAllergies = await patientService.GetAllergiesAsync(CurrentPatient.Id);
+
+        OtherDoctor = AllDoctors.Where(d => d.DoctorPatients != null && d.DoctorPatients.Any(dp => dp.PatientId == CurrentPatient.Id)).ToList();
+
+        //var docId = CurrentConsultation = CurrentPatient.Visits!.Where(v => v.VisitStatusId == 1).SelectMany(v => v.Consultations).FirstOrDefault(c => c.Doctor
+        CurrentConsultation = CurrentPatient.Visits!
+            .Where(v => v.VisitStatusId == 1)
+            .SelectMany(v => v.Consultations)
+            .FirstOrDefault(c => c.DoctorStaffId == CurrentUser.Id) ?? new();
     }
 
     public async Task AddLabTestToBatch(LabTestDto labTestDto)
@@ -787,7 +1001,7 @@
 
     }
 
-    
+
     public async Task OnMedicineGenreChange()
     {
         FilteredMedicineTypes = AllMedicineTypes;
@@ -1241,5 +1455,125 @@
 
         Snackbar.Add("Consultation saved and bill updated!", Severity.Success);
     }
+
+    public async Task SaveAllergyAsync()
+    {
+        var existingAllergy = await patientService.GetAllergyByNameAsync(CurrentAllergy.AllergyName);
+
+        if(existingAllergy.Id > 0)
+        {
+            saveMessage = $"Allergy already exists for current {CurrentPatient.FisrtName}";
+
+            Snackbar.Add(saveMessage, Severity.Error);
+        }
+        else
+        {
+            var newAllergy = new AllergyDto
+            {
+                AllergyName = CurrentAllergy.AllergyName,
+                PatientId = CurrentPatient.Id,
+                Description = CurrentAllergy.Description,
+            };
+
+            var result = await patientService.AddAllergyAsync(newAllergy);
+
+            if (result)
+            {
+                saveMessage = $"Allergy not added";
+
+                Snackbar.Add(saveMessage, Severity.Error);
+
+                AllAllergies = await patientService.GetAllergiesAsync(CurrentPatient.Id);
+                StateHasChanged();
+            }
+        }
+
+    }
+
+    private async Task ConfirmAsync(string word)
+    {
+        string message = string.Empty;
+        if(word == "condition")
+            showConditionDialog = true;
+
+        if (word == "transfer")
+            showTransferDialog = true;
+
+        if (word == "closure")
+        { 
+            var parameters = new DialogParameters<ConfirmationModal>
+            {
+                { x => x.ContentText, "Are you sure you want to complete this consultation, process is irrevokable?" },
+                { x => x.ButtonText, "Yes" },
+                { x => x.Color, Color.Success }
+            };
+
+            var dialog = await DialogService.ShowAsync<ConfirmationModal>("Confirm", parameters);
+            var result = await dialog.Result;
+
+            if (!result.Canceled)
+            {
+                // await patientService.UpdatePatientAsync(CurrentPatient, CurrentPatient.Id);
+                CurrentConsultation.FinishDate = DateTime.UtcNow;
+                await patientService.UpdateConsultationAsync(CurrentConsultation, CurrentConsultation.Id);
+            }
+        }
+    }
+
+    public async Task SaveConditionAsync()
+    {
+        var result = await patientService.UpdatePatientAsync(CurrentPatient, CurrentPatient.Id);
+
+        if (result)
+        {
+            saveMessage = $"Condition updated successfully!";
+
+            Snackbar.Add(saveMessage, Severity.Success);
+
+            CurrentPatient = await patientService.GetPatientByCodeAsync(CurrentPatient.PatientCode);
+            StateHasChanged();
+        }
+        else
+        {
+            saveMessage = $"Condition not updated successfully!";
+
+            Snackbar.Add(saveMessage, Severity.Error);
+            StateHasChanged();
+        }
+
+    }
+
+
+public async Task SaveReferralAsync()
+{
+    var existingReferral = await patientService.GetReferralByConsultationIdAsync(CurrentConsultation.Id);
+
+    if (existingReferral != null)
+    {
+        StateHasChanged();
+        if (_referralPrintRef != null)
+        {
+            await _referralPrintRef.GenerateReferralPdfAsync();
+        }
+    }
+    else
+    {
+
+        CurrentReferral.DoctorFullName = CurrentConsultation.DoctorFullName;
+        CurrentReferral.PatientFullName = CurrentPatient.PatientFullName;
+        CurrentReferral.ConsultationId = CurrentConsultation.Id;
+
+        var result = await patientService.AddReferralLetterAsync(CurrentReferral);
+        saveMessage = "Referral letter issued successfully!";
+
+        Snackbar.Add(saveMessage, Severity.Success);
+        StateHasChanged();
+
+        if (_referralPrintRef != null)
+        {
+            await _referralPrintRef.GenerateReferralPdfAsync();
+        }
+    }
+}
 
 }

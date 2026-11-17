@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Humanizer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client.NativeInterop;
 using NovaCare.Components.Pages.PatientPages;
 using NovaCare.Data;
@@ -8,6 +9,7 @@ using NovaCare.Modals.InsuranceModals;
 using NovaCare.Modals.JoinTables;
 using NovaCare.Modals.PatientModals;
 using NovaCare.Modals.StaffModals;
+using NovaCare.Shared.DTOs.DoctorDTOs;
 using NovaCare.Shared.DTOs.InsuranceDTOs;
 using NovaCare.Shared.DTOs.JoinDto;
 using NovaCare.Shared.DTOs.JoinDTOs;
@@ -343,7 +345,7 @@ namespace NovaCare.Services
                     DoctorPatients = patient.DoctorPatients
                         .Select(dp => new DoctorPatientDto
                         {
-                            DoctorId = dp.DoctorId
+                            DoctorId = dp.DoctorId,
                         }).ToList(),
 
                     //Visits
@@ -485,15 +487,17 @@ namespace NovaCare.Services
                                 VisitId = c.VisitId,
                                 RoomId = c.RoomId,
                                 DoctorId = c.DoctorId,
+                                DoctorStaffId = c.Doctor != null ? c.Doctor.StaffId : null,
+                                //DoctorFullName = c.Doctor != null ? c.Doctor.FullName : string.Empty,
                                 MedicalDepartmentId = c.MedicalDepartmentId,
                                 BillItemId = c.BillItemId,
                                 MedicalDepartmentName = c.MedicalDepartment != null ? c.MedicalDepartment.MedicalDepartmentName : string.Empty,
                                 RoomName = c.Room != null ? c.Room.RoomName : string.Empty,
-                                //DoctorName = c.Doctor != null ? c.Doctor.FullName : string.Empty,
                                 PaymentStatusName = (c.BillItem != null && c.BillItem.Bill != null && c.BillItem.Bill.PaymentStatus != null)
                                     ? c.BillItem.Bill.PaymentStatus.PaymentStatusName
                                     : "Unbilled"
                             }).ToList(),
+
 
                             // 5. Lab Tests
                             LabTests = v.LabTests.Select(l => new LabTestDto
@@ -1533,6 +1537,197 @@ namespace NovaCare.Services
                
                 }).FirstOrDefaultAsync();
             return visit.Id;
+        }
+
+        public async Task<List<PrescriptionDto>> GetPreviousPrescriptionsAsync(int patientId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var prescriptions = await context.Prescriptions
+                .AsNoTracking()
+                .Where(p => p.Visit.PatientId == patientId)
+                .OrderByDescending(p => p.PrescribedDate)
+                .Select(p => new PrescriptionDto
+                {
+                    Id = p.Id,
+                    PrescribedDate = p.PrescribedDate,
+                    Quantity = p.Quantity,
+                    Dosage = p.Dosage,
+                    IsDispensed = p.IsDispensed,
+                    Notes = p.Notes,
+                    MedicineName = p.Medicine != null ? p.Medicine.MedicineName : string.Empty,
+                })
+                .ToListAsync();
+
+            return prescriptions;
+        }
+
+
+        public async Task<List<LabTestDto>> GetPreviousLabTestsAsync(int patientId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var tests = await context.LabTests
+                .AsNoTracking()
+                .Where(p => p.Visit.PatientId == patientId)
+                .OrderByDescending(p => p.CreatedDate)
+                .Select(p => new LabTestDto
+                {
+                    Id = p.Id,
+                    CreatedDate = p.CreatedDate,
+                    DiseaseName = p.DiseaseName,
+                    TestResult = p.TestResult,
+                })
+                .ToListAsync();
+
+            return tests;
+        }
+
+        public async Task<List<TreatmentDto>> GetPreviousTreatmentsAsync(int patientId)
+        {
+
+            using var context = _contextFactory.CreateDbContext();
+
+            var treats = await context.Treatments
+                .AsNoTracking()
+                .Where(p => p.Visit.PatientId == patientId)
+                .OrderByDescending(p => p.StartDate)
+                .Select(p => new TreatmentDto
+                {
+                    Id = p.Id,
+                    StartDate = p.StartDate,
+                    FinishDate = p.FinishDate,
+                    TreatmentTypeName = p.TreatmentType != null ? p.TreatmentType.TreatmentTypeName : string.Empty,
+                    SurgeryName = p.Surgery != null ? p.Surgery.SurgeryName : string.Empty,
+                    TherapyName = p.Therapy != null ? p.Therapy.TherapyName : string.Empty,
+                })
+                .ToListAsync();
+
+            return treats;
+        }
+
+        public async Task<List<DoctorDto>> GetOtherDoctorAsync(int patientId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var treats = await context.Doctors
+                .AsNoTracking()
+                .Where(p => p.DoctorPatients.Any(dp => dp.PatientId == patientId))
+                .Select(p => new DoctorDto
+                {
+                    DoctorFullName = $"{p.Staff!.FisrtName} {p.Staff!.MiddleName} {p.Staff!.LastName}",
+                })
+                .ToListAsync();
+
+            return treats;
+        }
+
+        public async Task<List<AllergyDto>> GetAllergiesAsync(int patientId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var treats = await context.Allergies
+                .AsNoTracking()
+                .Where(p => p.PatientId == patientId)
+                .Select(p => new AllergyDto
+                {
+                    AllergyName = p.AllergyName,
+                    Description = p.Description
+                })
+                .ToListAsync();
+
+            return treats;
+        }
+
+        public async Task<bool> AddAllergyAsync(AllergyDto dto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var newAllergy = new Allergy
+                {
+                    PatientId = dto.PatientId,
+                    AllergyName = dto.AllergyName,
+                    Description = dto.Description
+                };
+
+                var result = context.Allergies.Add(newAllergy);
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<AllergyDto> GetAllergyByNameAsync(string allergyName)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var allergy = await context.Allergies
+                .AsNoTracking()
+                .Where(p => p.AllergyName.ToLower().Trim() == allergyName.ToLower().Trim())
+                .Select(p => new AllergyDto
+                {
+                    Id = p.Id,
+                    AllergyName = p.AllergyName,
+                    PatientId = p.PatientId,
+                    Description = p.Description
+                })
+                .FirstOrDefaultAsync();
+
+            return allergy ?? new();
+        }
+
+        public async Task<ReferralDto> AddReferralLetterAsync(ReferralDto dto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var newAllergy = new Referral
+                {
+                    DoctorFullName = dto.DoctorFullName,
+                    PatientFullName = dto.PatientFullName,
+                    IssuedDate = DateTime.UtcNow,
+                    ConsultationId = dto.ConsultationId,
+                    DoctorsNote = dto.DoctorsNote
+                };
+
+                var result = context.Referrals.Add(newAllergy);
+                await context.SaveChangesAsync();
+
+                dto.Id = result.Entity.Id;
+                return dto;
+            }
+            catch
+            {
+                return new();
+            }
+        }
+
+        public async Task<ReferralDto> GetReferralByConsultationIdAsync(int consId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var referral = await context.Referrals
+                .AsNoTracking()
+                .Where(p => p.ConsultationId == consId)
+                .Select(p => new ReferralDto
+                {
+                    Id = p.Id,
+                    DoctorFullName = p.DoctorFullName,
+                    PatientFullName = p.PatientFullName,
+                    IssuedDate = p.IssuedDate,
+                    ConsultationId = p.ConsultationId,
+                    DoctorsNote = p.DoctorsNote
+                })
+                .FirstOrDefaultAsync();
+
+            return referral ?? new();
         }
     }
 }

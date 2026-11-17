@@ -42,10 +42,14 @@ namespace NovaCare.Modals.PatientModals
         public Doctor? Doctor { get; set; }
         public Visit? Visit { get; set; }
         public BillItem? BillItem { get; set; }
+        public Referral? Referral { get; set; }
 
         // Orders placed during this specific consultation
         public List<LabTest> LabTests { get; set; } = new();
         public List<Prescription> Prescriptions { get; set; } = new();
         public List<Treatment> Treatments { get; set; } = new();
+
+
+
     }
 }

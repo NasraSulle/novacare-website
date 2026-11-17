@@ -1,7 +1,11 @@
-﻿using NovaCare.Shared.DTOs.InsuranceDTOs;
+﻿using NovaCare.Modals.PatientModals;
+using NovaCare.Shared.DTOs.DoctorDTOs;
+using NovaCare.Shared.DTOs.InsuranceDTOs;
 using NovaCare.Shared.DTOs.JoinDto;
+using NovaCare.Shared.DTOs.LabTestDTOs;
 using NovaCare.Shared.DTOs.PatientDTOs;
 using NovaCare.Shared.DTOs.ReportDTOs;
+using NovaCare.Shared.DTOs.TreatmentDTOs;
 
 namespace NovaCare.Interfaces
 {
@@ -43,5 +47,16 @@ namespace NovaCare.Interfaces
 
         Task<List<ConsultationDto>> GetAllConsultationsAsync();
         Task<ConsultationDto> GetConsultationByIdAsync(int conId);
+
+        Task<List<PrescriptionDto>> GetPreviousPrescriptionsAsync(int patientId);
+        Task<List<LabTestDto>> GetPreviousLabTestsAsync(int patientId);
+        Task<List<TreatmentDto>> GetPreviousTreatmentsAsync(int patientId);
+        Task<List<DoctorDto>> GetOtherDoctorAsync(int patientId);
+
+        Task<List<AllergyDto>> GetAllergiesAsync(int patientId);
+        Task<AllergyDto> GetAllergyByNameAsync(string allergyName);
+        Task<bool> AddAllergyAsync(AllergyDto dto);
+        Task<ReferralDto> AddReferralLetterAsync(ReferralDto dto);
+        Task<ReferralDto> GetReferralByConsultationIdAsync(int consId);
     }
 }
