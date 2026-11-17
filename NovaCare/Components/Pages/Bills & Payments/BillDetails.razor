@@ -28,7 +28,10 @@
                                             <MudPaper Class="pa-3 ma-2" Outlined="true">
                                                 <MudGrid Spacing="1">
                                                     <MudItem md="12" sm="12">
-                                                        <MudText Typo="Typo.subtitle2">Patient & Bill Details</MudText>
+                                                        @* <MudText Typo="Typo.subtitle2"> *@
+                                                        <MudText Typo="Typo.subtitle2"
+                                                                 Style="background: linear-gradient(to right, #4e3ee0ff, rgba(0, 123, 255, 0));" Class="p-2 text-white">
+                                                            Patient & Bill Details</MudText>
                                                     </MudItem>
 
                                                     @if (CurrentBill.Id > 0)
@@ -36,10 +39,10 @@
                                                         <MudItem md="6" sm="12">
                                                             <MudField Label="Patient" Margin="Margin.Dense" Variant="Variant.Outlined">@CurrentBill.PatientFullName</MudField>
                                                         </MudItem>
-                                                        <MudItem md="3" sm="12">
+                                                        <MudItem md="2" sm="12">
                                                             <MudField Label="Issued Date" Margin="Margin.Dense" Variant="Variant.Outlined">@CurrentBill.BillDate.ToLocalTime().ToString("dd MMM yyyy")</MudField>
                                                         </MudItem>
-                                                        <MudItem md="3" sm="12">
+                                                        <MudItem md="4" sm="12">
                                                             <MudField Label="Invoice No." Margin="Margin.Dense" Variant="Variant.Outlined">@CurrentBill.BillNumber</MudField>
                                                         </MudItem>
                                                     }
@@ -180,7 +183,11 @@
                                 <MudPaper Class="pa-3 ma-2" Outlined="true">
                                     <MudSimpleTable Hover="true" Dense="true">
                                         <thead>
-                                            <tr><th colspan="2">Balance Breakdown</th></tr>
+                                            <tr><th colspan="2" class="px-0">
+                                                <MudText Typo="Typo.subtitle2"
+                                                     Style="background: linear-gradient(to right, green, rgba(0, 123, 255, 0));" Class="p-2 text-white">
+                                                     @* Style="background: linear-gradient(to right, #4e3ee0ff, rgba(0, 123, 255, 0));" Class="p-2 text-white"> *@
+                                                Balance Breakdown</MudText></th></tr>
                                         </thead>
                                         <tbody>
                                             <tr><td>Total Invoice Amount</td><td class="text-end">@CurrentBill.TotalAmount.ToString("N2")</td></tr>
@@ -208,7 +215,7 @@
                                     }
                                 </MudPaper>
                             </MudItem>
-                                                        @if (CurrentBill.PatientBalanceDue > 0 || CurrentBill.PaymentModeId != 2)
+                            @if (CurrentBill.PatientBalanceDue > 0 || CurrentBill.PaymentModeId != 2)
                             {
                                 <MudItem md="12" xs="12">
                                     <MudPaper Class="pa-3 ma-2" Outlined="true">
@@ -415,7 +422,11 @@
                                         <MudPaper Class="pa-3 ma-2" Outlined="true">
                                             <MudGrid Spacing="1">
                                                 <MudItem md="12" sm="12">
-                                                    <MudText Typo="Typo.subtitle2">Closing Disclaimer</MudText>
+                                                    <MudText 
+                                                        @* Typo="Typo.subtitle2"> *@
+                                                        Style="background: linear-gradient(to right, red, rgba(0, 123, 255, 0));" Class="p-2 text-white">
+
+                                                        Closing Disclaimer</MudText>
                                                 </MudItem>
 
                                                 <MudItem md="12" sm="12">

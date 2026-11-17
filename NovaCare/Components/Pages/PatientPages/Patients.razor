@@ -283,7 +283,8 @@
 
         var Parameters = new DialogParameters
         {
-            {"CurrentUser" , CurrentUser}
+            {"CurrentUser" , CurrentUser},
+            { "TitleIcon", Icons.Material.Filled.AssistWalker }
         };
 
         var dialog = await Dialog.ShowAsync<NewPatient>("Register New Patient", Parameters, _maxWidth);
@@ -316,7 +317,8 @@
             var parameters = new DialogParameters
             {
                 { "CurrentPatient", CurrentPatient },
-                { "CurrentUser", CurrentUser }
+                { "CurrentUser", CurrentUser },
+                { "TitleIcon", Icons.Material.Filled.AssistWalker }
             };
 
             var dialog = await Dialog.ShowAsync<PatientConsultation>("Patient Consultation", parameters, _maxWidth);
@@ -333,7 +335,8 @@
             var parameters = new DialogParameters
             {
                 { "CurrentPatient", CurrentPatient },
-                { "CurrentUser", CurrentUser }
+                { "CurrentUser", CurrentUser },
+                { "TitleIcon", Icons.Material.Filled.AssistWalker }
             };
 
             var dialog = await Dialog.ShowAsync<EditPatient>("Patient Profile & New Visit", parameters, _maxWidth);

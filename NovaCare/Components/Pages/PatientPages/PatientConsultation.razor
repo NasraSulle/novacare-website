@@ -8,6 +8,15 @@
 
 
 <MudDialog Style="background-color: rgba(246,246,246,1) !important;">
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            @if (!string.IsNullOrEmpty(TitleIcon))
+            {
+                <MudIcon Icon="@TitleIcon" />
+            }
+            <MudText Typo="Typo.h6">@MudDialog.Title</MudText>
+        </MudStack>
+    </TitleContent>
     <DialogContent>
         <MudGrid Class="pa-3 pt-6" Justify="Justify.Center">
             <MudItem md="10" Class="ps-0 pt-0">
@@ -794,6 +803,7 @@
     private void Cancel() => MudDialog.Cancel();
     private ReferralLetterPrint? _referralPrintRef;
 
+    [Parameter] public string? TitleIcon { get; set; }
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     [Parameter] public PatientDto CurrentPatient { get; set; } = new();
     [Parameter] public VisitDto CurrentVisit { get; set; } = new();

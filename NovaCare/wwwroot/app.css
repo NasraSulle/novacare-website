@@ -1,4 +1,12 @@
-﻿.mud-button {
+﻿.mud-stepper .mud-stepper-nav .mud-step {
+    position: relative;
+    cursor: default;
+    pointer-events: none;
+    user-select: text;
+    padding: 0px !important;
+}
+
+.mud-button {
     text-transform: none !important;
 }
 
