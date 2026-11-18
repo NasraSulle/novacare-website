@@ -10,6 +10,10 @@
     text-transform: none !important;
 }
 
+.no-uppercase-tabs .mud-tab {
+    text-transform: none !important;
+}
+
 /* Removes text decoration from MudNavLink, its hover states, and its text wrappers */
 .mud-nav-link,
 .mud-nav-link:hover,

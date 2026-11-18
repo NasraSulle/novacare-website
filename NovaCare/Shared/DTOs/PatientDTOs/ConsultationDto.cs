@@ -32,6 +32,7 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         // Orders placed during this specific consultation
         public List<LabTestDto> LabTests { get; set; } = new();
         public List<TreatmentDto> Treatments { get; set; } = new();
+        public List<PrescriptionDto> Prescriptions { get; set; } = new();
 
         // UI Helpers
         public string MedicalDepartmentName { get; set; } = string.Empty;

@@ -1,6 +1,7 @@
 ﻿@using NovaCare.Shared.DTOs.DiseaseDTOs
 @using NovaCare.Shared.DTOs.RoomDTOs
 @using NovaCare.Shared.DTOs.TreatmentDTOs
+@using NovaCare.Components.Pages.LabPages
 
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -237,23 +238,32 @@
                                                                     <MudTable Dense="true" FixedHeader="true" Class="shadow-none" FixedFooter="true" Items="@LabTestsBatch" Height="200px" Hover="true" Breakpoint="Breakpoint.Sm" Context="medContext">
                                                                         <HeaderContent>
                                                                             <MudTh>Lab Test</MudTh>
-                                                                            <MudTh>Cost</MudTh>
+                                                                            @* <MudTh>Cost</MudTh> *@
                                                                             <MudTh Class="text-end">
                                                                                 @* <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.FolderDelete" OnClick="ResetTests" /> *@
                                                                             </MudTh>
                                                                         </HeaderContent>
                                                                         <RowTemplate>
                                                                             <MudTd DataLabel="Lab Test">@medContext.DiseaseName</MudTd>
-                                                                            <MudTd DataLabel="Patient_Id">@medContext.LabTestCost</MudTd>
+                                                                            @* <MudTd DataLabel="Patient_Id">@medContext.LabTestCost</MudTd> *@
                                                                             <MudTd DataLabel="" Class="text-end">
-                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveLabTestFromBatch(medContext))" />
+                                                                                @if (medContext.IsReadyForService)
+                                                                                {
+                                                                                    if (!string.IsNullOrWhiteSpace(medContext.TestResult)) {
+                                                                                        <MudIconButton Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Outlined.Shower" OnClick="@(() => ShowLabResults(medContext))" />
+                                                                                    }
+                                                                                }
+                                                                                else
+                                                                                { 
+                                                                                    <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveLabTestFromBatch(medContext))" />
+                                                                                }
                                                                             </MudTd>
                                                                         </RowTemplate>
-                                                                        <FooterContent>
+                                                                        @* <FooterContent>
                                                                             <MudTh>Total Cost</MudTh>
                                                                             <MudTh>@LabTestsBatch.Sum(x => x.LabTestCost)</MudTh>
                                                                             <MudTh></MudTh>
-                                                                        </FooterContent>
+                                                                        </FooterContent> *@
                                                                     </MudTable>
                                                                 }
                                                             </MudItem>
@@ -351,27 +361,33 @@
                                                                     <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@PrescriptionsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
                                                                         <HeaderContent>
                                                                             <MudTh>Name</MudTh>
-                                                                            <MudTh>Price</MudTh>
+                                                                            @* <MudTh>Price</MudTh> *@
                                                                             <MudTh>Qty</MudTh>
-                                                                            <MudTh>Amount</MudTh>
+                                                                            @* <MudTh>Amount</MudTh> *@
                                                                             <MudTh Class="text-end">
                                                                                 @* <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.FolderDelete" OnClick="ResetTests" /> *@
                                                                             </MudTh>
                                                                         </HeaderContent>
                                                                         <RowTemplate>
                                                                             <MudTd DataLabel="Prescription">@docContext.MedicineName</MudTd>
-                                                                            <MudTd DataLabel="Quantity">@docContext.UnitPrice</MudTd>
+                                                                            @* <MudTd DataLabel="Quantity">@docContext.UnitPrice</MudTd> *@
                                                                             <MudTd DataLabel="Quantity">@docContext.Quantity</MudTd>
-                                                                            <MudTd DataLabel="Quantity">@docContext.TotalPrice</MudTd>
+                                                                            @* <MudTd DataLabel="Quantity">@docContext.TotalPrice</MudTd> *@
                                                                             <MudTd DataLabel="" Class="text-end">
-                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemovePrescriptionFromBatch(docContext))" />
+                                                                                @if(docContext.IsReadyForService){
+
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemovePrescriptionFromBatch(docContext))" />
+                                                                                }
                                                                             </MudTd>
                                                                         </RowTemplate>
-                                                                        <FooterContent>
+                                                                       @*  <FooterContent>
                                                                             <MudTh>Total Cost</MudTh>
                                                                             <MudTh>@PrescriptionsBatch?.Sum(x => x.TotalPrice)</MudTh>
                                                                             <MudTh></MudTh>
-                                                                        </FooterContent>
+                                                                        </FooterContent> *@
                                                                     </MudTable>
                                                                 }
                                                             </MudItem>
@@ -579,26 +595,34 @@
                                                                 else
                                                                 {
 
-                                                                    <MudTable Dense="true" FixedHeader="true" FixedFooter="true" Items="@TreatmentsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
+                                                                    <MudTable Elevation="0" Dense="true" FixedHeader="true" FixedFooter="true" Items="@TreatmentsBatch" Height="220px" Hover="true" Breakpoint="Breakpoint.Sm" Context="docContext">
                                                                         <HeaderContent>
                                                                             <MudTh>Name</MudTh>
-                                                                            <MudTh>Cost</MudTh>
+                                                                            @* <MudTh>Cost</MudTh> *@
                                                                             <MudTh Class="text-end">
                                                                                 @* <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.FolderDelete" OnClick="ResetTests" /> *@
                                                                             </MudTh>
                                                                         </HeaderContent>
                                                                         <RowTemplate>
-                                                                            <MudTd DataLabel="Name">@docContext.TreatmentTypeName</MudTd>
-                                                                            <MudTd DataLabel="Consultation Cost">@docContext.TreatmentCost</MudTd>
+                                                                            <MudTd DataLabel="Name">
+                                                                                @($"{(!string.IsNullOrWhiteSpace(docContext.TherapyName) ? $"{docContext.TherapyName} - " : "")} {(!string.IsNullOrWhiteSpace(docContext.SurgeryName) ? $"{docContext.SurgeryName} - " : "")} {docContext.TreatmentTypeName}")
+                                                                            </MudTd>
+                                                                            @* <MudTd DataLabel="Consultation Cost">@docContext.TreatmentCost</MudTd> *@
                                                                             <MudTd DataLabel="" Class="text-end">
-                                                                                <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveTreatmentFromBatch(docContext))" />
+                                                                                @if(docContext.IsReadyForService){
+
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveTreatmentFromBatch(docContext))" />
+                                                                                }
                                                                             </MudTd>
                                                                         </RowTemplate>
-                                                                        <FooterContent>
+                                                                     @*    <FooterContent>
                                                                             <MudTh>Total Cost</MudTh>
                                                                             <MudTh>@TreatmentsBatch?.Sum(x => x.TreatmentCost)</MudTh>
                                                                             <MudTh></MudTh>
-                                                                        </FooterContent>
+                                                                        </FooterContent> *@
                                                                     </MudTable>
                                                                 }
                                                             </MudItem>
@@ -718,7 +742,7 @@
                                                             {
                                                                 <MudStack Spacing="0" Class="mb-1">
                                                                     <MudText Typo="Typo.body2"><b>@presc.DiseaseName</b></MudText>
-                                                                    <MudText Typo="Typo.caption">@($"Results:{presc.TestResult} - Checked On. {presc.CreatedDate}")</MudText>
+                                                                    <MudText Typo="Typo.caption">@($"Checked On. {presc.CreatedDate} - Results:{(string.IsNullOrWhiteSpace(presc.TestResult) ? "Not Out" : $"{presc.TestResult}")}")</MudText>
                                                                 </MudStack>
                                                             }
                                                         }
@@ -743,7 +767,7 @@
                                                             foreach (var treat in PreviousTreatments)
                                                             {
                                                                 <MudStack Spacing="0" Class="mb-1">
-                                                                    <MudText Typo="Typo.body2"><b>@($"{(treat.TherapyName != null ? $"{treat.TherapyName} - " : "")} {(treat.SurgeryName != null ? $"{treat.SurgeryName} - " : "")} {treat.TreatmentTypeName}")</b></MudText>
+                                                                    <MudText Typo="Typo.body2"><b>@($"{(!string.IsNullOrWhiteSpace(treat.TherapyName) ? $"{treat.TherapyName} - " : "")} {(!string.IsNullOrWhiteSpace(treat.SurgeryName) ? $"{treat.SurgeryName} - " : "")} {treat.TreatmentTypeName}")</b></MudText>
                                                                     <MudText Typo="Typo.caption">@($"From:{treat.StartDate} - To. {treat.FinishDate}")</MudText>
                                                                 </MudStack>
                                                             }
@@ -802,6 +826,7 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!; 
     private void Cancel() => MudDialog.Cancel();
     private ReferralLetterPrint? _referralPrintRef;
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
 
     [Parameter] public string? TitleIcon { get; set; }
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
@@ -813,6 +838,7 @@
     [Parameter] public TreatmentDto CurrentTreatment { get; set; } = new();
     AllergyDto CurrentAllergy = new();
     ReferralDto CurrentReferral = new();
+    PreliminaryTestDto CurrentVitals = new();
 
     List<DiseaseDto> AllDiseases = new();
     List<LabTestDto>? LabTestsBatch = new();
@@ -881,6 +907,11 @@
         AllRooms = await roomService.GetAllRoomsAsync();
 
 
+        await UpdateSideBar();
+    }
+
+    public async Task UpdateSideBar()
+    {
         PreviousPrescription = await patientService.GetPreviousPrescriptionsAsync(CurrentPatient.Id);
         PreviousLabTests = await patientService.GetPreviousLabTestsAsync(CurrentPatient.Id);
         PreviousTreatments = await patientService.GetPreviousTreatmentsAsync(CurrentPatient.Id);
@@ -893,6 +924,14 @@
             .Where(v => v.VisitStatusId == 1)
             .SelectMany(v => v.Consultations)
             .FirstOrDefault(c => c.DoctorStaffId == CurrentUser.Id) ?? new();
+
+
+        CurrentVitals = CurrentPatient.Visits!
+            .FirstOrDefault(v => v.VisitStatusId == 1)?.PreliminaryTest ?? new();
+
+        TreatmentsBatch = PreviousTreatments.Where(tr => tr.ConsultationId == CurrentConsultation.Id).ToList();
+        LabTestsBatch = PreviousLabTests.Where(tr => tr.ConsultationId == CurrentConsultation.Id).ToList();
+        PrescriptionsBatch = PreviousPrescription.Where(tr => tr.ConsultationId == CurrentConsultation.Id).ToList();
     }
 
     public async Task AddLabTestToBatch(LabTestDto labTestDto)
@@ -919,6 +958,23 @@
         await InvokeAsync(StateHasChanged);
     }
 
+
+    private async Task ShowLabResults(LabTestDto labTestDto)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"TestId" , labTestDto.Id},
+            {"CurrentUser" , CurrentUser}
+        };
+
+        var dialog = await DialogService.ShowAsync<EditLabTest>("Lab Test Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
 
     public async Task RemoveLabTestFromBatch(LabTestDto labTestDto)
     {
@@ -1305,18 +1361,21 @@
         isCreatedSuccessfully = false;
 
         isSaving = true;
+        StateHasChanged();
 
         if (string.IsNullOrWhiteSpace(CurrentConsultation.Diagnosis))
         {
             saveMessage = "Please fill patient Diagnosis";
+            Snackbar.Add($"{saveMessage}", Severity.Error);
             isSaving = false;
             return;
         }
 
         try
         {
-            if (CurrentVisit.Id > 0)
+            if (CurrentConsultation.Id > 0)
             {
+                CurrentVisit.Id = CurrentConsultation.VisitId;
                 if (LabTestsBatch != null && LabTestsBatch.Any())
                 {
                     foreach (var test in LabTestsBatch)
@@ -1366,6 +1425,7 @@
 
             }
             var visitUpdateResponse = await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
+            await UpdateSideBar();
 
             StateHasChanged();
 

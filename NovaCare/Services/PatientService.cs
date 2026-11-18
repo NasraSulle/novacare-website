@@ -34,6 +34,7 @@ namespace NovaCare.Services
             using var context = _contextFactory.CreateDbContext();
             var patients = await context.Patients
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(patient => new PatientDto
                 {
                     Id = patient.Id,
@@ -141,6 +142,7 @@ namespace NovaCare.Services
             using var context = _contextFactory.CreateDbContext();
             var patientTypes = await context.PatientTypes
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(title => new PatientTypeDto
                 {
                     Id = title.Id,
@@ -157,6 +159,7 @@ namespace NovaCare.Services
             using var context = _contextFactory.CreateDbContext();
             var patientStatus = await context.PatientStatuses
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(status => new PatientStatusDto
                 {
                     Id = status.Id,
@@ -273,6 +276,7 @@ namespace NovaCare.Services
             var patients = await context.Patients
                 .Where(x => x.RegisteredDate >= fromDate && x.RegisteredDate <= toDate)
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(patient => new PatientDto
                 {
                     Id = patient.Id,
@@ -311,6 +315,7 @@ namespace NovaCare.Services
             using var context = _contextFactory.CreateDbContext();
             var patient = await context.Patients
                 .AsNoTracking()
+                .AsSplitQuery() // Prevents Cartesian explosion across Bills, LabTests, Prescriptions, Treatments, etc.
                 .Where(x => x.Id == patientId)
                 .Select(patient => new PatientDto
                 {
@@ -348,7 +353,27 @@ namespace NovaCare.Services
                             DoctorId = dp.DoctorId,
                         }).ToList(),
 
-                    //Visits
+                    // Registered Insurance Policies (Fetched ONCE here instead of inside every visit)
+                    PatientInsuarances = patient.PatientInsuarances
+                        .Select(pi => new PatientInsuaranceDto
+                        {
+                            PatientInsuaranceId = pi.PatientInsuaranceId,
+                            PatientId = pi.PatientId,
+                            InsuaranceId = pi.InsuaranceId,
+                            InsuranceSchemeId = pi.InsuranceSchemeId,
+                            MemberCardNumber = pi.MemberCardNumber,
+                            PrincipalMemberName = pi.PrincipalMemberName,
+                            RelationshipToPrincipal = pi.RelationshipToPrincipal,
+                            ValidFrom = pi.ValidFrom,
+                            ValidTo = pi.ValidTo,
+                            IsPrimary = pi.IsPrimary,
+                            IsActive = pi.IsActive,
+                            InsuranceProviderName = pi.Insuarance != null ? pi.Insuarance.InsuaranceName : string.Empty,
+                            InsuranceSchemeName = pi.InsuranceScheme != null ? pi.InsuranceScheme.SchemeName : string.Empty,
+                            DefaultCoveragePercent = pi.InsuranceScheme != null ? pi.InsuranceScheme.DefaultCoveragePercent : 100m
+                        }).ToList(),
+
+                    // Visits
                     Visits = patient.Visits
                         .Select(v => new VisitDto
                         {
@@ -364,11 +389,11 @@ namespace NovaCare.Services
                             PatientInsuaranceId = v.PatientInsuaranceId,
                             RegisteredPaymentMode = v.PaymentMode != null ? v.PaymentMode.PaymentModeName : "Cash",
                             InsuranceProviderName = (v.PatientInsuarance != null && v.PatientInsuarance.Insuarance != null)
-                        ? v.PatientInsuarance.Insuarance.InsuaranceName
-                        : string.Empty,
+                                ? v.PatientInsuarance.Insuarance.InsuaranceName
+                                : string.Empty,
                             InsuranceSchemeName = (v.PatientInsuarance != null && v.PatientInsuarance.InsuranceScheme != null)
-                        ? v.PatientInsuarance.InsuranceScheme.SchemeName
-                        : string.Empty,
+                                ? v.PatientInsuarance.InsuranceScheme.SchemeName
+                                : string.Empty,
                             MemberCardNumber = v.PatientInsuarance != null ? v.PatientInsuarance.MemberCardNumber : string.Empty,
                             AuthorizationNumber = v.VisitInsuranceAuth != null ? v.VisitInsuranceAuth.AuthorizationNumber : string.Empty,
 
@@ -378,57 +403,11 @@ namespace NovaCare.Services
                             VisitStatusName = v.VisitStatus != null ? v.VisitStatus.VisitStatusName : string.Empty,
                             PreliminaryTestId = v.PreliminaryTest != null ? v.PreliminaryTest.Id : null,
 
-                            // 1. Patient
-                            Patient = v.Patient == null ? null : new PatientDto
-                            {
-                                Id = v.Patient.Id,
-                                FisrtName = v.Patient.FirstName,
-                                MiddleName = v.Patient.MiddleName,
-                                LastName = v.Patient.LastName,
-                                PatientCode = v.Patient.PatientCode,
-                                PatientPhoto = v.Patient.PatientPhoto,
-                                Age = v.Patient.Age,
-                                PhoneNumber = v.Patient.PhoneNumber,
-                                EmailAddress = v.Patient.EmailAddress,
-                                HomeAddress = v.Patient.HomeAddress,
-                                RegisteredDate = v.Patient.RegisteredDate,
-                                Gender = v.Patient.Gender,
-                                KinFullName = v.Patient.KinFullName,
-                                KinPhoneNumber = v.Patient.KinPhoneNumber,
-                                KinHomeAddress = v.Patient.KinHomeAddress,
-                                PatientStatusId = v.Patient.PatientStatusId,
-                                PatientTypeId = v.Patient.PatientTypeId,
-                                PatientFullName = v.Patient.PatientFullName,
-                                PatientStatusName = v.Patient.PatientStatus != null ? v.Patient.PatientStatus.PatientStatusName : string.Empty,
-                                PatientTypeName = v.Patient.PatientType != null ? v.Patient.PatientType.PatientTypeName : string.Empty,
-                                PatientInsuarances = v.Patient.PatientInsuarances
-                            .Where(pi => pi.IsActive)
-                            .Select(pi => new PatientInsuaranceDto
-                            {
-                                PatientInsuaranceId = pi.PatientInsuaranceId,
-                                PatientId = pi.PatientId,
-                                InsuaranceId = pi.InsuaranceId,
-                                InsuranceSchemeId = pi.InsuranceSchemeId,
-                                MemberCardNumber = pi.MemberCardNumber,
-                                PrincipalMemberName = pi.PrincipalMemberName,
-                                RelationshipToPrincipal = pi.RelationshipToPrincipal,
-                                IsPrimary = pi.IsPrimary,
-                                IsActive = pi.IsActive,
-                                InsuranceProviderName = pi.Insuarance != null ? pi.Insuarance.InsuaranceName : string.Empty,
-                                InsuranceSchemeName = pi.InsuranceScheme != null ? pi.InsuranceScheme.SchemeName : string.Empty,
-                                DefaultCoveragePercent = pi.InsuranceScheme != null ? pi.InsuranceScheme.DefaultCoveragePercent : 100m
-                            }).ToList()
-                            },
-
                             // 2. Preliminary Test (Vitals)
                             PreliminaryTest = v.PreliminaryTest == null ? null : new PreliminaryTestDto
                             {
                                 Id = v.PreliminaryTest.Id,
-                                //HeartRate = v.PreliminaryTest.HeartRate,
-                                //RespiratoryRate = v.PreliminaryTest.RespiratoryRate,
-                                //Temperature = v.PreliminaryTest.Temperature,
                                 PreliminaryPressure = v.PreliminaryTest.PreliminaryPressure,
-                                //OxygenSaturation = v.PreliminaryTest.OxygenSaturation,
                                 PreliminaryHeight = v.PreliminaryTest.PreliminaryHeight,
                                 PreliminaryWeight = v.PreliminaryTest.PreliminaryWeight,
                                 VisitId = v.PreliminaryTest.VisitId,
@@ -456,7 +435,7 @@ namespace NovaCare.Services
                                 BillTypeName = b.BillType != null ? b.BillType.TypeNme : string.Empty,
                                 PaymentModeName = b.PaymentMode != null ? b.PaymentMode.PaymentModeName : "Cash",
                                 PaymentStatusName = b.PaymentStatus != null ? b.PaymentStatus.PaymentStatusName : "Unpaid",
-                                StaffFullName = b.Staff != null ? b.Staff.FisrtName : string.Empty, //full name letter
+                                StaffFullName = b.Staff != null ? b.Staff.FisrtName : string.Empty,
                                 BillItems = b.BillItems.Select(bi => new BillItemDto
                                 {
                                     Id = bi.Id,
@@ -488,7 +467,6 @@ namespace NovaCare.Services
                                 RoomId = c.RoomId,
                                 DoctorId = c.DoctorId,
                                 DoctorStaffId = c.Doctor != null ? c.Doctor.StaffId : null,
-                                //DoctorFullName = c.Doctor != null ? c.Doctor.FullName : string.Empty,
                                 MedicalDepartmentId = c.MedicalDepartmentId,
                                 BillItemId = c.BillItemId,
                                 MedicalDepartmentName = c.MedicalDepartment != null ? c.MedicalDepartment.MedicalDepartmentName : string.Empty,
@@ -497,7 +475,6 @@ namespace NovaCare.Services
                                     ? c.BillItem.Bill.PaymentStatus.PaymentStatusName
                                     : "Unbilled"
                             }).ToList(),
-
 
                             // 5. Lab Tests
                             LabTests = v.LabTests.Select(l => new LabTestDto
@@ -518,8 +495,9 @@ namespace NovaCare.Services
                                 BillItemId = l.BillItemId,
                                 PaymentStatusName = (l.BillItem != null && l.BillItem.Bill != null && l.BillItem.Bill.PaymentStatus != null)
                                     ? l.BillItem.Bill.PaymentStatus.PaymentStatusName
-                : "Unbilled"
+                                    : "Unbilled"
                             }).ToList(),
+
                             // 6. Prescriptions
                             Prescriptions = v.Prescriptions.Select(p => new PrescriptionDto
                             {
@@ -535,11 +513,11 @@ namespace NovaCare.Services
                                 DoctorId = p.DoctorId,
                                 BillItemId = p.BillItemId,
                                 MedicineName = p.Medicine != null ? p.Medicine.MedicineName : string.Empty,
-                                //DoctorName = p.Doctor != null ? p.Doctor.FullName : string.Empty,
                                 PaymentStatusName = (p.BillItem != null && p.BillItem.Bill != null && p.BillItem.Bill.PaymentStatus != null)
-                            ? p.BillItem.Bill.PaymentStatus.PaymentStatusName
-                            : "Unbilled"
+                                    ? p.BillItem.Bill.PaymentStatus.PaymentStatusName
+                                    : "Unbilled"
                             }).ToList(),
+
                             // 7. Treatments
                             Treatments = v.Treatments.Select(t => new TreatmentDto
                             {
@@ -565,38 +543,52 @@ namespace NovaCare.Services
                                 TherapyName = t.Therapy != null ? t.Therapy.TherapyName : string.Empty,
                                 MedicalDeptName = t.MedicalDepartment != null ? t.MedicalDepartment.MedicalDepartmentName : string.Empty,
                                 WardName = t.Ward != null ? t.Ward.WardName : string.Empty,
-                                //DoctorName = t.Doctor != null ? t.Doctor.FullName : string.Empty,
                                 RoomName = t.Room != null ? t.Room.RoomName : string.Empty,
                                 PaymentStatusName = (t.BillItem != null && t.BillItem.Bill != null && t.BillItem.Bill.PaymentStatus != null)
-                            ? t.BillItem.Bill.PaymentStatus.PaymentStatusName
-                            : "Unbilled"
+                                    ? t.BillItem.Bill.PaymentStatus.PaymentStatusName
+                                    : "Unbilled"
                             }).ToList()
-                        }).ToList(),
-
-                    // Registered Insurance Policies (NHIF, ZHIF, Jubilee, Strategis, etc.)
-                    PatientInsuarances = patient.PatientInsuarances
-                        .Select(pi => new PatientInsuaranceDto
-                        {
-                            PatientInsuaranceId = pi.PatientInsuaranceId,
-                            PatientId = pi.PatientId,
-                            InsuaranceId = pi.InsuaranceId,
-                            InsuranceSchemeId = pi.InsuranceSchemeId,
-                            MemberCardNumber = pi.MemberCardNumber,
-                            PrincipalMemberName = pi.PrincipalMemberName,
-                            RelationshipToPrincipal = pi.RelationshipToPrincipal,
-                            ValidFrom = pi.ValidFrom,
-                            ValidTo = pi.ValidTo,
-                            IsPrimary = pi.IsPrimary,
-                            IsActive = pi.IsActive,
-                            InsuranceProviderName = pi.Insuarance != null ? pi.Insuarance.InsuaranceName : string.Empty,
-                            InsuranceSchemeName = pi.InsuranceScheme != null ? pi.InsuranceScheme.SchemeName : string.Empty,
-                            DefaultCoveragePercent = pi.InsuranceScheme != null ? pi.InsuranceScheme.DefaultCoveragePercent : 100m
                         }).ToList()
                 })
                 .FirstOrDefaultAsync();
 
-            return patient ?? new();
+            if (patient == null)
+                return new();
+
+            // Populate visit.Patient in memory (0 extra SQL queries, preserves exact structure)
+            var visitPatientRef = new PatientDto
+            {
+                Id = patient.Id,
+                FisrtName = patient.FisrtName,
+                MiddleName = patient.MiddleName,
+                LastName = patient.LastName,
+                PatientCode = patient.PatientCode,
+                PatientPhoto = patient.PatientPhoto,
+                Age = patient.Age,
+                PhoneNumber = patient.PhoneNumber,
+                EmailAddress = patient.EmailAddress,
+                HomeAddress = patient.HomeAddress,
+                RegisteredDate = patient.RegisteredDate,
+                Gender = patient.Gender,
+                KinFullName = patient.KinFullName,
+                KinPhoneNumber = patient.KinPhoneNumber,
+                KinHomeAddress = patient.KinHomeAddress,
+                PatientStatusId = patient.PatientStatusId,
+                PatientTypeId = patient.PatientTypeId,
+                PatientFullName = patient.PatientFullName,
+                PatientStatusName = patient.PatientStatusName,
+                PatientTypeName = patient.PatientTypeName,
+                PatientInsuarances = patient.PatientInsuarances.Where(pi => pi.IsActive).ToList()
+            };
+
+            foreach (var visit in patient.Visits)
+            {
+                visit.Patient = visitPatientRef;
+            }
+
+            return patient;
         }
+
 
 
         public async Task<VisitDto?> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName)
@@ -604,17 +596,42 @@ namespace NovaCare.Services
             if (string.IsNullOrWhiteSpace(pCodeOrFullName))
                 return null;
 
-            var searchTerm = pCodeOrFullName.Trim().ToLower();
+            var searchTerm = pCodeOrFullName.Trim();
 
             using var context = _contextFactory.CreateDbContext();
 
+            // STEP 1: Fast, lightweight lookup to get ONLY the Visit Id (no heavy joins or photos)
+            // Try exact PatientCode match first (uses index on PatientCode)
+            var targetVisitId = await context.Visits
+                .AsNoTracking()
+                .Where(v => v.VisitStatusId == 1 &&
+                            v.Patient != null &&
+                            v.Patient.PatientCode == searchTerm)
+                .OrderByDescending(v => v.VisitDate)
+                .Select(v => (int?)v.Id)
+                .FirstOrDefaultAsync();
+
+            // Fallback to FullName search if no exact PatientCode matched
+            if (targetVisitId == null)
+            {
+                targetVisitId = await context.Visits
+                    .AsNoTracking()
+                    .Where(v => v.VisitStatusId == 1 &&
+                                v.Patient != null &&
+                                EF.Functions.Like(v.Patient.PatientFullName, $"%{searchTerm}%"))
+                    .OrderByDescending(v => v.VisitDate)
+                    .Select(v => (int?)v.Id)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (targetVisitId == null)
+                return null;
+
+            // STEP 2: Fetch full VisitDto by Primary Key (instant clustered index seek across all split queries)
             var visit = await context.Visits
                 .AsNoTracking()
-                .Where(v => v.VisitStatusId == 1 && // Only search Active visits
-                            v.Patient != null &&
-                            (v.Patient.PatientCode.ToLower() == searchTerm ||
-                             v.Patient.PatientFullName.ToLower().Contains(searchTerm)))
-                .OrderByDescending(v => v.VisitDate)
+                .AsSplitQuery()
+                .Where(v => v.Id == targetVisitId.Value)
                 .Select(v => new VisitDto
                 {
                     Id = v.Id,
@@ -781,8 +798,9 @@ namespace NovaCare.Services
                         BillItemId = l.BillItemId,
                         PaymentStatusName = (l.BillItem != null && l.BillItem.Bill != null && l.BillItem.Bill.PaymentStatus != null)
                             ? l.BillItem.Bill.PaymentStatus.PaymentStatusName
-        : "Unbilled"
+                            : "Unbilled"
                     }).ToList(),
+
                     // 6. Prescriptions
                     Prescriptions = v.Prescriptions.Select(p => new PrescriptionDto
                     {
@@ -800,9 +818,10 @@ namespace NovaCare.Services
                         MedicineName = p.Medicine != null ? p.Medicine.MedicineName : string.Empty,
                         //DoctorName = p.Doctor != null ? p.Doctor.FullName : string.Empty,
                         PaymentStatusName = (p.BillItem != null && p.BillItem.Bill != null && p.BillItem.Bill.PaymentStatus != null)
-                    ? p.BillItem.Bill.PaymentStatus.PaymentStatusName
-                    : "Unbilled"
+                            ? p.BillItem.Bill.PaymentStatus.PaymentStatusName
+                            : "Unbilled"
                     }).ToList(),
+
                     // 7. Treatments
                     Treatments = v.Treatments.Select(t => new TreatmentDto
                     {
@@ -831,13 +850,14 @@ namespace NovaCare.Services
                         //DoctorName = t.Doctor != null ? t.Doctor.FullName : string.Empty,
                         RoomName = t.Room != null ? t.Room.RoomName : string.Empty,
                         PaymentStatusName = (t.BillItem != null && t.BillItem.Bill != null && t.BillItem.Bill.PaymentStatus != null)
-                    ? t.BillItem.Bill.PaymentStatus.PaymentStatusName
-                    : "Unbilled"
+                            ? t.BillItem.Bill.PaymentStatus.PaymentStatusName
+                            : "Unbilled"
                     }).ToList()
-                }).FirstOrDefaultAsync();
+                })
+                .FirstOrDefaultAsync();
+
             return visit;
         }
-
 
 
         public async Task<bool> UpdatePatientAsync(PatientDto dto, int patientId)
@@ -965,7 +985,8 @@ namespace NovaCare.Services
             using var context = _contextFactory.CreateDbContext();
             var visits = await context.Visits
                 .AsNoTracking()
-                .OrderByDescending(v => v.VisitDate)
+                .AsSplitQuery()
+                //.OrderByDescending(v => v.VisitDate)
                 .Select(visit => new VisitDto
                 {
                     Id = visit.Id,
@@ -1093,6 +1114,7 @@ namespace NovaCare.Services
             using var context = _contextFactory.CreateDbContext();
             var visits = await context.VisitTypes
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(visit => new VisitTypeDto
                 {
                     Id = visit.Id,
@@ -1155,6 +1177,7 @@ namespace NovaCare.Services
 
             var patient = await context.Patients
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.PatientCode == patientCode)
                 .Select(patient => new PatientDto
                 {
@@ -1279,6 +1302,7 @@ namespace NovaCare.Services
 
             var cons = await context.Consultations
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.Id == conId)
                 .Select(consDto => new ConsultationDto
                 {
@@ -1309,7 +1333,8 @@ namespace NovaCare.Services
 
             var cons = await context.Consultations
                 .AsNoTracking()
-                .OrderByDescending(c => c.StartDate)
+                .AsSplitQuery()
+                //.OrderByDescending(c => c.StartDate)
                 .Select(consDto => new ConsultationDto
                 {
                     Id = consDto.Id,
@@ -1395,8 +1420,9 @@ namespace NovaCare.Services
 
             return await context.PatientInsuarances
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(pi => pi.PatientId == patientId && pi.IsActive)
-                .OrderByDescending(pi => pi.IsPrimary)
+                //.OrderByDescending(pi => pi.IsPrimary)
                 .Select(pi => new PatientInsuaranceDto
                 {
                     PatientInsuaranceId = pi.PatientInsuaranceId,
@@ -1470,6 +1496,7 @@ namespace NovaCare.Services
 
             return await context.VisitInsuranceAuths
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(a => a.VisitId == visitId)
                 .Select(a => new VisitInsuranceAuthDto
                 {
@@ -1530,7 +1557,8 @@ namespace NovaCare.Services
 
             var visit = await context.Visits
                 .AsNoTracking()
-                .Where(v => v.Id == pId)
+                .AsSplitQuery()
+                .Where(v => v.PatientId == pId)
                 .Select(v => new VisitDto
                 {
                     Id = v.Id,
@@ -1545,8 +1573,9 @@ namespace NovaCare.Services
 
             var prescriptions = await context.Prescriptions
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.Visit.PatientId == patientId)
-                .OrderByDescending(p => p.PrescribedDate)
+                //.OrderByDescending(p => p.PrescribedDate)
                 .Select(p => new PrescriptionDto
                 {
                     Id = p.Id,
@@ -1554,8 +1583,15 @@ namespace NovaCare.Services
                     Quantity = p.Quantity,
                     Dosage = p.Dosage,
                     IsDispensed = p.IsDispensed,
+                    ConsultationId = p.ConsultationId,
                     Notes = p.Notes,
                     MedicineName = p.Medicine != null ? p.Medicine.MedicineName : string.Empty,
+                    IsReadyForService =
+                            (p.BillItem != null && p.BillItem.Bill != null && p.BillItem.Bill.PaymentStatusId == 3)
+                            ||
+                            (p.BillItem != null && p.BillItem.Bill != null &&
+                             p.BillItem.Bill.PaymentModeId == 2 &&
+                             p.BillItem.Bill.PatientPaidAmount >= p.BillItem.Bill.TotalPatientAmount)
                 })
                 .ToListAsync();
 
@@ -1569,14 +1605,22 @@ namespace NovaCare.Services
 
             var tests = await context.LabTests
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.Visit.PatientId == patientId)
-                .OrderByDescending(p => p.CreatedDate)
+                //.OrderByDescending(p => p.CreatedDate)
                 .Select(p => new LabTestDto
                 {
                     Id = p.Id,
                     CreatedDate = p.CreatedDate,
+                    ConsultationId = p.ConsultationId,
                     DiseaseName = p.DiseaseName,
                     TestResult = p.TestResult,
+                    IsReadyForService =
+                            (p.BillItem != null && p.BillItem.Bill != null && p.BillItem.Bill.PaymentStatusId == 3)
+                            ||
+                            (p.BillItem != null && p.BillItem.Bill != null &&
+                             p.BillItem.Bill.PaymentModeId == 2 &&
+                             p.BillItem.Bill.PatientPaidAmount >= p.BillItem.Bill.TotalPatientAmount)
                 })
                 .ToListAsync();
 
@@ -1590,16 +1634,24 @@ namespace NovaCare.Services
 
             var treats = await context.Treatments
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.Visit.PatientId == patientId)
-                .OrderByDescending(p => p.StartDate)
+                //.OrderByDescending(p => p.StartDate)
                 .Select(p => new TreatmentDto
                 {
                     Id = p.Id,
                     StartDate = p.StartDate,
+                    ConsultationId = p.ConsultationId,
                     FinishDate = p.FinishDate,
                     TreatmentTypeName = p.TreatmentType != null ? p.TreatmentType.TreatmentTypeName : string.Empty,
                     SurgeryName = p.Surgery != null ? p.Surgery.SurgeryName : string.Empty,
                     TherapyName = p.Therapy != null ? p.Therapy.TherapyName : string.Empty,
+                    IsReadyForService =
+                            (p.BillItem != null && p.BillItem.Bill != null && p.BillItem.Bill.PaymentStatusId == 3)
+                            ||
+                            (p.BillItem != null && p.BillItem.Bill != null &&
+                             p.BillItem.Bill.PaymentModeId == 2 &&
+                             p.BillItem.Bill.PatientPaidAmount >= p.BillItem.Bill.TotalPatientAmount)
                 })
                 .ToListAsync();
 
@@ -1612,6 +1664,7 @@ namespace NovaCare.Services
 
             var treats = await context.Doctors
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.DoctorPatients.Any(dp => dp.PatientId == patientId))
                 .Select(p => new DoctorDto
                 {
@@ -1628,6 +1681,7 @@ namespace NovaCare.Services
 
             var treats = await context.Allergies
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.PatientId == patientId)
                 .Select(p => new AllergyDto
                 {
@@ -1669,6 +1723,7 @@ namespace NovaCare.Services
 
             var allergy = await context.Allergies
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.AllergyName.ToLower().Trim() == allergyName.ToLower().Trim())
                 .Select(p => new AllergyDto
                 {
@@ -1715,6 +1770,7 @@ namespace NovaCare.Services
 
             var referral = await context.Referrals
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(p => p.ConsultationId == consId)
                 .Select(p => new ReferralDto
                 {
