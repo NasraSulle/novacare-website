@@ -24,7 +24,7 @@
             @* Lab Summary Metric Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total @firstPart Tests</MudText>
                             <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredLabTests.Count</MudText>
@@ -35,7 +35,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="6" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-warning);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-warning);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Pending / New</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight:700;">
@@ -48,7 +48,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="6" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-success);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Completed / Updated</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
@@ -66,16 +66,16 @@
             <MudDataGrid Loading="@isSearchLoading"
                          Hover="true"
                          Striped="false"
-                         Elevation="0"
+                         Elevation="0" 
                          Outlined="true"
                          RowClick="@((args) => PreviewLabTestProfile(args.Item.Id))"
                          RowStyle="cursor: pointer;"
                          T="LabTestDto"
                          Items="@FilteredLabTests"
                          ReadOnly="@_readOnly"
-                         Class="rounded-lg"
+                         Class="bg-transparent"
                          Bordered="false"
-                         Dense="false">
+                         Dense="true">
                 <ToolBarContent>
                     <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
                         <div class="d-flex align-center gap-2">
@@ -117,7 +117,7 @@
                     <TemplateColumn Title="Diagnostic Test" SortBy="@(x => x.DiseaseName)">
                         <CellTemplate>
                             <div class="d-flex align-center py-1">
-                                <MudAvatar Size="Size.Medium" Color="Color.Primary" Variant="Variant.Outlined" Class="me-3">
+                                <MudAvatar Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="me-3">
                                     <MudIcon Icon="@Icons.Material.Outlined.Biotech" Size="Size.Small" />
                                 </MudAvatar>
                                 <div>
@@ -180,7 +180,7 @@
                     <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
                         <CellTemplate>
                             <MudTooltip Text="View / Update Results">
-                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
                                                Size="Size.Small"
                                                Color="Color.Default"
                                                OnClick="@(() => PreviewLabTestProfile(context.Item.Id))" />

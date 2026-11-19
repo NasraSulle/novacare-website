@@ -25,7 +25,7 @@
             @* Queue Summary Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="6">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-warning);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-warning);background-color: rgba(246,246,246,0.01) !important;">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Pending Dispense Queue</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight:700;">@FilteredPrescriptions.Count</MudText>
@@ -36,7 +36,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);background-color: rgba(246,246,246,0.01) !important;">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Units to Dispense</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Primary" Style="font-weight:700;">@FilteredPrescriptions.Sum(x => x.Quantity)</MudText>
@@ -56,9 +56,9 @@
                          T="PrescriptionDto"
                          Items="@FilteredPrescriptions"
                          ReadOnly="@_readOnly"
-                         Class="rounded-lg"
+                         Class="" Style="background-color: rgba(246,246,246,0.01) !important;"
                          Bordered="false"
-                         Dense="false">
+                         Dense="true">
                 <ToolBarContent>
                     <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
                         <div class="d-flex align-center gap-2">
@@ -134,7 +134,7 @@
                     </TemplateColumn>
 
                     @* Dispense Action *@
-                    <TemplateColumn Title="Action" CellStyle="text-align: right;">
+                    <TemplateColumn CellStyle="text-align: right;">
                         <CellTemplate>
                             <MudButton Variant="Variant.Filled"
                                        Color="Color.Success"

@@ -30,7 +30,7 @@
             @* Inventory Summary Metric Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Items</MudText>
                             <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredMedicines.Count</MudText>
@@ -41,7 +41,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="6" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-success);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">In Stock</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
@@ -54,7 +54,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="6" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-error);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-error);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Out / Low Stock</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Error" Style="font-weight:700;">
@@ -76,9 +76,9 @@
                          T="MedicineDto"
                          Items="@FilteredMedicines"
                          ReadOnly="@_readOnly"
-                         Class="rounded-lg"
+                         Class="bg-transparent"
                          Bordered="false"
-                         Dense="false"
+                         Dense="true"
                          RowStyle="cursor: pointer;"
                          RowClick="@((args) => PreviewMedicineProfile(args.Item))">
                 <ToolBarContent>
@@ -198,7 +198,7 @@
                     <TemplateColumn Title="" CellStyle="width: 56px; text-align: right;">
                         <CellTemplate>
                             <MudTooltip Text="View / Edit Medicine">
-                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
                                                Size="Size.Small"
                                                Color="Color.Default"
                                                OnClick="@(() => PreviewMedicineProfile(context.Item))" />

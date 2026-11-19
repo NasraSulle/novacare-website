@@ -12,39 +12,39 @@
                  Rounded="false"
                  Border="true"
                  ApplyEffectsToContainer="true"
-                 Color="Color.Primary"
+                 TabHeaderClass="bg-transparent"
                  SliderColor="Color.Primary"
-                 PanelClass="pa-3 pa-sm-5">
+                 TabPanelsClass="p-0 pa-0 pa-sm-5">
             @foreach (var category in medicineCategories)
             {
                 var currentGenre = category;
                 <MudTabPanel Text="@currentGenre"
                              Style="text-transform: none; font-weight: 500; justify-content: flex-start;"
                              OnClick="@(() => SelectGenre(currentGenre))">
-                    <MudPaper Elevation="0" Class="pa-0">
+                    <MudPaper Elevation="0" Class="pa-0 w-100" Style="background-color: rgba(246,246,246,1) !important;">
                         <MudTabs Elevation="0"
                                  Rounded="true"
                                  ApplyEffectsToContainer="true"
-                                 Color="Color.Secondary"
+                                 TabHeaderClass="bg-primary-subtle  dense-tabs"
                                  SliderColor="Color.Secondary"
-                                 PanelClass="pt-4"
+                                 TabPanelsClass="pa-4"
                                  Centered="false">
-                            <MudTabPanel Text="All Forms" Style="text-transform: none;">
+                            <MudTabPanel Text="All Forms" Icon="@Icons.Material.Filled.Medication" Style="text-transform: none;">
                                 <Medicines CurrentUser="currentUser" Genre="@genre" />
                             </MudTabPanel>
-                            <MudTabPanel Text="Tabs & Caps" Style="text-transform: none;">
+                            <MudTabPanel Text="Tabs & Caps" Icon="@Icons.Material.Filled.Circle" Style="text-transform: none;">
                                 <Medicines CurrentUser="currentUser" FilterBy="Tablets" Genre="@genre" />
                             </MudTabPanel>
-                            <MudTabPanel Text="Injections" Style="text-transform: none;">
+                            <MudTabPanel Text="Injections" Icon="@Icons.Material.Filled.PushPin" Style="text-transform: none;">
                                 <Medicines CurrentUser="currentUser" FilterBy="Injection" Genre="@genre" />
                             </MudTabPanel>
-                            <MudTabPanel Text="Syrup" Style="text-transform: none;">
+                            <MudTabPanel Text="Syrup" Icon="@Icons.Material.Filled.MedicationLiquid" Style="text-transform: none;">
                                 <Medicines CurrentUser="currentUser" FilterBy="Syrup" Genre="@genre" />
                             </MudTabPanel>
-                            <MudTabPanel Text="Cream" Style="text-transform: none;">
+                            <MudTabPanel Text="Cream" Icon="@Icons.Material.Filled.SportsCricket" Style="text-transform: none;">
                                 <Medicines CurrentUser="currentUser" FilterBy="Cream" Genre="@genre" />
                             </MudTabPanel>
-                            <MudTabPanel Text="Drip" Style="text-transform: none;">
+                            <MudTabPanel Text="Drip" Icon="@Icons.Material.Filled.WaterDrop" Style="text-transform: none;">
                                 <Medicines CurrentUser="currentUser" FilterBy="Drip" Genre="@genre" />
                             </MudTabPanel>
                         </MudTabs>

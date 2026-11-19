@@ -11,6 +11,7 @@ using NovaCare.Helpers;
 using NovaCare.Interfaces;
 using NovaCare.Modals.StaffModals;
 using NovaCare.Services;
+using NovaCare.Shared.HospitalCredentials;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,9 @@ builder.Services.AddIdentityCore<Staff>(options =>
 
 builder.Services.AddSingleton<IEmailSender<Staff>, IdentityNoOpEmailSender>();
 builder.Services.AddSingleton<IConverter>(new STASynchronizedConverter(new PdfTools()));
+builder.Services.Configure<HospitalInfoSettings>(
+    builder.Configuration.GetSection("HospitalInfo"));
+
 
 var app = builder.Build();
 

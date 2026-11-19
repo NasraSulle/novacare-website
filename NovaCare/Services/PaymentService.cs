@@ -642,6 +642,9 @@ namespace NovaCare.Services
                     PaymentStatusId = b.PaymentStatusId,
                     PatientInsuaranceId = b.PatientInsuaranceId,
                     StaffId = b.StaffId,
+                    StaffFullName = b.Staff != null
+                                    ? $"{string.Join(" ", b.Staff.StaffTitles!.Select(st => st.StaffTitleName))} {b.Staff.LastName}"
+                                    : string.Empty,
 
                     // UI Display Helpers
                     VisitName = (b.Visit != null && b.Visit.VisitType != null) ? b.Visit.VisitType.TypeName : string.Empty,

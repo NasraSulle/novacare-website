@@ -11,9 +11,9 @@
 @attribute [Authorize]
 <PageTitle>Lab Tests - NovaCare</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4 px-3 px-sm-6">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-3 px-sm-6">
     @* Page Header *@
-    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center">
         <SectionTitle Icon="@icon" Title="@title" />
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
             Track diagnostic requests, pending lab work, and completed test reports
@@ -21,13 +21,13 @@
     </div>
 
     @* Main Elevated Card Container *@
-    <MudPaper Elevation="2" Outlined="true" Class="rounded-lg overflow-hidden">
+    <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden" Style="background-color: rgba(246,246,246,1) !important;">
         <MudTabs Elevation="0"
                  Rounded="false"
                  ApplyEffectsToContainer="true"
-                 Color="Color.Primary"
-                 SliderColor="Color.Primary"
-                 PanelClass="pa-3 pa-sm-6"
+                 TabHeaderClass="bg-secondary-subtle"
+                 SliderColor="Color.Error"
+                 TabPanelsClass="pa-3 pa-sm-6"
                  Centered="false">
             <MudTabPanel Text="All Lab Tests" Icon="@Icons.Material.Outlined.Biotech" Style="text-transform: none; font-weight: 500;">
                 <LabTests CurrentUser="currentUser" />

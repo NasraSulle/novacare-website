@@ -71,7 +71,7 @@
                     <MudGrid Spacing="2">
                         <!-- Doctor Availability (Calculated from real allStaffs data) -->
                         <MudItem xs="12" sm="6">
-                            <MudPaper Outlined="true" Class="@($"pa-3 relative-tile {(DoctorAvailabilityPct < 60 ? "vital-tile--alert" : "")}")">
+                            <MudPaper Outlined="true" Class="@($"pa-3 relative-tile {(DoctorAvailabilityPct < 60 ? "vitalError-tile--alert" : "vitalInfo-tile--alert")}")">
                                 <div class="d-flex align-center justify-space-between mb-1">
                                     <span class="d-flex align-center gap-2 text-white text-sm">
                                         <MudIcon Icon="@Icons.Material.Outlined.MedicalServices" Size="Size.Small" /> Doctor Availability
@@ -84,7 +84,7 @@
 
                         <!-- Overall Staff Readiness (Calculated from real allStaffs data) -->
                         <MudItem xs="12" sm="6">
-                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile vitalSuccess-tile--alert">
                                 <div class="d-flex align-center justify-space-between mb-1">
                                     <span class="d-flex align-center gap-2  text-white text-sm">
                                         <MudIcon Icon="@Icons.Material.Outlined.Badge" Size="Size.Small" /> Staff Readiness
@@ -97,7 +97,7 @@
 
                         <!-- ICU Capacity -->
                         <MudItem xs="12" sm="6">
-                            <MudPaper Outlined="true" Class="pa-3 relative-tile vital-tile--alert">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile vitalError-tile--alert">
                                 <div class="d-flex align-center justify-space-between mb-1">
                                     <span class="d-flex align-center gap-2 text-white text-sm">
                                         <MudIcon Class="text-white" Icon="@Icons.Material.Outlined.LocalActivity" Size="Size.Small" /> ICU Capacity
@@ -110,7 +110,7 @@
 
                         <!-- Bed Occupancy -->
                         <MudItem xs="12" sm="6">
-                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile vitalWarning-tile--alert">
                                 <div class="d-flex align-center justify-space-between mb-1">
                                     <span class="d-flex align-center gap-2  text-white text-sm">
                                         <MudIcon Icon="@Icons.Material.Outlined.Bed" Size="Size.Small" /> Bed Occupancy
@@ -123,20 +123,20 @@
 
                         <!-- Emergency Readiness -->
                         <MudItem xs="12" sm="6">
-                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile vitalSecondary-tile--alert">
                                 <div class="d-flex align-center justify-space-between mb-1">
                                     <span class="d-flex align-center gap-2  text-white text-sm">
                                         <MudIcon Icon="@Icons.Material.Outlined.Emergency" Size="Size.Small" /> Emergency Readiness
                                     </span>
                                     <MudText Typo="Typo.body2" Class="font-weight-bold">@AvailableERBedsPercentage%</MudText>
                                 </div>
-                                <MudProgressLinear Value="@AvailableERBedsPercentage" Color="Color.Success" Size="Size.Small" Rounded="true" />
+                                <MudProgressLinear Value="@AvailableERBedsPercentage" Color="Color.Secondary" Size="Size.Small" Rounded="true" />
                             </MudPaper>
                         </MudItem>
 
                         <!-- Surgery Success -->
                         <MudItem xs="12" sm="6">
-                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile vitalSuccess-tile--alert">
                                 <div class="d-flex align-center justify-space-between mb-1">
                                     <span class="d-flex align-center gap-2  text-white text-sm">
                                         <MudIcon Icon="@Icons.Material.Outlined.MonitorHeart" Size="Size.Small" /> Surgery Success
@@ -149,7 +149,7 @@
 
                         <!-- Patient Satisfaction -->
                         <MudItem xs="12" sm="6">
-                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile vitalSuccess-tile--alert">
                                 <div class="d-flex align-center justify-space-between mb-1">
                                     <span class="d-flex align-center gap-2  text-white text-sm">
                                         <MudIcon Icon="@Icons.Material.Outlined.SentimentSatisfied" Size="Size.Small" /> Patient Satisfaction
@@ -162,7 +162,7 @@
 
                         <!-- Clinical Quality -->
                         <MudItem xs="12" sm="6">
-                            <MudPaper Outlined="true" Class="pa-3 relative-tile">
+                            <MudPaper Outlined="true" Class="pa-3 relative-tile vitalPrimary-tile--alert">
                                 <div class="d-flex align-center justify-space-between mb-1">
                                     <span class="d-flex align-center gap-2  text-white text-sm">
                                         <MudIcon Icon="@Icons.Material.Outlined.Shield" Size="Size.Small" /> Clinical Quality
@@ -236,7 +236,7 @@
 
     <!-- Charts Layer 1 -->
     <MudItem xs="12" md="4">
-        <MudPaper Elevation="0" Class="chart-card">
+        <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Weekly Distribution</MudText>
             <MudChart T="double"
                       ChartType="ChartType.Pie"
@@ -248,7 +248,7 @@
     </MudItem>
 
     <MudItem xs="12" md="4">
-        <MudPaper Elevation="0" Class="chart-card">
+        <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Weekly Patients By Type</MudText>
             <MudChart T="double" ChartType="ChartType.Bar"
                       ChartSeries="@_weeklyPatientsByType"
@@ -259,7 +259,7 @@
     </MudItem>
 
     <MudItem xs="12" md="4">
-        <MudPaper Elevation="0" Class="chart-card">
+        <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Weekly Patients By Age</MudText>
             @* <MudChart T="double" ChartType="ChartType.Line"
                       ChartSeries="@_weeklyPatientsByAge"
@@ -595,7 +595,7 @@
 
     <!-- Ph.3 -->
     <MudItem xs="12" md="6" Class="pt-0">
-        <MudPaper Elevation="0" Class="chart-card">
+        <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Doctors By Clinical Role</MudText>
             <MudChart T="double" ChartType="ChartType.Bar"
                       ChartSeries="@_weeklyDoctorsBySpecialization"
@@ -645,7 +645,7 @@
 
             <!-- Doctors Availability & Carousel Grid -->
             <MudItem xs="12" sm="7">
-                <MudPaper Elevation="0" Class="chart-card">
+                <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
                     <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">Doctors Availability</MudText>
                     <MudChart T="double" ChartType="ChartType.Donut"
                               ChartSeries="@_weeklyAvailableDoctors"

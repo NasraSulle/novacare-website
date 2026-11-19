@@ -12,18 +12,18 @@
 @using NovaCare
 @using NovaCare.Components
 @using NovaCare.Components.Layout
+@using NovaCare.Components.Pages.ReportPages
 @using NovaCare.Interfaces
 @using NovaCare.Modals.StaffModals
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
-
 @using NovaCare.Shared.DTOs.DoctorDTOs
-@using NovaCare.Shared.Enums
-@using NovaCare.Shared.DTOs.StaffDTOs
 @using NovaCare.Shared.DTOs.LabTestDTOs
-@using NovaCare.Shared.DTOs.PatientDTOs
 @using NovaCare.Shared.DTOs.MedicineDTOs
+@using NovaCare.Shared.DTOs.PatientDTOs
 @using NovaCare.Shared.DTOs.ReportDTOs
-@using NovaCare.Components.Pages.ReportPages
+@using NovaCare.Shared.DTOs.StaffDTOs
+@using NovaCare.Shared.Enums
+@using NovaCare.Shared.HospitalCredentials
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
 
 @inject IStaffService staffService
 @inject IDoctorService doctorService
@@ -40,3 +40,5 @@
 
 @inject IJSRuntime JS
 
+@using Microsoft.Extensions.Options
+@inject IOptions<HospitalInfoSettings> HospitalOptions

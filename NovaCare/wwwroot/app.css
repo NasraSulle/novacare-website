@@ -14,6 +14,20 @@
     text-transform: none !important;
 }
 
+.mud-tabs-vertical .mud-tab {
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+/*.mud-tabs .mud-tab.mud-tab-active {
+    background-color: var(--mud-palette-primary-hover) !important;
+}*/
+
+.mud-tabs .mud-tab.mud-tab-active {
+    /*background-color: color-mix(in srgb, currentColor 12%, transparent) !important;*/
+    background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
 /* Removes text decoration from MudNavLink, its hover states, and its text wrappers */
 .mud-nav-link,
 .mud-nav-link:hover,
@@ -21,12 +35,31 @@
     text-decoration: none !important;
 }
 
+.mud-tab {
+    min-height: 30px !important;
+    min-width: auto !important;
+    padding: 10px 30px !important;
+    font-size: 0.85rem !important;
+}
+
+
     /* Faint white background for the currently active nav link */
-    .mud-nav-link.active {
+/*    .mud-nav-link.active {
         background-color: rgba(255, 255, 255, 0.15) !important;
         color: white !important;
         font-weight: 500;
-    }
+    }*/
+
+.mud-navmenu.mud-navmenu-bordered .mud-nav-link.active:not(.mud-nav-link-disabled) {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: white !important;
+    font-weight: 500 !important;
+    border-right: none !important;
+    border-inline-end: none !important;
+    border-left: 3px solid white !important;
+    border-inline-start: 3px solid white !important;
+}
+
 
     /* Subtle hover effect for inactive links */
     .mud-nav-link:hover {
@@ -39,6 +72,7 @@
     .mud-nav-link .mud-nav-link-text {
         color: white !important;
         text-decoration: none !important;
+
     }
 
 
@@ -248,10 +282,32 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-.vital-tile--alert {
+.vitalInfo-tile--alert {
+    border-left: 4px solid var(--mud-palette-info) !important;
+    background-color: rgba(var(--mud-palette-info-rgb), 0.03) !important;
+}
+
+.vitalSuccess-tile--alert {
+    border-left: 4px solid var(--mud-palette-success) !important;
+    background-color: rgba(var(--mud-palette-success-rgb), 0.03) !important;
+}
+.vitalError-tile--alert {
     border-left: 4px solid var(--mud-palette-error) !important;
     background-color: rgba(var(--mud-palette-error-rgb), 0.03) !important;
 }
+.vitalWarning-tile--alert {
+    border-left: 4px solid var(--mud-palette-warning) !important;
+    background-color: rgba(var(--mud-palette-warning-rgb), 0.03) !important;
+}
+.vitalSecondary-tile--alert {
+    border-left: 4px solid var(--mud-palette-secondary) !important;
+    background-color: rgba(var(--mud-palette-secondary-rgb), 0.03) !important;
+}
+.vitalPrimary-tile--alert {
+    border-left: 4px solid var(--mud-palette-primary) !important;
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.03) !important;
+}
+
 
 /* Clinical AI Box */
 .ai-sparkle-box {
@@ -304,7 +360,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background-color: #ffffff;
+    /*background-color: #ffffff;*/
+    background-color:transparent !important;
     border: 1px solid var(--mud-palette-lines-default);
     border-radius: 5px;
     overflow: hidden;
@@ -365,6 +422,7 @@
     border-radius: 5px;
     border: 1px solid var(--mud-palette-lines-default);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color:transparent;
 }
 
     .surface-card:hover {

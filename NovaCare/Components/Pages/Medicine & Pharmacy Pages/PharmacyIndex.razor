@@ -13,9 +13,9 @@
 @attribute [Authorize]
 <PageTitle>Pharmacy - NovaCare</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4 px-3 px-sm-6">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-3 px-sm-6">
     @* Page Header *@
-    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center">
         <SectionTitle Icon="@icon" Title="@title" />
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
             Dispense patient prescriptions and manage pharmacy inventory catalog
@@ -23,20 +23,22 @@
     </div>
 
     @* Main Elevated Card Container *@
-    <MudPaper Elevation="2" Outlined="true" Class="rounded-lg overflow-hidden">
+    <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden" Style="background-color: rgba(246,246,246,1) !important;">
         <MudTabs Elevation="0"
                  Rounded="false"
                  ApplyEffectsToContainer="true"
-                 Color="Color.Primary"
-                 SliderColor="Color.Primary"
-                 PanelClass="pa-0">
+                 TabHeaderClass="bg-secondary-subtle"
+                 SliderColor="Color.Error"
+                 TabPanelsClass="pa-0">
             <MudTabPanel Text="Prescriptions Queue" Icon="@Icons.Material.Outlined.ReceiptLong" Style="text-transform: none; font-weight: 500;">
                 <div class="pa-3 pa-sm-6">
                     <Prescriptions />
                 </div>
             </MudTabPanel>
             <MudTabPanel Text="Medicines Catalog" Icon="@Icons.Material.Outlined.Inventory2" Style="text-transform: none; font-weight: 500;">
-                <MedicineIndex />
+                <div class="pt-1 pt-sm-6">
+                    <MedicineIndex />
+                </div>
             </MudTabPanel>
         </MudTabs>
     </MudPaper>

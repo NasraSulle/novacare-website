@@ -12,22 +12,22 @@
 @attribute [Authorize]
 <PageTitle>Patients - NovaCare</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4 px-3 px-sm-6">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-3 px-sm-6">
     @* Page Header *@
-    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center">
         <SectionTitle Icon="@icon" Title="@title" />
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
             Manage patient records, admissions, triage vitals, and consultations
         </MudText>
     </div>
 
-    @* Primary Category Tabs + Sub-Filter Tabs *@
-    <MudPaper Elevation="2" Outlined="true" Class="rounded-lg overflow-hidden">
+    @* Primary Category Tabs + Sub-Filter Tabs TabPanelsClass="pa-3 pa-sm-6"*@
+    <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden" Style="background-color: rgba(246,246,246,1) !important;">
         <MudTabs Elevation="0"
-                 Rounded="false"
-                 Color="Color.Primary"
+                 Rounded="false" Border="true"
+                 TabHeaderClass="bg-transparent"
+                 Position="Position.Start"
                  SliderColor="Color.Primary"
-                 PanelClass="pa-0"
                  Centered="false">
             <MudTabPanel Text="All Patients" Icon="@Icons.Material.Outlined.People" Style="text-transform: none; font-weight: 500;" OnClick="@(() => SetGenre("All Patients"))">
                 @RenderSubTabs("All Patients")
@@ -75,13 +75,13 @@
 
     private RenderFragment RenderSubTabs(string genre) => __builder =>
     {
-        <div style="background-color: rgba(63,81,181,0.03); border-top: 1px solid rgba(0,0,0,0.08);">
+        <div class="w-100" style="border-top: 1px solid rgba(0,0,0,0.08);">
             <MudTabs Elevation="0"
                      Rounded="false"
                      ApplyEffectsToContainer="true"
-                     Color="Color.Secondary"
-                     SliderColor="Color.Secondary"
-                     PanelClass="pa-3 pa-sm-6 bg-white"
+                     TabHeaderClass="bg-secondary-subtle"
+                     SliderColor="Color.Error"
+                     TabPanelsClass="pa-3 pa-sm-6 w-100"
                      Centered="false">
                 <MudTabPanel Text="All" Style="text-transform: none;">
                     <Patients PatientGenre="@genre" />
