@@ -1,6 +1,7 @@
 ﻿@page "/LabTestIndex"
 
 @using Microsoft.AspNetCore.Authorization
+@using NovaCare.Shared.DTOs.StaffDTOs
 
 @rendermode InteractiveServer
 <MudPopoverProvider />
@@ -8,39 +9,48 @@
 <MudSnackbarProvider />
 
 @attribute [Authorize]
-<PageTitle>LabTests - NovaCare</PageTitle>
+<PageTitle>Lab Tests - NovaCare</PageTitle>
 
-<MudGrid Class="pa-3" Justify="Justify.FlexStart">
-    <SectionTitle Icon="@icon" Title="@title" />
-</MudGrid>
-<MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
-        <MudItem Class="pa-0" md="12">
-            <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
-                <MudTabPanel Text="All Lab Test" Style="text-transform: none;">
-                    <LabTests CurrentUser="currentUser" />
-                </MudTabPanel>
-                <MudTabPanel Text="New Lab Tests" Style="text-transform: none;">
-                    <LabTests CurrentUser="currentUser" FilterBy="New" />
-                </MudTabPanel>
-                <MudTabPanel Text="Updated Lab Tests" Style="text-transform: none;">
-                    <LabTests CurrentUser="currentUser" FilterBy="Updated" />
-                </MudTabPanel>
-            </MudTabs>
-        </MudItem>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4 px-3 px-sm-6">
+    @* Page Header *@
+    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4">
+        <SectionTitle Icon="@icon" Title="@title" />
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
+            Track diagnostic requests, pending lab work, and completed test reports
+        </MudText>
+    </div>
 
-</MudGrid>
+    @* Main Elevated Card Container *@
+    <MudPaper Elevation="2" Outlined="true" Class="rounded-lg overflow-hidden">
+        <MudTabs Elevation="0"
+                 Rounded="false"
+                 ApplyEffectsToContainer="true"
+                 Color="Color.Primary"
+                 SliderColor="Color.Primary"
+                 PanelClass="pa-3 pa-sm-6"
+                 Centered="false">
+            <MudTabPanel Text="All Lab Tests" Icon="@Icons.Material.Outlined.Biotech" Style="text-transform: none; font-weight: 500;">
+                <LabTests CurrentUser="currentUser" />
+            </MudTabPanel>
+            <MudTabPanel Text="New Lab Tests" Icon="@Icons.Material.Outlined.PendingActions" Style="text-transform: none; font-weight: 500;">
+                <LabTests CurrentUser="currentUser" FilterBy="New" />
+            </MudTabPanel>
+            <MudTabPanel Text="Updated Lab Tests" Icon="@Icons.Material.Outlined.TaskAlt" Style="text-transform: none; font-weight: 500;">
+                <LabTests CurrentUser="currentUser" FilterBy="Updated" />
+            </MudTabPanel>
+        </MudTabs>
+    </MudPaper>
+</MudContainer>
 
 @code {
     bool IsNewLabTest;
     StaffDto currentUser = new();
     public string icon = Icons.Material.Filled.Biotech;
-    public string title = "LabTests Section";
+    public string title = "Laboratory Tests";
 
     protected override async Task OnInitializedAsync()
     {
         currentUser = await userService.GetLoggedInUserAsync();
-
         await InvokeAsync(StateHasChanged);
     }
-
 }

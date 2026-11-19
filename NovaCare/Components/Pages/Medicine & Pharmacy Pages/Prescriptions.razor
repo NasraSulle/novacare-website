@@ -3,60 +3,147 @@
 @using NovaCare.Shared.DTOs.TreatmentDTOs
 @inject IDialogService Dialog
 
-<MudGrid Justify="Justify.Center" Class="pa-0 pt-1 ps-0 pe-0 pb-0">
-    <MudItem md="12" Class="" Style="text-align: center;">
+<MudGrid Spacing="3">
+    <MudItem xs="12">
         @if (isLoading)
         {
-            <MudItem Class="pa-6">
+            <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
-            </MudItem>
+            </div>
         }
-        else if (!isLoading && !AllPrescriptions!.Any() && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredPrescriptions == null || !FilteredPrescriptions.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudItem Class="pa-6">
-                <MudGrid>
-                    <MudItem md="12">
-                        <MudGrid Justify="Justify.SpaceBetween">
-                            <MudItem>
-                                <MudText Typo="Typo.h6">@($"All Prescriptions")</MudText>
-                            </MudItem>
-                        </MudGrid>
-                    </MudItem>
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex justify-space-between align-center mb-4">
+                    <MudText Typo="Typo.h6">Pending Prescriptions</MudText>
+                </div>
+                <NoDataNotice NoDataMessage="@messageMedicine" />
+            </MudPaper>
+        }
+        else if (FilteredPrescriptions != null)
+        {
+            @* Queue Summary Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-warning);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Pending Dispense Queue</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight:700;">@FilteredPrescriptions.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Warning" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.PendingActions" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Units to Dispense</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Primary" Style="font-weight:700;">@FilteredPrescriptions.Sum(x => x.Quantity)</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.LocalPharmacy" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
 
-                    <MudItem md="12">
-                        <NoDataNotice NoDataMessage="@messageMedicine" />
-                    </MudItem>
-                </MudGrid>
-            </MudItem>
-        }
-        else if (AllPrescriptions != null)
-        {
-            <MudDataGrid Loading="@isSearchLoading" Hover="true" T="PrescriptionDto" Items="@AllPrescriptions" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6 shadow-none rounded-0"
-                         Bordered="false" Dense="true">
+            @* Prescriptions Data Grid *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="PrescriptionDto"
+                         Items="@FilteredPrescriptions"
+                         ReadOnly="@_readOnly"
+                         Class="rounded-lg"
+                         Bordered="false"
+                         Dense="false">
                 <ToolBarContent>
-                    <MudText Typo="Typo.h6">@($"All Prescriptions")</MudText>
-                    <MudSpacer />
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">Pending Prescriptions</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Text">@($"{FilteredPrescriptions.Count} pending")</MudChip>
+                        </div>
 
-                    <MudItem>
-                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
-                                      Margin="Margin.Dense" Variant="Variant.Outlined"
-                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
-                    </MudItem>
-                    @if (isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
-                    }
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search medicine, dosage, or Visit ID..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 260px;" />
+
+                            @if (isReport)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Error"
+                                           OnClick="GeneratePdf"
+                                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                                           Style="text-transform:none; white-space:nowrap;">
+                                    Generate Pdf
+                                </MudButton>
+                            }
+                        </div>
+                    </div>
                 </ToolBarContent>
 
                 <Columns>
-                    <PropertyColumn Property="x => x.MedicineName" Title="Medicine" />
-                    <PropertyColumn Property="x => x.Dosage" Title="Dosage" />
-                    <PropertyColumn Property="x => x.Quantity" Title="Quantity" />
-                    <TemplateColumn Title="Action">
+                    @* Medicine & Visit Reference *@
+                    <TemplateColumn Title="Medication" SortBy="@(x => x.MedicineName)">
                         <CellTemplate>
-                            <MudItem>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send" Size="Size.Small" OnClick="@(() => DispenseAsync(context.Item))">Dispense</MudButton>
-                            </MudItem>
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined" Class="me-3">
+                                    <MudIcon Icon="@Icons.Material.Outlined.MedicationLiquid" Size="Size.Small" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600; line-height: 1.2;">
+                                        @context.Item.MedicineName
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @($"Visit ID: #{context.Item.VisitId}")
+                                    </MudText>
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Dosage Instructions *@
+                    <TemplateColumn Title="Dosage Instructions" SortBy="@(x => x.Dosage)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">
+                                @context.Item.Dosage
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Quantity *@
+                    <TemplateColumn Title="Quantity" SortBy="@(x => x.Quantity)">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2" Style="font-weight: 600;">
+                                @($"{context.Item.Quantity} units")
+                            </MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Dispense Action *@
+                    <TemplateColumn Title="Action" CellStyle="text-align: right;">
+                        <CellTemplate>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Success"
+                                       StartIcon="@Icons.Material.Filled.CheckCircleOutline"
+                                       Size="Size.Small"
+                                       Style="text-transform: none;"
+                                       OnClick="@(() => DispenseAsync(context.Item))">
+                                Dispense
+                            </MudButton>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
@@ -70,12 +157,12 @@
 </MudGrid>
 
 @code {
-
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
-    private bool _readOnly;
+    private bool _readOnly = true;
 
     [Parameter] public List<PrescriptionDto> AllPrescriptions { get; set; } = new();
+    List<PrescriptionDto> FilteredPrescriptions = new();
     [Parameter] public string FilterBy { get; set; } = string.Empty;
     [Parameter] public string Genre { get; set; } = string.Empty;
     [Parameter] public bool isReport { get; set; }
@@ -95,21 +182,47 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        await Task.Delay(500);
+        await Task.Delay(300);
 
-        AllPrescriptions = await medicineService.GetAllPrescriptionsAsync();
-        AllPrescriptions = (await medicineService.GetAllPrescriptionsAsync())
-            .Where(p => p.IsReadyForService && p.IsDispensed == false)
-            .ToList();
+        if (!isReport)
+        {
+            var fetched = await medicineService.GetAllPrescriptionsAsync() ?? new();
+            AllPrescriptions = fetched
+                .Where(p => p.IsReadyForService && !p.IsDispensed)
+                .ToList();
+        }
 
-
-
-
-        if (!AllPrescriptions.Any())
-            messageMedicine = $"Prescriptions are not avalible!";
+        ApplyFilterAndSearch();
 
         isLoading = false;
         StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<PrescriptionDto> query = AllPrescriptions ?? Enumerable.Empty<PrescriptionDto>();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.MedicineName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.Dosage?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                x.VisitId.ToString().Contains(searchString.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        FilteredPrescriptions = query.ToList();
+
+        if (!FilteredPrescriptions.Any())
+            messageMedicine = "No pending prescriptions available.";
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
     }
 
     public async Task Back()
@@ -117,20 +230,6 @@
         CurrentPrescription = new();
         isEdit = false;
         await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task OnSearch(string text)
-    {
-        searchString = text;
-        isSearchLoading = true;
-        await Task.Delay(500);
-
-        AllPrescriptions = AllPrescriptions?.Where(x => x.IsReadyForService && x.IsDispensed == false && x.VisitId.ToString().ToLower().Trim() == searchString).ToList() ?? new();
-
-        if (!AllPrescriptions.Any())
-            messageMedicine = $"Prescriptions are not avalible!";
-
-        isSearchLoading = false;
     }
 
     public async Task DispenseAsync(PrescriptionDto prescription)
@@ -147,7 +246,7 @@
         var dialog = await Dialog.ShowAsync<ConfirmationModal>("Confirmation", parameters, options);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             CurrentPrescription = prescription;
             CurrentPrescription.IsDispensed = true;
@@ -156,8 +255,11 @@
             if (success)
             {
                 var dispensedMed = await medicineService.GetMedicineByIdAsync(CurrentPrescription.Id);
-                dispensedMed.MedicineQty = dispensedMed.MedicineQty - CurrentPrescription.Quantity;
-                await medicineService.UpdateMedicineAsync(dispensedMed, dispensedMed.Id);
+                if (dispensedMed != null)
+                {
+                    dispensedMed.MedicineQty = dispensedMed.MedicineQty - CurrentPrescription.Quantity;
+                    await medicineService.UpdateMedicineAsync(dispensedMed, dispensedMed.Id);
+                }
             }
 
             await OnInitializedAsync();
@@ -171,7 +273,7 @@
             ReportType = "Prescriptions",
             FromDate = fromDate,
             ToDate = toDate,
-            Data = AllPrescriptions
+            Data = FilteredPrescriptions
         };
 
         pdfBase64 = pdfExportService.GenerateStaffPreview<PrescriptionDto>(reportDto, CurrentUser);

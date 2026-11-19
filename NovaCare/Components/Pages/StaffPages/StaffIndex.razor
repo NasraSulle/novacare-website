@@ -11,58 +11,70 @@
 @attribute [Authorize]
 <PageTitle>Staffs - NovaCare</PageTitle>
 
-<MudGrid Class="pa-3" Justify="Justify.FlexStart">
-    <SectionTitle Icon="@icon" Title="@title" />
-</MudGrid>
-<MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
-    <MudItem Class="pa-0" md="12">
-        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4 px-3 px-sm-6">
+    @* Page Header *@
+    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4">
+        <SectionTitle Icon="@icon" Title="@title" />
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
+            Manage clinical personnel, roles, and availability status
+        </MudText>
+    </div>
+
+    @* Main Elevated Card Container *@
+    <MudPaper Elevation="2" Outlined="true" Class="rounded-lg overflow-hidden">
+        <MudTabs Elevation="0"
+                 Rounded="false"
+                 ApplyEffectsToContainer="true"
+                 Color="Color.Primary"
+                 SliderColor="Color.Primary"
+                 PanelClass="pa-3 pa-sm-6"
+                 Centered="false">
             @if (currentUser != null && currentUser.IsViewAllStaffs)
             {
-                <MudTabPanel Text="All Staff" Style="text-transform: none;">
+                <MudTabPanel Text="All Staff" Icon="@Icons.Material.Outlined.Groups" Style="text-transform: none; font-weight: 500;">
                     <Staffs CurrentUser="currentUser" />
                 </MudTabPanel>
             }
             @if (currentUser != null && currentUser.IsViewAllLeaders)
             {
-                <MudTabPanel Text="Executives" Style="text-transform: none;">
+                <MudTabPanel Text="Executives" Icon="@Icons.Material.Outlined.AdminPanelSettings" Style="text-transform: none; font-weight: 500;">
                     <Staffs FilterBy="Leaders" CurrentUser="currentUser" />
                 </MudTabPanel>
             }
             @if (currentUser != null && currentUser.IsViewAllDoctors)
             {
-                <MudTabPanel Text="Doctors" Style="text-transform: none;">
+                <MudTabPanel Text="Doctors" Icon="@Icons.Material.Outlined.MedicalServices" Style="text-transform: none; font-weight: 500;">
                     <Staffs FilterBy="Doctors" CurrentUser="currentUser" />
                 </MudTabPanel>
             }
             @if (currentUser != null && currentUser.IsViewAllNurses)
             {
-                <MudTabPanel Text="Nurses" Style="text-transform: none;">
+                <MudTabPanel Text="Nurses" Icon="@Icons.Material.Outlined.LocalHospital" Style="text-transform: none; font-weight: 500;">
                     <Staffs FilterBy="Nurses" CurrentUser="currentUser" />
                 </MudTabPanel>
             }
             @if (currentUser != null && currentUser.IsViewAllHelps)
             {
-                <MudTabPanel Text="Receptionists" Style="text-transform: none;">
+                <MudTabPanel Text="Receptionists" Icon="@Icons.Material.Outlined.SupportAgent" Style="text-transform: none; font-weight: 500;">
                     <Staffs FilterBy="Helpers" CurrentUser="currentUser" />
                 </MudTabPanel>
             }
             @if (currentUser != null && currentUser.IsViewAllAdmins)
             {
-                <MudTabPanel Text="System Admin" Style="text-transform: none;">
+                <MudTabPanel Text="System Admin" Icon="@Icons.Material.Outlined.Security" Style="text-transform: none; font-weight: 500;">
                     <Staffs FilterBy="Administrators" CurrentUser="currentUser" />
                 </MudTabPanel>
             }
         </MudTabs>
-    </MudItem>
-</MudGrid>
+    </MudPaper>
+</MudContainer>
 
-    @code {
+@code {
     StaffDto? currentUser;
     StaffDto? currentStaff;
 
     public string icon = Icons.Material.Filled.People;
-    public string title = "Staffs Section";
+    public string title = "Staff Directory";
 
     protected override async Task OnInitializedAsync()
     {

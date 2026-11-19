@@ -1,82 +1,194 @@
 ﻿@using NovaCare.Shared.DTOs.LabTestDTOs
+@using NovaCare.Shared.DTOs.StaffDTOs
 @inject IDialogService Dialog
 
-<MudGrid>
-    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+<MudGrid Spacing="3">
+    <MudItem xs="12">
         @if (isLoading)
         {
-            <MudItem Class="pa-6">
+            <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
-            </MudItem>
+            </div>
         }
-        else if (!isLoading && !FilteredLabTests!.Any() && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredLabTests == null || !FilteredLabTests.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudItem Class="pa-6">
-                <MudGrid>
-                    <MudItem md="12">
-                        <MudGrid Justify="Justify.SpaceBetween">
-                            <MudItem>
-                                <MudText Typo="Typo.h6">@($"All {firstPart} Tests")</MudText>
-                            </MudItem>
-                            @* <MudItem>
-                                @if (CurrentUser != null && CurrentUser.IsCreateNewLabTest)
-                                {
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="OpenNewLabTestModal" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium">Add</MudButton>
-                                }
-                            </MudItem> *@
-                        </MudGrid>
-                    </MudItem>
-
-                    <MudItem md="12">
-                        <NoDataNotice NoDataMessage="@messageLabTest" />
-                    </MudItem>
-                </MudGrid>
-            </MudItem>
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
+                    <MudText Typo="Typo.h6">@($"All {firstPart} Lab Tests")</MudText>
+                </div>
+                <NoDataNotice NoDataMessage="@messageLabTest" />
+            </MudPaper>
         }
         else if (FilteredLabTests != null)
         {
-            <MudDataGrid Loading="@isSearchLoading" Hover="true" RowClick="@((args) => PreviewLabTestProfile(args.Item.Id))" T="LabTestDto" Items="@FilteredLabTests" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
-                         Bordered="false" Dense="true">
-                <ToolBarContent>
-                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
-                    <MudSpacer />
-                    <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+            @* Lab Summary Metric Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total @firstPart Tests</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredLabTests.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Science" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-warning);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Pending / New</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight:700;">
+                                @FilteredLabTests.Count(x => string.Equals(x.LabTestStatusName, "New", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Warning" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.HourglassEmpty" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Completed / Updated</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                                @FilteredLabTests.Count(x => !string.Equals(x.LabTestStatusName, "New", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.CheckCircle" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
 
-                    <MudItem>
-                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
-                                      Margin="Margin.Dense" Variant="Variant.Outlined"
-                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
-                    </MudItem>
-                    @* @if (CurrentUser != null && CurrentUser.IsCreateNewStaff && !isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenNewLabTestModal"> Add</MudButton>
-                    } *@
-                    @if (isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
-                    }
+            @* Main Lab Tests Data Table *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Striped="false"
+                         Elevation="0"
+                         Outlined="true"
+                         RowClick="@((args) => PreviewLabTestProfile(args.Item.Id))"
+                         RowStyle="cursor: pointer;"
+                         T="LabTestDto"
+                         Items="@FilteredLabTests"
+                         ReadOnly="@_readOnly"
+                         Class="rounded-lg"
+                         Bordered="false"
+                         Dense="false">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart} Lab Tests")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredLabTests.Count} records")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search test, patient, or status..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 260px;" />
+
+                            @if (isReport)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Error"
+                                           OnClick="GeneratePdf"
+                                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                                           Style="text-transform:none; white-space:nowrap;">
+                                    Generate Pdf
+                                </MudButton>
+                            }
+                        </div>
+                    </div>
                 </ToolBarContent>
 
                 <Columns>
-                    <PropertyColumn Property="x => x.DiseaseName" Title="Disease Name" />
-                    <PropertyColumn Property="x => x.PatientFullName" Title="Patient Full Name" />
-                    <PropertyColumn Property="x => x.CreatedDate.ToShortDateString()" Title="Date" />
-@*                  <PropertyColumn Property="x => x.PatientId" Title="Patient Id" />
-                    <PropertyColumn Property="x => x.TestResult" Title="Test Result" />
-                    <PropertyColumn Property="x => x.RequesteeDoctor" Title="Doctor" />
-                    <PropertyColumn Property="x => x.UpdaterLabTechnician" Title="Lab Personnel" />
-                    <PropertyColumn Property="x => x.ConsultationId" Title="Consultation Id" /> *@
-                    <TemplateColumn>
+                    @* Diagnostic Test & Category *@
+                    <TemplateColumn Title="Diagnostic Test" SortBy="@(x => x.DiseaseName)">
                         <CellTemplate>
-                            <MudItem Style="text-align: center;">
-                                <MudChip Color="@(context.Item.LabTestStatusName == "New" ? Color.Warning : Color.Success)" Variant="Variant.Outlined" Size="Size.Small">
-                                    @* <MudIcon Icon="@Icons.Material.Filled.Circle" Color="Color.Inherit" Size="Size.Small" /> *@
-                                    @(context.Item.LabTestStatusName)
-                                </MudChip>
-                            </MudItem>
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Size="Size.Medium" Color="Color.Primary" Variant="Variant.Outlined" Class="me-3">
+                                    <MudIcon Icon="@Icons.Material.Outlined.Biotech" Size="Size.Small" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600; line-height: 1.2;">
+                                        @context.Item.DiseaseName
+                                    </MudText>
+                                    @if (!string.IsNullOrWhiteSpace(context.Item.DiseaseTypeName))
+                                    {
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                            @context.Item.DiseaseTypeName
+                                        </MudText>
+                                    }
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Patient Name *@
+                    <TemplateColumn Title="Patient" SortBy="@(x => x.PatientFullName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudAvatar Size="Size.Small" Class="me-2 border">
+                                    <MudImage Src="Images/dp.png" Alt="Patient Avatar" />
+                                </MudAvatar>
+                                <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                    @context.Item.PatientFullName
+                                </MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Requested / Created Date *@
+                    <TemplateColumn Title="Requested Date" SortBy="@(x => x.CreatedDate)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.CalendarToday" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.CreatedDate.ToShortDateString()</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Status Pill *@
+                    <TemplateColumn Title="Status" SortBy="@(x => x.LabTestStatusName)">
+                        <CellTemplate>
+                            @{
+                                bool isNew = string.Equals(context.Item.LabTestStatusName, "New", StringComparison.OrdinalIgnoreCase);
+                            }
+                            <MudChip T="string"
+                                     Color="@(isNew ? Color.Warning : Color.Success)"
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Small"
+                                     Style="font-weight: 500;">
+                                <span style="@($"display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background-color:{(isNew ? "#ed6c02" : "#2e7d32")};")"></span>
+                                @(string.IsNullOrWhiteSpace(context.Item.LabTestStatusName) ? "Unknown" : context.Item.LabTestStatusName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Row Action Indicator *@
+                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="View / Update Results">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => PreviewLabTestProfile(context.Item.Id))" />
+                            </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
+
                 <PagerContent>
                     <MudDataGridPager T="LabTestDto" />
                 </PagerContent>
@@ -88,7 +200,7 @@
 @code {
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
-    private bool _readOnly;
+    private bool _readOnly = true;
     private bool _isCellEditMode;
     private bool _editTriggerRowClick;
     [Parameter] public bool isReport { get; set; }
@@ -112,7 +224,7 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        await Task.Delay(500);
+        await Task.Delay(300);
 
         if (!isReport)
         {
@@ -120,62 +232,50 @@
             AllLabTests = AllLabTests?
                 .Where(x => x.IsReadyForService)
                 .ToList() ?? new();
-
         }
+
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<LabTestDto> query = AllLabTests ?? Enumerable.Empty<LabTestDto>();
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            FilteredLabTests = AllLabTests;
-            messageLabTest = "Lab Tests are not avalible!";
-            firstPart = "Lab";
+            firstPart = "Diagnostic";
+            messageLabTest = "No lab tests are currently available.";
         }
         else
         {
             firstPart = FilterBy;
-            messageLabTest = $"{firstPart} Lab Tests are not avalible!";
-
-            if (FilterBy != null)
-            {
-                FilteredLabTests = AllLabTests?.Where(x => x.LabTestStatusName == FilterBy).ToList();
-            }
-            else
-            {
-                FilteredLabTests = new();
-            }
+            messageLabTest = $"No {firstPart.ToLower()} lab tests are currently available.";
+            query = query.Where(x => string.Equals(x.LabTestStatusName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
         }
-        isLoading = false;
-        StateHasChanged();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.DiseaseName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.DiseaseTypeName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.PatientFullName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.LabTestStatusName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                x.CreatedDate.ToShortDateString().Contains(searchString, StringComparison.OrdinalIgnoreCase));
+        }
+
+        FilteredLabTests = query.ToList();
     }
 
     private async Task OnSearch(string text)
     {
         searchString = text;
         isSearchLoading = true;
-        await Task.Delay(500);
-
-        if (string.IsNullOrWhiteSpace(FilterBy))
-        {
-            FilteredLabTests = AllLabTests?.Where(x => x.LabTestStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientFullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.DiseaseName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.CreatedDate.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-            messageLabTest = "Staffs are not avalible!";
-            firstPart = "Staff";
-        }
-        else
-        {
-            var prop = typeof(StaffDto).GetProperty(FilterBy);
-
-            firstPart = FilterBy.Substring(2);
-            messageLabTest = $"{firstPart}s are not avalible!";
-
-            if (prop != null)
-            {
-                FilteredLabTests = AllLabTests?.Where(x => (bool?)prop.GetValue(x, null) == true && x.LabTestStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.PatientFullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.DiseaseName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.CreatedDate.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-            else
-            {
-                FilteredLabTests = null;
-            }
-        }
+        ApplyFilterAndSearch();
         isSearchLoading = false;
+        await Task.CompletedTask;
     }
 
     private async Task PreviewLabTestProfile(int testId)
@@ -189,13 +289,13 @@
         var dialog = await Dialog.ShowAsync<EditLabTest>("Lab Test Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }
     }
 
-        public async Task Back()
+    public async Task Back()
     {
         CurrentLabTest = new();
         isEdit = false;

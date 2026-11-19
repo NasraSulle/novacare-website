@@ -2,103 +2,210 @@
 @using NovaCare.Shared.DTOs.StaffDTOs
 @inject IDialogService Dialog
 
-<MudGrid>
-    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+<MudGrid Spacing="3">
+    <MudItem xs="12">
         @if (isLoading)
         {
-            <MudItem Class="pa-6">
+            <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
-            </MudItem>
+            </div>
         }
-        else if (!isLoading && !FilteredStaffs!.Any() && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredStaffs == null || !FilteredStaffs.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudItem Class="pa-6">
-                <MudGrid>
-                    <MudItem md="12">
-                        <MudGrid Justify="Justify.SpaceBetween">
-                            <MudItem>
-                                <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
-                            </MudItem>
-                            <MudItem>
-                                @if (CurrentUser != null && CurrentUser.IsCreateNewPatient)
-                                {
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="OpenRegisterModal" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium">Add</MudButton>
-                                }
-                            </MudItem>
-                        </MudGrid>
-                    </MudItem>
-
-                    <MudItem md="12">
-                        <NoDataNotice NoDataMessage="@messageStaff" />
-                    </MudItem>
-                </MudGrid>
-            </MudItem>
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
+                    <MudText Typo="Typo.h6">@($"All {firstPart}")</MudText>
+                    @if (CurrentUser != null && CurrentUser.IsCreateNewStaff && !isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenRegisterModal" StartIcon="@Icons.Material.Filled.PersonAdd" Style="text-transform:none;">
+                            Add Staff
+                        </MudButton>
+                    }
+                </div>
+                <NoDataNotice NoDataMessage="@messageStaff" />
+            </MudPaper>
         }
         else if (FilteredStaffs != null)
         {
-            <MudDataGrid Loading="@isSearchLoading" Hover="true" RowClick="@((args) => OpenEditStaffModal(args.Item.Id))" T="StaffDto" Items="@FilteredStaffs" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
-                         Bordered="false" Dense="true">
+            @* Quick Summary Metric Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total @firstPart</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredStaffs.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.PeopleAlt" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Available</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                                @FilteredStaffs.Count(x => string.Equals(x.StaffStatusName, "Available", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.CheckCircle" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-error);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Unavailable</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Error" Style="font-weight:700;">
+                                @FilteredStaffs.Count(x => !string.Equals(x.StaffStatusName, "Available", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Error" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.DoNotDisturbOn" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            @* Main Data Table *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Striped="false"
+                         Elevation="0"
+                         Outlined="true"
+                         RowClick="@((args) => OpenEditStaffModal(args.Item.Id))"
+                         RowStyle="cursor: pointer;"
+                         T="StaffDto"
+                         Items="@FilteredStaffs"
+                         ReadOnly="@_readOnly"
+                         Class="rounded-lg"
+                         Bordered="false"
+                         Dense="false">
                 <ToolBarContent>
-                    <MudText Typo="Typo.h6">@($"All {firstPart}")</MudText>
-                    <MudSpacer />
-                    <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart}")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredStaffs.Count} records")</MudChip>
+                        </div>
 
-                    <MudItem>
-                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
-                                      Margin="Margin.Dense" Variant="Variant.Outlined"
-                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search name, email, or status..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 260px;" />
 
-                    </MudItem>
-                    @if (CurrentUser != null && CurrentUser.IsCreateNewStaff && !isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                    }
-                    @if (isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
-                    }
+                            @if (CurrentUser != null && CurrentUser.IsCreateNewStaff && !isReport)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.PersonAdd"
+                                           OnClick="OpenRegisterModal"
+                                           Style="text-transform:none; white-space:nowrap;">
+                                    Add Staff
+                                </MudButton>
+                            }
+                            @if (isReport)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Error"
+                                           OnClick="GeneratePdf"
+                                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                                           Style="text-transform:none; white-space:nowrap;">
+                                    Generate Pdf
+                                </MudButton>
+                            }
+                        </div>
+                    </div>
                 </ToolBarContent>
 
                 <Columns>
-                    <TemplateColumn Title="Full Name">
+                    @* Staff Member Avatar, Name & Role *@
+                    <TemplateColumn Title="Staff Member" SortBy="@(x => x.FisrtName)">
                         <CellTemplate>
-                            <MudItem Style="display: flex; align-items: center;">
-                                <MudAvatar Size="Size.Small">
-                                    @if (context.Item.StaffPhoto == null)
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Size="Size.Medium" Class="me-3 border">
+                                    @if (context.Item.StaffPhoto == null || context.Item.StaffPhoto.Length == 0)
                                     {
-                                        <MudImage Src="Images/dp.png"></MudImage>
+                                        <MudImage Src="Images/dp.png" Alt="Default Avatar" />
                                     }
                                     else
                                     {
-                                        <MudImage ObjectFit="ObjectFit.Cover" Height="50" Width="50" Src="@( $"data:image/jpeg;base64,{Convert.ToBase64String(context.Item.StaffPhoto)}" )" Alt="Profile Photo" Class="rounded-circle" />
+                                        <MudImage ObjectFit="ObjectFit.Cover"
+                                                  Src="@($"data:image/jpeg;base64,{Convert.ToBase64String(context.Item.StaffPhoto)}")"
+                                                  Alt="Profile Photo" />
                                     }
                                 </MudAvatar>
-                                <MudText Typo="Typo.body2" Class="ps-1">
-                                    @($"{context.Item.FisrtName} {context.Item.MiddleName} {context.Item.LastName}".Trim())
-                                </MudText>
-                            </MudItem>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600; line-height: 1.2;">
+                                        @($"{context.Item.FisrtName} {context.Item.MiddleName} {context.Item.LastName}".Replace("  ", " ").Trim())
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @(string.IsNullOrWhiteSpace(context.Item.ClinicalTitleName) ? context.Item.AdministrativeTitleName : context.Item.ClinicalTitleName)
+                                    </MudText>
+                                </div>
+                            </div>
                         </CellTemplate>
                     </TemplateColumn>
-                    <PropertyColumn Property="x => x.Email">
-                        <EditTemplate>
-                            <MudSelect @bind-Value="context.Item.FisrtName" Required RequiredError="You must select a Position!!!" Margin="@Margin.Dense">
-                                <MudSelectItem Value="0">zero</MudSelectItem>
-                                <MudSelectItem Value="1">one</MudSelectItem>
-                                <MudSelectItem Value="17">seventeen</MudSelectItem>
-                            </MudSelect>
-                        </EditTemplate>
-                    </PropertyColumn>
-                    @* <PropertyColumn Property="x => x.StaffTitleName" Title="Title/ Position" /> *@
-                    <TemplateColumn>
+
+                    @* Contact Email *@
+                    <TemplateColumn Title="Contact Email" SortBy="@(x => x.Email)">
                         <CellTemplate>
-                            <MudItem Style="text-align: center;">
-                                <MudChip Color="@(context.Item.StaffStatusName == "Available" ? Color.Success : Color.Error)" Size="Size.Small">
-                                    @(context.Item.StaffStatusName)
-                                </MudChip>
-                            </MudItem>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.Email" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.Email</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Department / Group *@
+                    <TemplateColumn Title="Department / Group">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2">
+                                @(string.IsNullOrWhiteSpace(context.Item.ClinicalTitleGroupName) ? context.Item.AdministrativeTitleGroupName : context.Item.ClinicalTitleGroupName)
+                            </MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Status Badge *@
+                    <TemplateColumn Title="Status" SortBy="@(x => x.StaffStatusName)">
+                        <CellTemplate>
+                            @{
+                                bool isAvailable = string.Equals(context.Item.StaffStatusName, "Available", StringComparison.OrdinalIgnoreCase);
+                            }
+                            <MudChip T="string"
+                                     Color="@(isAvailable ? Color.Success : Color.Error)"
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Small"
+                                     Style="font-weight: 500;">
+                                <span style="@($"display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background-color:{(isAvailable ? "#2e7d32" : "#d32f2f")};")"></span>
+                                @(string.IsNullOrWhiteSpace(context.Item.StaffStatusName) ? "Unknown" : context.Item.StaffStatusName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Row Action Indicator *@
+                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="View / Edit Profile">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => OpenEditStaffModal(context.Item.Id))" />
+                            </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
+
                 <PagerContent>
                     <MudDataGridPager T="StaffDto" />
                 </PagerContent>
@@ -109,13 +216,7 @@
 
 @code {
     [Parameter] public EventCallback<string> OnEditStaff { get; set; }
-    private bool _readOnly;
-
-    private void PreviewStaffProfile(StaffDto item)
-    {
-        //GetStaffById with aaaall Details
-    }
-    //=====================HERE===============================
+    private bool _readOnly = true;
 
     [Parameter] public List<StaffDto>? AllStaffs { get; set; } = new();
     List<StaffDto> FilteredStaffs = new();
@@ -139,36 +240,55 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        await Task.Delay(500);
+        await Task.Delay(300);
 
         if (!isReport)
             AllStaffs = await staffService.GetAllStaffsAsync();
 
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<StaffDto> query = AllStaffs ?? Enumerable.Empty<StaffDto>();
+
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            FilteredStaffs = AllStaffs;
-            messageStaff = "Staffs are not avalible!";
             firstPart = "Staff";
+            messageStaff = "No staff records are currently available.";
         }
         else
         {
-            // Use Reflection to look up the property by its string name
-            var prop = typeof(StaffDto).GetProperty(FilterBy);
-
             firstPart = FilterBy;
-            messageStaff = $"{firstPart} are not avalible!";
-
-            if (FilterBy != null)
-            {
-                FilteredStaffs = AllStaffs?.Where(x => x.AdministrativeTitleGroupName.Trim().ToLower() == FilterBy.Trim().ToLower() || x.ClinicalTitleGroupName.Trim().ToLower() == FilterBy.Trim().ToLower()).ToList();
-            }
-            else
-            {
-                FilteredStaffs = new();
-            }
+            messageStaff = $"No {firstPart.ToLower()} records are currently available.";
+            query = query.Where(x =>
+                string.Equals(x.AdministrativeTitleGroupName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(x.ClinicalTitleGroupName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
         }
-        isLoading = false;
-        StateHasChanged();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.FisrtName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.MiddleName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.LastName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.Email?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.StaffStatusName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        FilteredStaffs = query.ToList();
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
     }
 
     public async Task EditStaff(string staffId)
@@ -194,41 +314,10 @@
         var dialog = await Dialog.ShowAsync<EditStaffModal>("Edit Staff Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (result.Canceled)
+        if (result != null && result.Canceled)
         {
             await OnInitializedAsync();
         }
-    }
-
-    private async Task OnSearch(string text)
-    {
-        searchString = text;
-        isSearchLoading = true;
-        await Task.Delay(500);
-
-        if (string.IsNullOrWhiteSpace(FilterBy))
-        {
-            FilteredStaffs = AllStaffs?.Where(x => x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.StaffStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-            messageStaff = "Staffs are not avalible!";
-            firstPart = "Staff";
-        }
-        else
-        {
-            var prop = typeof(StaffDto).GetProperty(FilterBy);
-
-            firstPart = FilterBy.Substring(2);
-            messageStaff = $"{firstPart}s are not avalible!";
-
-            if (prop != null)
-            {
-                FilteredStaffs = AllStaffs?.Where(x => (x.AdministrativeTitleGroupName.ToLower() == FilterBy.ToLower() || x.ClinicalTitleGroupName.ToLower() == FilterBy.ToLower()) && x.FisrtName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MiddleName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.StaffStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-            else
-            {
-                FilteredStaffs = null;
-            }
-        }
-        isSearchLoading = false;
     }
 
     public async Task OpenRegisterModal()
@@ -236,7 +325,7 @@
         var dialog = await Dialog.ShowAsync<Register>("Register New Staff", _maxWidth);
         var result = await dialog.Result;
 
-        if (result.Canceled)
+        if (result != null && result.Canceled)
         {
             await OnInitializedAsync();
         }
@@ -262,9 +351,9 @@
         var dialog = await Dialog.ShowAsync<PdfPreview>($"Report Pdf", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }
     }
-}            
+}

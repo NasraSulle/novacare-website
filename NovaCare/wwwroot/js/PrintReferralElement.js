@@ -141,3 +141,91 @@
         }, 250);
     };
 
+
+window.printLabResultElement = function (elementId) {
+    const originalContent = document.getElementById(elementId);
+    if (!originalContent) {
+        console.error("Element not found:", elementId);
+        return;
+    }
+
+    // 1. Clone the element so we don't modify the live Blazor UI
+    const clonedContent = originalContent.cloneNode(true);
+
+    // 2. Physically remove all elements marked with 'no-print'
+    clonedContent.querySelectorAll('.no-print').forEach(el => el.remove());
+
+    // 3. Convert textareas (like Test Result Conclusion) into auto-expanding divs
+    const originalTextareas = originalContent.querySelectorAll('textarea');
+    const clonedTextareas = clonedContent.querySelectorAll('textarea');
+
+    clonedTextareas.forEach((clonedTa, index) => {
+        const textValue = originalTextareas[index]?.value || clonedTa.value || '';
+        const textDiv = document.createElement('div');
+        textDiv.textContent = textValue;
+        textDiv.style.whiteSpace = 'pre-wrap';      // Preserves line breaks & wrapping
+        textDiv.style.wordBreak = 'break-word';     // Prevents long words from overflowing
+        textDiv.style.fontFamily = 'inherit';
+        textDiv.style.fontSize = 'inherit';
+        textDiv.style.lineHeight = '1.5';
+        textDiv.style.padding = '8px 0';
+        textDiv.style.minHeight = '120px';
+
+        // Replace the textarea inside the MudBlazor input wrapper
+        clonedTa.parentNode.replaceChild(textDiv, clonedTa);
+    });
+
+    // 4. Copy stylesheets from the main page
+    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+        .map(style => style.outerHTML)
+        .join('\n');
+
+    const printWindow = window.open('', '_blank', 'width=900,height=1000');
+    printWindow.document.write(`
+    <html>
+        <head>
+            <title>Lab Result</title>
+            ${styles}
+            <style>
+                body {
+                    background: white !important;
+                    margin: 0;
+                    padding: 16px;
+                }
+                #${elementId} {
+                    width: 100% !important;
+                    box-shadow: none !important;
+                }
+                /* Expand fixed-height table so all rows print */
+                .mud-table-container {
+                    height: auto !important;
+                    max-height: none !important;
+                    overflow: visible !important;
+                }
+                /* Ensure MudInput wrappers expand naturally */
+                .mud-input-control, .mud-input, .mud-input-slot {
+                    height: auto !important;
+                    max-height: none !important;
+                    overflow: visible !important;
+                }
+            </style>
+        </head>
+        <body>
+            ${clonedContent.outerHTML}
+        </body>
+    </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+};
+
+
+
+
+

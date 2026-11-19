@@ -2,77 +2,207 @@
 @using NovaCare.Shared.DTOs.StaffDTOs
 @inject IDialogService Dialog
 
-<MudGrid>
-    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+<MudGrid Spacing="3">
+    <MudItem xs="12">
         @if (isLoading)
         {
-            <MudItem Class="pa-6">
+            <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
-            </MudItem>
+            </div>
         }
-        else if (!isLoading && !FilteredMedicines!.Any() && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredMedicines == null || !FilteredMedicines.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudItem Class="pa-6">
-                <MudGrid>
-                    <MudItem md="12">
-                        <MudGrid Justify="Justify.SpaceBetween">
-                            <MudItem>
-                                <MudText Typo="Typo.h6">@($"All {firstPart} {Genre}")</MudText>
-                            </MudItem>
-                            <MudItem>
-                                @if (CurrentUser != null && CurrentUser.IsCreateNewPatient)
-                                {
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                                }
-                            </MudItem>
-                        </MudGrid>
-                    </MudItem>
-
-                    <MudItem md="12">
-                        <NoDataNotice NoDataMessage="@messageMedicine" />
-                    </MudItem>
-                </MudGrid>
-            </MudItem>
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
+                    <MudText Typo="Typo.h6">@($"{Genre} {(string.IsNullOrWhiteSpace(FilterBy) ? "" : $"- {FilterBy}")}")</MudText>
+                    @if (CurrentUser != null && CurrentUser.IsCreateNewMedicine && !isReport)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
+                            Add Medicine
+                        </MudButton>
+                    }
+                </div>
+                <NoDataNotice NoDataMessage="@messageMedicine" />
+            </MudPaper>
         }
         else if (FilteredMedicines != null)
         {
-            <MudDataGrid Loading="@isSearchLoading" Hover="true" T="MedicineDto" Items="@FilteredMedicines" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6 ms-2 shadow-none rounded-0"
-                         Bordered="false" Dense="true" RowClick="@((args) => PreviewMedicineProfile(args.Item))">
-                <ToolBarContent>
-                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
-                    <MudSpacer />
-                    <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+            @* Inventory Summary Metric Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Items</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredMedicines.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Medication" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">In Stock</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                                @FilteredMedicines.Count(x => string.Equals(x.MedicineStatusName?.Trim(), "InStock", StringComparison.OrdinalIgnoreCase) && x.MedicineQty > 0)
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.CheckCircle" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-error);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Out / Low Stock</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Error" Style="font-weight:700;">
+                                @FilteredMedicines.Count(x => !string.Equals(x.MedicineStatusName?.Trim(), "InStock", StringComparison.OrdinalIgnoreCase) || x.MedicineQty <= 0)
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Error" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.WarningAmber" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
 
-                    <MudItem>
-                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
-                                      Margin="Margin.Dense" Variant="Variant.Outlined"
-                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
-                    </MudItem>
-                    @if (CurrentUser.IsCreateNewMedicine && !isReport)
-                    {
-                            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                    }
-                    @if (isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
-                    }
+            @* Medicines Data Grid *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="MedicineDto"
+                         Items="@FilteredMedicines"
+                         ReadOnly="@_readOnly"
+                         Class="rounded-lg"
+                         Bordered="false"
+                         Dense="false"
+                         RowStyle="cursor: pointer;"
+                         RowClick="@((args) => PreviewMedicineProfile(args.Item))">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">
+                                @(isReport ? "All Medicines" : $"{Genre} {(string.IsNullOrWhiteSpace(FilterBy) ? "Catalog" : $"({FilterBy})")}")
+                            </MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredMedicines.Count} items")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search medicine or status..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 240px;" />
+
+                            @if (CurrentUser != null && CurrentUser.IsCreateNewMedicine && !isReport)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           OnClick="OpenRegisterModal"
+                                           Style="text-transform:none; white-space:nowrap;">
+                                    Add Medicine
+                                </MudButton>
+                            }
+                            @if (isReport)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Error"
+                                           OnClick="GeneratePdf"
+                                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                                           Style="text-transform:none; white-space:nowrap;">
+                                    Generate Pdf
+                                </MudButton>
+                            }
+                        </div>
+                    </div>
                 </ToolBarContent>
 
                 <Columns>
-                    <PropertyColumn Property="x => x.MedicineName" Title="Medicine Name" />
-                    <PropertyColumn Property="x => x.MedicineQty" Title="Quantity" />
-                    @if (CurrentUser.IsCreateNewMedicine)
-                    {
-                        <PropertyColumn Property="x => x.BuyingPrice" Title="Buying Price" />
-                    }
-                    <PropertyColumn Property="x => x.SellingPrice" Title="Price" />
-                    <TemplateColumn>
+                    @* Medicine Name & Form Type *@
+                    <TemplateColumn Title="Medicine Name" SortBy="@(x => x.MedicineName)">
                         <CellTemplate>
-                            <MudItem Style="text-align: center;">
-                                <MudChip Color="@(context.Item.MedicineStatusName == "InStock" ? Color.Success : Color.Error)" Size="Size.Small">
-                                    @(context.Item.MedicineStatusName)
-                                </MudChip>
-                            </MudItem>
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="me-3">
+                                    <MudIcon Icon="@Icons.Material.Outlined.Medication" Size="Size.Small" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600; line-height: 1.2;">
+                                        @context.Item.MedicineName
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        @($"{context.Item.MedicineGenre} • {context.Item.MedicineType}")
+                                    </MudText>
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Stock Quantity *@
+                    <TemplateColumn Title="Available Qty" SortBy="@(x => x.MedicineQty)">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2" Style="font-weight: 600;">
+                                @($"{context.Item.MedicineQty:N0} units")
+                            </MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @if (CurrentUser != null && CurrentUser.IsCreateNewMedicine)
+                    {
+                        <TemplateColumn Title="Buying Price" SortBy="@(x => x.BuyingPrice)">
+                            <CellTemplate>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    @($"{context.Item.BuyingPrice:N2}")
+                                </MudText>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    }
+
+                    <TemplateColumn Title="Selling Price" SortBy="@(x => x.SellingPrice)">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body2" Style="font-weight: 600;">
+                                @($"{context.Item.SellingPrice:N2}")
+                            </MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Stock Status Badge *@
+                    <TemplateColumn Title="Stock Status" SortBy="@(x => x.MedicineStatusName)">
+                        <CellTemplate>
+                            @{
+                                bool isInStock = string.Equals(context.Item.MedicineStatusName?.Trim(), "InStock", StringComparison.OrdinalIgnoreCase) && context.Item.MedicineQty > 0;
+                            }
+                            <MudChip T="string"
+                                     Color="@(isInStock ? Color.Success : Color.Error)"
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Small"
+                                     Style="font-weight: 500;">
+                                <span style="@($"display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background-color:{(isInStock ? "#2e7d32" : "#d32f2f")};")"></span>
+                                @(string.IsNullOrWhiteSpace(context.Item.MedicineStatusName) ? "Out of Stock" : context.Item.MedicineStatusName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Row Action *@
+                    <TemplateColumn Title="" CellStyle="width: 56px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="View / Edit Medicine">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => PreviewMedicineProfile(context.Item))" />
+                            </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
@@ -86,12 +216,9 @@
 </MudGrid>
 
 @code {
-
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
-    private bool _readOnly;
-
-
+    private bool _readOnly = true;
 
     [Parameter] public List<MedicineDto> AllMedicines { get; set; } = new();
     List<MedicineDto> FilteredMedicines = new();
@@ -115,42 +242,67 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        await Task.Delay(500);
+        await Task.Delay(300);
 
         if (!isReport)
         {
-            AllMedicines = await medicineService.GetAllMedicinesAsync();
+            AllMedicines = await medicineService.GetAllMedicinesAsync() ?? new();
+        }
+
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<MedicineDto> query = AllMedicines ?? Enumerable.Empty<MedicineDto>();
+
+        if (!isReport)
+        {
+            if (!string.IsNullOrWhiteSpace(Genre))
+            {
+                query = query.Where(x => string.Equals(x.MedicineGenre?.Trim(), Genre.Trim(), StringComparison.OrdinalIgnoreCase));
+            }
 
             if (string.IsNullOrWhiteSpace(FilterBy))
             {
-                FilteredMedicines = AllMedicines.Where(x => x.MedicineGenre.Trim().ToLower() == Genre.Trim().ToLower()).ToList();
-                messageMedicine = $"{Genre} Medicines are not avalible!";
-                firstPart = $"{Genre}";
+                firstPart = Genre;
+                messageMedicine = $"{Genre} medicines are not available.";
             }
             else
             {
-
                 firstPart = FilterBy;
-                messageMedicine = $"{Genre} {firstPart} are not avalible!";
-
-                if (FilterBy != null && Genre != null)
-                {
-                    FilteredMedicines = AllMedicines?.Where(x => x.MedicineType.Trim().ToLower() == FilterBy.Trim().ToLower() && x.MedicineGenre.Trim().ToLower() == Genre.Trim().ToLower()).ToList() ?? new();
-                }
-                else
-                {
-                    FilteredMedicines = new();
-                }
+                messageMedicine = $"{Genre} ({FilterBy}) medicines are not available.";
+                query = query.Where(x => string.Equals(x.MedicineType?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
             }
         }
         else
         {
             firstPart = "Medicine";
-            FilteredMedicines = AllMedicines;
+            messageMedicine = "No medicines available for the selected report period.";
         }
 
-        isLoading = false;
-        StateHasChanged();
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.MedicineName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.MedicineType?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.MedicineGenre?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.MedicineStatusName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        FilteredMedicines = query.ToList();
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
     }
 
     public async Task Back()
@@ -160,41 +312,12 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task OnSearch(string text)
-    {
-        searchString = text;
-        isSearchLoading = true;
-        await Task.Delay(500);
-
-        if (string.IsNullOrWhiteSpace(FilterBy))
-        {
-            FilteredMedicines = AllMedicines?.Where(x => x.MedicineName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-            messageMedicine = "Staffs are not avalible!";
-            firstPart = "Staff";
-        }
-        else
-        {
-            firstPart = FilterBy.Substring(2);
-            messageMedicine = $"{firstPart}s are not avalible!";
-
-            if (FilterBy != null)
-            {
-                FilteredMedicines = AllMedicines?.Where(x => x.MedicineType == FilterBy && x.MedicineName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.MedicineStatusName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-            }
-            else
-            {
-                FilteredMedicines = new();
-            }
-        }
-        isSearchLoading = false;
-    }
-
     public async Task OpenRegisterModal()
     {
         var dialog = await Dialog.ShowAsync<NewMedicine>("Register New Medicine", _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }
@@ -209,7 +332,7 @@
         var dialog = await Dialog.ShowAsync<EditMedicine>("Medicine Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }
