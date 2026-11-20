@@ -8,26 +8,52 @@
 @inject SignInManager<Staff> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Profile</PageTitle>
+<PageTitle>Profile - NovaCare</PageTitle>
 
-<MudText Typo="Typo.h6" GutterBottom="true">Profile</MudText>
+<div class="mb-4">
+    <MudText Typo="Typo.h6" Style="font-weight: 600;">Profile Information</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">
+        View your system username and update your primary contact phone number.
+    </MudText>
+</div>
+
+<MudDivider Class="mb-4" />
 
 <StatusMessage />
 
 <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
     <DataAnnotationsValidator />
 
-    <MudGrid>
-        <MudItem md="12">
-            <MudStaticTextField Value="@username" Label="Username" Disabled="true" Placeholder="Please choose your username." />
+    <MudGrid Spacing="3">
+        <MudItem xs="12">
+            <MudStaticTextField Value="@username"
+                                Label="Username"
+                                Disabled="true"
+                                Variant="Variant.Outlined"
+                                Margin="Margin.Dense"
+                                Adornment="Adornment.Start"
+                                AdornmentIcon="@Icons.Material.Outlined.Badge"
+                                HelperText="Your login username cannot be changed." />
         </MudItem>
-        <MudItem md="12">
-            <MudStaticTextField For="@(() => Input.PhoneNumber)" @bind-Value="Input.PhoneNumber"
-                                Label="Phone Number" HelperText="Please enter your phone number."
-                                UserAttributes="@(new() { { "autocomplete", "tel-national" } } )" />
+        <MudItem xs="12">
+            <MudStaticTextField For="@(() => Input.PhoneNumber)"
+                                @bind-Value="Input.PhoneNumber"
+                                Label="Phone Number"
+                                Variant="Variant.Outlined"
+                                Margin="Margin.Dense"
+                                Adornment="Adornment.Start"
+                                AdornmentIcon="@Icons.Material.Outlined.Phone"
+                                HelperText="Used for account recovery and clinical alerts."
+                                UserAttributes="@(new() { { "autocomplete", "tel-national" } })" />
         </MudItem>
-        <MudItem md="12">
-            <MudStaticButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" FormAction="FormAction.Submit">Save</MudStaticButton>
+        <MudItem xs="12" Class="d-flex justify-end mt-2">
+            <MudStaticButton Variant="Variant.Filled"
+                             Color="Color.Primary"
+                             StartIcon="@Icons.Material.Filled.Save"
+                             FormAction="FormAction.Submit"
+                             Style="text-transform: none; min-width: 160px;">
+                Save Changes
+            </MudStaticButton>
         </MudItem>
     </MudGrid>
 </EditForm>

@@ -3,89 +3,160 @@
 @inject ISnackbar Snackbar
 @inject IDialogService Dialog
 
-<MudGrid>
-    <MudItem md="12" Class="pa-0">
+<MudGrid Spacing="3">
+    <MudItem xs="12">
         @if (isLoading)
         {
-            <MudItem Class="pa-6 text-center">
+            <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
-            </MudItem>
+            </div>
         }
         else if (!FilteredClaims.Any() && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudItem Class="pa-6">
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
                 <NoDataNotice NoDataMessage="No insurance claims found." />
-            </MudItem>
+            </MudPaper>
         }
         else
         {
-            <MudDataGrid Hover="true" T="InsuranceClaimDto" Items="@FilteredClaims" Dense="true" Class="ps-6 pe-6 pb-6">
+            @* Claims Financial Summary Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Claimed (@FilteredClaims.Count)</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredClaims.Sum(x => x.ClaimedAmount).ToString("N2")</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.RequestQuote" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-info);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Approved</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info" Style="font-weight:700;">@FilteredClaims.Sum(x => x.ApprovedAmount).ToString("N2")</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.FactCheck" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Settled</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">@FilteredClaims.Sum(x => x.SettledAmount).ToString("N2")</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.PriceCheck" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            @* Main Claims Grid *@
+            <MudDataGrid Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="InsuranceClaimDto"
+                         Items="@FilteredClaims"
+                         Dense="false"
+                         Class="rounded-lg">
                 <ToolBarContent>
-                    <MudText Typo="Typo.h6">@($"{(StatusFilter.HasValue ? StatusFilter.Value.ToString() : "All")} Insurance Claims")</MudText>
-                    <MudSpacer />
-                    <MudTextField T="string" ValueChanged="@OnSearch" Placeholder="Search Claim #, Patient, Card..."
-                                  Adornment="Adornment.Start" Margin="Margin.Dense" Variant="Variant.Outlined"
-                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-2" />
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"{(StatusFilter.HasValue ? StatusFilter.Value.ToString() : "All")} Insurance Claims")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredClaims.Count} claims")</MudChip>
+                        </div>
+
+                        <MudTextField T="string"
+                                      Value="@searchString"
+                                      ValueChanged="@OnSearch"
+                                      Placeholder="Search Claim #, Patient, Insurer, Card..."
+                                      Adornment="Adornment.Start"
+                                      Margin="Margin.Dense"
+                                      Variant="Variant.Outlined"
+                                      Clearable="true"
+                                      Immediate="true"
+                                      DebounceInterval="300"
+                                      AdornmentIcon="@Icons.Material.Filled.Search"
+                                      IconSize="Size.Small"
+                                      Style="min-width: 280px;" />
+                    </div>
                 </ToolBarContent>
 
                 <Columns>
-                    <PropertyColumn Property="x => x.ClaimNumber" Title="Claim #" />
-                    <PropertyColumn Property="x => x.PatientFullName" Title="Patient" />
-                    <PropertyColumn Property="x => x.InsuranceProviderName" Title="Insurer" />
-                    <PropertyColumn Property="x => x.MemberCardNumber" Title="Card No." />
-                    <PropertyColumn Property="x => x.AuthorizationNumber" Title="Auth Code" />
+                    @* Claim # & Auth *@
+                    <TemplateColumn Title="Claim & Auth #" SortBy="@(x => x.ClaimNumber)">
+                        <CellTemplate>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Color="Color.Primary" Style="font-weight: 600;">
+                                    @context.Item.ClaimNumber
+                                </MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @($"Auth: {(string.IsNullOrWhiteSpace(context.Item.AuthorizationNumber) ? "N/A" : context.Item.AuthorizationNumber)}")
+                                </MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Patient & Insurer *@
+                    <TemplateColumn Title="Patient & Insurer" SortBy="@(x => x.PatientFullName)">
+                        <CellTemplate>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Style="font-weight: 600;">
+                                    @context.Item.PatientFullName
+                                </MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                    @($"{context.Item.InsuranceProviderName} • Card: {context.Item.MemberCardNumber}")
+                                </MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
                     <PropertyColumn Property="x => x.ClaimedAmount" Title="Claimed" Format="N2" />
                     <PropertyColumn Property="x => x.ApprovedAmount" Title="Approved" Format="N2" />
                     <PropertyColumn Property="x => x.SettledAmount" Title="Settled" Format="N2" />
-                    <TemplateColumn Title="Status">
+
+                    <TemplateColumn Title="Status" SortBy="@(x => x.Status)">
                         <CellTemplate>
-                            <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Item.Status)">
-                                @context.Item.Status.ToString()
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="@GetStatusColor(context.Item.Status)" Style="font-weight: 500;">
+                                @context.Item.Status.ToString().Replace("_", " ")
                             </MudChip>
                         </CellTemplate>
                     </TemplateColumn>
-                    @* <TemplateColumn Title="Actions">
-                        <CellTemplate>
-                            @if (context.Item.Status == ClaimStatus.Submitted || context.Item.Status == ClaimStatus.Queried)
-                            {
-                                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Warning" OnClick="@(() => OpenAdjudicate(context.Item))">
-                                    Adjudicate
-                                </MudButton>
-                            }
-                            @if (context.Item.Status == ClaimStatus.Approved || context.Item.Status == ClaimStatus.Partially_Approved)
-                            {
-                                <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => OpenSettle(context.Item))">
-                                    Settle Payout
-                                </MudButton>
-                            }
-                        </CellTemplate>
-                    </TemplateColumn> *@
+
                     <TemplateColumn Title="Actions">
                         <CellTemplate>
-                            <MudIconButton Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print"
-                                           title="Preview / Print Claim Folio PDF" OnClick="@(() => PreviewClaimPdfAsync(context.Item))" />
+                            <div class="d-flex align-center gap-1 flex-wrap">
+                                <MudTooltip Text="Preview / Print Claim Folio PDF">
+                                    <MudIconButton Size="Size.Small" Color="Color.Primary" Icon="@Icons.Material.Outlined.Print"
+                                                   OnClick="@(() => PreviewClaimPdfAsync(context.Item))" />
+                                </MudTooltip>
 
-                            @if (context.Item.Status == ClaimStatus.Draft)
-                            {
-                                <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Info" OnClick="@(() => MarkClaimSubmittedAsync(context.Item))">
-                                    Mark Submitted
-                                </MudButton>
-                            }
-                            @if (context.Item.Status == ClaimStatus.Submitted || context.Item.Status == ClaimStatus.Queried)
-                            {
-                                <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Warning" OnClick="@(() => OpenAdjudicate(context.Item))">
-                                    Adjudicate
-                                </MudButton>
-                            }
-                            @if (context.Item.Status == ClaimStatus.Approved || context.Item.Status == ClaimStatus.Partially_Approved)
-                            {
-                                <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => OpenSettle(context.Item))">
-                                    Settle Payout
-                                </MudButton>
-                            }
+                                @if (context.Item.Status == ClaimStatus.Draft)
+                                {
+                                    <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Info" Style="text-transform:none;" OnClick="@(() => MarkClaimSubmittedAsync(context.Item))">
+                                        Submit
+                                    </MudButton>
+                                }
+                                @if (context.Item.Status == ClaimStatus.Submitted || context.Item.Status == ClaimStatus.Queried)
+                                {
+                                    <MudButton Size="Size.Small" Variant="Variant.Outlined" Color="Color.Warning" Style="text-transform:none;" OnClick="@(() => OpenAdjudicate(context.Item))">
+                                        Adjudicate
+                                    </MudButton>
+                                }
+                                @if (context.Item.Status == ClaimStatus.Approved || context.Item.Status == ClaimStatus.Partially_Approved)
+                                {
+                                    <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success" Style="text-transform:none;" OnClick="@(() => OpenSettle(context.Item))">
+                                        Settle
+                                    </MudButton>
+                                }
+                            </div>
                         </CellTemplate>
                     </TemplateColumn>
-
                 </Columns>
 
                 <PagerContent>
@@ -109,10 +180,10 @@
                     <MudSelectItem Value="ClaimStatus.Rejected">Rejected</MudSelectItem>
                 </MudSelect>
             </MudItem>
-            <MudItem xs="6">
+            <MudItem xs="12" sm="6">
                 <MudNumericField @bind-Value="adjApproved" Label="Approved Amount" Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
-            <MudItem xs="6">
+            <MudItem xs="12" sm="6">
                 <MudNumericField @bind-Value="adjRejected" Label="Rejected Amount" Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
             <MudItem xs="12">
@@ -134,10 +205,10 @@
             <MudItem xs="12">
                 <MudNumericField @bind-Value="settleAmount" Label="Amount Paid by Insurer" Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
-            <MudItem xs="6">
+            <MudItem xs="12" sm="6">
                 <MudTextField @bind-Value="settleRef" Label="EFT / Remittance Ref #" Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
-            <MudItem xs="6">
+            <MudItem xs="12" sm="6">
                 <MudTextField @bind-Value="settleBatch" Label="Batch Number (Optional)" Variant="Variant.Outlined" Margin="Margin.Dense" />
             </MudItem>
         </MudGrid>
@@ -179,7 +250,7 @@
     private async Task LoadClaimsAsync()
     {
         isLoading = true;
-        AllClaims = await paymentService.GetAllInsuranceClaimsAsync(StatusFilter);
+        AllClaims = await paymentService.GetAllInsuranceClaimsAsync(StatusFilter) ?? new();
         FilteredClaims = AllClaims;
         isLoading = false;
     }
@@ -194,10 +265,10 @@
         }
 
         FilteredClaims = AllClaims.Where(c =>
-            c.ClaimNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-            c.PatientFullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-            c.InsuranceProviderName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-            c.MemberCardNumber.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+            (c.ClaimNumber?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (c.PatientFullName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (c.InsuranceProviderName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (c.MemberCardNumber?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false)
         ).ToList();
     }
 
@@ -263,7 +334,6 @@
         _ => Color.Default
     };
 
-
     private async Task MarkClaimSubmittedAsync(InsuranceClaimDto claim)
     {
         await paymentService.CreateOrSubmitClaimAsync(claim.BillId, CurrentUser.Id, submitImmediately: true);
@@ -288,5 +358,4 @@
 
         await Dialog.ShowAsync<PdfPreview>($"Claim Folio - {claim.ClaimNumber}", parameters, options);
     }
-
 }

@@ -1,34 +1,76 @@
 ﻿@page "/Account/Manage/PersonalData"
 
+@using Microsoft.AspNetCore.Identity
 @using NovaCare.Data
+
 @inject UserManager<Staff> UserManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Personal Data</PageTitle>
+<PageTitle>Personal Data - NovaCare</PageTitle>
 
-<MudText Typo="Typo.h6" GutterBottom="true">Personal data</MudText>
+<div class="mb-4">
+    <div class="d-flex align-center gap-2 mb-1">
+        <MudIcon Icon="@Icons.Material.Outlined.PrivacyTip" Color="Color.Primary" />
+        <MudText Typo="Typo.h6" Style="font-weight: 600;">Personal Data & Privacy</MudText>
+    </div>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">
+        Download a copy of your personal account records or permanently close your account.
+    </MudText>
+</div>
 
 <StatusMessage />
 
-<MudGrid>
-    <MudItem md="12">
-        <MudText Typo="Typo.body1">
-            Your account contains personal data that you have given us. This page allows you to download or delete that data.
-        </MudText>
+<MudGrid Spacing="3" Class="mt-1">
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Outlined="true" Class="pa-4 rounded-lg">
+            <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center gap-3">
+                <div>
+                    <div class="d-flex align-center gap-2 mb-1">
+                        <MudIcon Icon="@Icons.Material.Outlined.CloudDownload" Color="Color.Primary" Size="Size.Small" />
+                        <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">Export Personal Data</MudText>
+                    </div>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Your account contains personal data that you have provided to NovaCare. Download a portable JSON archive of these details.
+                    </MudText>
+                </div>
+
+                <form action="Account/Manage/DownloadPersonalData" method="post" class="flex-shrink-0">
+                    <AntiforgeryToken />
+                    <MudStaticButton Variant="Variant.Filled"
+                                     Color="Color.Primary"
+                                     StartIcon="@Icons.Material.Filled.Download"
+                                     FormAction="FormAction.Submit"
+                                     Style="text-transform: none; white-space: nowrap;">
+                        Download Data
+                    </MudStaticButton>
+                </form>
+            </div>
+        </MudPaper>
     </MudItem>
-    <MudItem md="12">
-        <MudAlert Severity="Severity.Warning" Variant="Variant.Text">
-            Deleting this data will permanently remove your account, and this cannot be recovered.
-        </MudAlert>
-    </MudItem>
-    <MudItem md="12">
-        <form action="Account/Manage/DownloadPersonalData" method="post">
-            <AntiforgeryToken />
-            <MudStaticButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" FormAction="FormAction.Submit">Download</MudStaticButton>
-        </form>
-    </MudItem>
-    <MudItem md="12">
-        <MudLink Href="Account/Manage/DeletePersonalData" Color="Color.Error">Delete</MudLink>
+
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Outlined="true" Class="pa-4 rounded-lg" Style="border-color: var(--mud-palette-error); background-color: rgba(211, 47, 47, 0.03);">
+            <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center gap-3">
+                <div>
+                    <div class="d-flex align-center gap-2 mb-1">
+                        <MudIcon Icon="@Icons.Material.Outlined.WarningAmber" Color="Color.Error" Size="Size.Small" />
+                        <MudText Typo="Typo.subtitle1" Color="Color.Error" Style="font-weight: 600;">Delete Account</MudText>
+                    </div>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Deleting this data will permanently remove your staff account and credentials. This action cannot be undone.
+                    </MudText>
+                </div>
+
+                <MudButton Href="Account/Manage/DeletePersonalData"
+                           Variant="Variant.Outlined"
+                           Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.DeleteForever"
+                           Style="text-transform: none; white-space: nowrap;"
+                           Class="flex-shrink-0">
+                    Delete Account
+                </MudButton>
+            </div>
+        </MudPaper>
     </MudItem>
 </MudGrid>
 

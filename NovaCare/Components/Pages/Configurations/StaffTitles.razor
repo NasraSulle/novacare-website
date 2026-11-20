@@ -1,100 +1,166 @@
 ﻿@using NovaCare.Shared.DTOs.StaffDTOs
 @inject IDialogService Dialog
 
-<MudGrid>
-    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+<MudGrid Spacing="3">
+    <MudItem xs="12">
         @if (isLoading)
         {
-            <MudItem Class="pa-6">
+            <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
-            </MudItem>
+            </div>
         }
-        else if (!isLoading && !FilteredTitles!.Any() && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredTitles == null || !FilteredTitles.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudGrid Class="pa-6">
-                <MudItem md="12" Class="d-flex align-center">
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
                     <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
-                    <MudSpacer />
-
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                </MudItem>
-                <MudItem md="12">
-                    <NoDataNotice NoDataMessage="@messageTitle" />
-                </MudItem>
-            </MudGrid>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
+                        Add Title
+                    </MudButton>
+                </div>
+                <NoDataNotice NoDataMessage="@messageTitle" />
+            </MudPaper>
         }
         else if (FilteredTitles != null)
         {
-            <MudGrid Class="ps-6 pt-6" Justify="Justify.Center">
-                <MudItem md="12">
-                    <MudDataGrid Loading="@isSearchLoading" Hover="true" T="StaffTitleDto" Items="@FilteredTitles" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
-                                 Bordered="false" Dense="true" RowClick="@((args) => PreviewTitleProfile(args.Item))">
-                        <ToolBarContent>
-                            <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
-                            <MudSpacer />
-                            <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
-
-                            <MudItem>
-                                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
-                                              Margin="Margin.Dense" Variant="Variant.Outlined"
-                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
-                            </MudItem>
-                            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-
-                        </ToolBarContent>
-
-                        <Columns>
-                            <PropertyColumn Property="x => x.StaffTitleName" Title="Title Name" />
-                            <PropertyColumn Property="x => x.StaffTypeName" Title="Department" />
-                            <PropertyColumn Property="x => x.TitleGroupName" Title="Group Name" />
-                            <PropertyColumn Property="x => x.StaffsCount" Title="Total Staffs" />
-                        </Columns>
-
-                        <PagerContent>
-                            <MudDataGridPager T="StaffTitleDto" />
-                        </PagerContent>
-                    </MudDataGrid>
+            @* Summary Metric Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Staff Titles</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredTitles.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Badge" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Assigned Personnel</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                                @FilteredTitles.Sum(x => x.StaffsCount)
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.PeopleAlt" />
+                        </MudAvatar>
+                    </MudPaper>
                 </MudItem>
             </MudGrid>
+
+            @* Staff Titles Data Table *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="StaffTitleDto"
+                         Items="@FilteredTitles"
+                         ReadOnly="@_readOnly"
+                         RowStyle="cursor: pointer;"
+                         Class="rounded-lg"
+                         Bordered="false"
+                         Dense="false"
+                         RowClick="@((args) => PreviewTitleProfile(args.Item))">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart}s")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredTitles.Count} titles")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search title, department, or group..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 260px;" />
+
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       OnClick="OpenRegisterModal"
+                                       Style="text-transform:none; white-space:nowrap;">
+                                Add Title
+                            </MudButton>
+                        </div>
+                    </div>
+                </ToolBarContent>
+
+                <Columns>
+                    <TemplateColumn Title="Title Name" SortBy="@(x => x.StaffTitleName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Class="me-3">
+                                    <MudIcon Icon="@Icons.Material.Outlined.Badge" Size="Size.Small" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@context.Item.StaffTitleName</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Role Designation</MudText>
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Department" SortBy="@(x => x.StaffTypeName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.Domain" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.StaffTypeName</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Group Name" SortBy="@(x => x.TitleGroupName)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">
+                                @(string.IsNullOrWhiteSpace(context.Item.TitleGroupName) ? "Unassigned" : context.Item.TitleGroupName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Total Staff" SortBy="@(x => x.StaffsCount)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">
+                                @($"{context.Item.StaffsCount} staff")
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="Edit Title">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => PreviewTitleProfile(context.Item))" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="StaffTitleDto" />
+                </PagerContent>
+            </MudDataGrid>
         }
     </MudItem>
 </MudGrid>
 
 @code {
-
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
-    private bool _readOnly;
-
-    private bool _isCellEditMode;
-    private bool _editTriggerRowClick; //!!?
-
-    private void StartedEditingItem(StaffTitleDto item)
-    {
-        isEdit = true;
-    }
-
-    private void CanceledEditingItem(StaffTitleDto item)
-    {
-        isEdit = false;
-    }
-
-    private async Task PreviewTitleProfile(StaffTitleDto item)
-    {
-        var Parameters = new DialogParameters
-        {
-            {"CurrentTitle" , item}
-        };
-        var dialog = await Dialog.ShowAsync<EditStaffTitle>("Title Details", Parameters, _maxWidth);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await OnInitializedAsync();
-        }
-    }
-
-    //=====================HERE===============================
+    private bool _readOnly = true;
 
     List<StaffTitleDto>? AllTitles;
     List<StaffTitleDto>? FilteredTitles;
@@ -114,33 +180,64 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        await Task.Delay(500);
+        await Task.Delay(300);
 
         AllTitles = await staffService.GetStaffTitlesAsync();
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<StaffTitleDto> query = AllTitles ?? Enumerable.Empty<StaffTitleDto>();
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            FilteredTitles = AllTitles;
-            messageTitle = $"{Genre} Titles are not avalible!";
             firstPart = "Title";
+            messageTitle = "No staff titles are currently configured.";
         }
         else
         {
-
             firstPart = FilterBy;
-            messageTitle = $"{Genre} {firstPart}s are not avalible!";
-
-            if (FilterBy != null && Genre != null)
-            {
-                FilteredTitles = AllTitles?.Where(x => x.StaffTypeName == FilterBy).ToList();
-            }
-            else
-            {
-                FilteredTitles = null;
-            }
+            messageTitle = $"No {firstPart.ToLower()} titles are currently available.";
+            query = query.Where(x => string.Equals(x.StaffTypeName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
         }
-        isLoading = false;
-        StateHasChanged();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.StaffTitleName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.StaffTypeName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.TitleGroupName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        FilteredTitles = query.ToList();
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
+    }
+
+    private async Task PreviewTitleProfile(StaffTitleDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentTitle" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditStaffTitle>("Title Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
     }
 
     public async Task Back()
@@ -150,41 +247,12 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task OnSearch(string text)
-    {
-        searchString = text;
-        isSearchLoading = true;
-        await Task.Delay(500);
-
-        if (string.IsNullOrWhiteSpace(FilterBy))
-        {
-            FilteredTitles = AllTitles?.Where(x => x.StaffTitleName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-            messageTitle = "Staffs are not avalible!";
-            firstPart = "Staff";
-        }
-        else
-        {
-            firstPart = FilterBy.Substring(2);
-            messageTitle = $"{firstPart}s are not avalible!";
-
-            if (searchString != null)
-            {
-                FilteredTitles = AllTitles?.Where(x => x.StaffTitleName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-            else
-            {
-                FilteredTitles = null;
-            }
-        }
-        isSearchLoading = false;
-    }
-
     public async Task OpenRegisterModal()
     {
         var dialog = await Dialog.ShowAsync<NewTitle>("Register New Title", _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }

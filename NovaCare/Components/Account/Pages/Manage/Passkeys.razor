@@ -10,52 +10,117 @@
 
 <PageTitle>Manage your passkeys</PageTitle>
 
-<MudText Typo="Typo.h6" GutterBottom="true">Manage your passkeys</MudText>
+<div class="d-flex flex-column flex-sm-row align-start align-sm-center justify-space-between mb-4 gap-2">
+    <div>
+        <MudText Typo="Typo.h5" Style="font-weight: 600;">Manage Passkeys</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">
+            Sign in faster and more securely using biometrics, device PIN, or hardware security keys
+        </MudText>
+    </div>
+    <MudChip T="string"
+             Color="@(currentPasskeys is { Count: > 0 } ? Color.Success : Color.Default)"
+             Variant="Variant.Outlined"
+             Size="Size.Small">
+        @($"{currentPasskeys?.Count ?? 0} Registered")
+    </MudChip>
+</div>
 
 <StatusMessage />
 
-@if (currentPasskeys is { Count: > 0 })
-{
-    <table class="table">
-        <tbody>
-            @foreach (var passkey in currentPasskeys)
-            {
-                <tr>
-                    <td>@(passkey.Name ?? "Unnamed passkey")</td>
-                    <td>
-                        @{
-                            var credentialId = Base64Url.EncodeToString(passkey.CredentialId);
-                        }
-                        <form @formname="@($"update-passkey-{credentialId}")" @onsubmit="UpdatePasskey" method="post">
-                            <AntiforgeryToken />
-                            <div>
-                                <input type="hidden" name="CredentialId" value="@credentialId" />
-                                <button type="submit" name="Action" value="rename" class="btn btn-primary" title="Rename this passkey">Rename</button>
-                                <button type="submit" name="Action" value="delete" class="btn btn-danger" title="Remove this passkey from your account">Delete</button>
+<MudGrid Spacing="3">
+    <MudItem xs="12">
+        @if (currentPasskeys is { Count: > 0 })
+        {
+            <MudStack Spacing="2">
+                @foreach (var passkey in currentPasskeys)
+                {
+                    var credentialId = Base64Url.EncodeToString(passkey.CredentialId);
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center gap-2">
+                            <div class="d-flex align-center gap-3">
+                                <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                                    <MudIcon Icon="@Icons.Material.Outlined.VpnKey" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">
+                                        @(passkey.Name ?? "Unnamed passkey")
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                        WebAuthn / FIDO2 Security Credential
+                                    </MudText>
+                                </div>
                             </div>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <MudText Typo="Typo.body1">No passkeys are registered.</MudText>
-}
 
-<form @formname="add-passkey" @onsubmit="AddPasskey" method="post">
-    <AntiforgeryToken />
-    @if (currentPasskeys is { Count: >= MaxPasskeyCount })
-    {
-        <MudText Typo="Typo.body2" Color="Color.Error">You have reached the maximum number of allowed passkeys. Please delete one before adding a new one.</MudText>
-    }
-    else
-    {
-        <PasskeySubmit Operation="PasskeyOperation.Create" Name="Input" class="btn btn-primary">Add a new passkey</PasskeySubmit>
-    }
-</form>
+                            <form @formname="@($"update-passkey-{credentialId}")" @onsubmit="UpdatePasskey" method="post">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="CredentialId" value="@credentialId" />
+                                <div class="d-flex align-center gap-2">
+                                    <button type="submit"
+                                            name="Action"
+                                            value="rename"
+                                            class="mud-button-root mud-button mud-button-outlined mud-button-outlined-primary mud-button-outlined-size-small mud-ripple"
+                                            style="text-transform: none; padding: 4px 12px; border-radius: 4px;"
+                                            title="Rename this passkey">
+                                        Rename
+                                    </button>
+                                    <button type="submit"
+                                            name="Action"
+                                            value="delete"
+                                            class="mud-button-root mud-button mud-button-outlined mud-button-outlined-error mud-button-outlined-size-small mud-ripple"
+                                            style="text-transform: none; padding: 4px 12px; border-radius: 4px;"
+                                            title="Remove this passkey from your account">
+                                        Delete
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </MudPaper>
+                }
+            </MudStack>
+        }
+        else
+        {
+            <MudPaper Elevation="0" Outlined="true" Class="pa-6 rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <MudIcon Icon="@Icons.Material.Outlined.KeyOff" Size="Size.Large" Color="Color.Secondary" Class="mb-2" />
+                <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">No passkeys registered yet</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                    Add a passkey below to enable passwordless sign-in on this device.
+                </MudText>
+            </MudPaper>
+        }
+    </MudItem>
+
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Outlined="true" Class="pa-4 rounded-lg">
+            <form @formname="add-passkey" @onsubmit="AddPasskey" method="post">
+                <AntiforgeryToken />
+                @if (currentPasskeys is { Count: >= MaxPasskeyCount })
+                {
+                    <MudAlert Severity="Severity.Error" Variant="Variant.Text">
+                        You have reached the maximum number of allowed passkeys (@MaxPasskeyCount). Please delete one before adding a new one.
+                    </MudAlert>
+                }
+                else
+                {
+                    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center gap-3">
+                        <div>
+                            <MudText Typo="Typo.subtitle2" Style="font-weight: 600;">Register a New Device or Security Key</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                Your browser will prompt you to verify using Touch ID, Windows Hello, or a USB security key.
+                            </MudText>
+                        </div>
+                        <PasskeySubmit Operation="PasskeyOperation.Create"
+                                       Name="Input"
+                                       class="mud-button-root mud-button mud-button-filled mud-button-filled-primary mud-button-filled-size-medium mud-ripple"
+                                       style="text-transform: none; white-space: nowrap;">
+                            Add a new passkey
+                        </PasskeySubmit>
+                    </div>
+                }
+            </form>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 @code {
     private const int MaxPasskeyCount = 100;

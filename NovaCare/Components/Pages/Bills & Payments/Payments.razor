@@ -1,73 +1,173 @@
 ﻿@inject IDialogService Dialog
 @using NovaCare.Shared.DTOs.PaymentDTOs
 
-<MudGrid>
-    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+<MudGrid Spacing="3">
+    <MudItem xs="12">
         @if (isLoading)
         {
-            <MudItem Class="pa-6">
+            <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
-            </MudItem>
+            </div>
         }
-        else if (!isLoading && !FilteredPayments!.Any() && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredPayments == null || !FilteredPayments.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudItem Class="pa-6">
-                <MudGrid>
-                    <MudItem md="12">
-                        <MudGrid Justify="Justify.SpaceBetween">
-                            <MudItem>
-                                <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
-                            </MudItem>
-                            @* <MudItem>
-                                @if (CurrentUser != null && CurrentUser.IsCreateNewPatient)
-                                {
-                                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                                }
-                            </MudItem> *@
-                        </MudGrid>
-                    </MudItem>
-
-                    <MudItem md="12">
-                        <NoDataNotice NoDataMessage="@messagePayment" />
-                    </MudItem>
-                </MudGrid>
-            </MudItem>
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
+                    <MudText Typo="Typo.h6">@($"All {firstPart} Payments")</MudText>
+                </div>
+                <NoDataNotice NoDataMessage="@messagePayment" />
+            </MudPaper>
         }
         else if (FilteredPayments != null)
         {
-            <MudDataGrid Loading="@isSearchLoading" Hover="true" T="PaymentDto" Items="@FilteredPayments" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
-                         Bordered="false" Dense="true" RowClick="@((args) => PreviewPaymentProfile(args.Item))">
-                <ToolBarContent>
-                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
-                    <MudSpacer />
-                    <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
+            @* Payment Summary Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Transactions</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredPayments.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Receipt" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Collected</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                                @FilteredPayments.Sum(x => x.Amount).ToString("N2")
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Paid" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-info);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Full Settlements</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info" Style="font-weight:700;">
+                                @FilteredPayments.Count(x => x.PaymentStatusName?.Contains("full", StringComparison.OrdinalIgnoreCase) ?? false)
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Verified" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
 
-                    <MudItem>
-                        <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
-                                      Margin="Margin.Dense" Variant="Variant.Outlined"
-                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
-                    </MudItem>
-                    @* @if (CurrentUser.IsCreateNewMedicine && !isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                    } *@
-                    @if (isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="GeneratePdf" StartIcon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Medium">Generate Pdf</MudButton>
-                    }
+            @* Main Data Grid *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="PaymentDto"
+                         Items="@FilteredPayments"
+                         ReadOnly="@_readOnly"
+                         Class="rounded-lg"
+                         Bordered="false"
+                         Dense="false"
+                         RowStyle="cursor: pointer;"
+                         RowClick="@((args) => PreviewPaymentProfile(args.Item))">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart} Payments")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredPayments.Count} records")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search Bill ID, amount, or status..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 260px;" />
+
+                            @if (isReport)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Error"
+                                           OnClick="GeneratePdf"
+                                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                                           Style="text-transform:none; white-space:nowrap;">
+                                    Generate Pdf
+                                </MudButton>
+                            }
+                        </div>
+                    </div>
                 </ToolBarContent>
 
                 <Columns>
-                    <PropertyColumn Property="x => x.BillId" Title="BillId" />
-                    @* <PropertyColumn Property="x => x.PaymentModeName" Title="Payment Mode" /> *@
-                    <PropertyColumn Property="x => x.PaymentDate" Title="Paid Date" />
-                    <TemplateColumn>
+                    @* Bill Reference *@
+                    <TemplateColumn Title="Bill Reference" SortBy="@(x => x.BillId)">
                         <CellTemplate>
-                            <MudItem Style="text-align: center;">
-                                <MudChip Color="@(context.Item.PaymentStatusName.Contains("full", StringComparison.OrdinalIgnoreCase) ? Color.Success : Color.Error)" Size="Size.Small">
-                                    @(context.Item.PaymentStatusName)
-                                </MudChip>
-                            </MudItem>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.Tag" Size="Size.Small" Color="Color.Primary" Class="me-1" />
+                                <MudText Typo="Typo.subtitle2" Style="font-weight: 600;">
+                                    @($"Bill #{context.Item.BillId}")
+                                </MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Paid Date *@
+                    <TemplateColumn Title="Paid Date" SortBy="@(x => x.PaymentDate)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.EventAvailable" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.PaymentDate.ToString("dd MMM yyyy, HH:mm")</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Amount Paid *@
+                    <TemplateColumn Title="Amount Paid" SortBy="@(x => x.Amount)">
+                        <CellTemplate>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Success" Style="font-weight: 700;">
+                                @context.Item.Amount.ToString("N2")
+                            </MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Status Badge *@
+                    <TemplateColumn Title="Settlement Status" SortBy="@(x => x.PaymentStatusName)">
+                        <CellTemplate>
+                            @{
+                                bool isFull = context.Item.PaymentStatusName?.Contains("full", StringComparison.OrdinalIgnoreCase) ?? false;
+                            }
+                            <MudChip T="string"
+                                     Color="@(isFull ? Color.Success : Color.Warning)"
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Small"
+                                     Style="font-weight: 500;">
+                                <span style="@($"display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background-color:{(isFull ? "#2e7d32" : "#ed6c02")};")"></span>
+                                @(string.IsNullOrWhiteSpace(context.Item.PaymentStatusName) ? "Recorded" : context.Item.PaymentStatusName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Action Indicator *@
+                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="View Payment Receipt">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => PreviewPaymentProfile(context.Item))" />
+                            </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
@@ -102,47 +202,54 @@
     bool isSearchLoading;
     bool isLoading;
     bool isEdit;
-    private bool _readOnly;
+    private bool _readOnly = true;
 
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        await Task.Delay(500);
+        await Task.Delay(300);
 
         if (!isReport)
         {
-            AllPayments = await paymentService.GetAllPaymentsAsync();
-
-            if (string.IsNullOrWhiteSpace(FilterBy))
-            {
-                FilteredPayments = AllPayments;
-                messagePayment = $"All bills are not avalible!";
-                firstPart = "Bill";
-            }
-            else
-            {
-
-                firstPart = FilterBy;
-                messagePayment = $"{firstPart} bills are not avalible!";
-
-                if (FilterBy != null && Genre != null)
-                {
-                    FilteredPayments = AllPayments?.Where(x => x.PaymentStatusName.Contains(FilterBy, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-                }
-                else
-                {
-                    FilteredPayments = new();
-                }
-            }
+            AllPayments = await paymentService.GetAllPaymentsAsync() ?? new();
         }
-        else
-        {
-            firstPart = "Medicine";
-            FilteredPayments = AllPayments;
-        }
+
+        ApplyFilterAndSearch();
 
         isLoading = false;
         StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<PaymentDto> query = AllPayments ?? Enumerable.Empty<PaymentDto>();
+
+        if (isReport)
+        {
+            firstPart = "Report";
+            messagePayment = "No payments found for the selected report period.";
+        }
+        else if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            firstPart = "Recorded";
+            messagePayment = "No payment records are currently available.";
+        }
+        else
+        {
+            firstPart = FilterBy;
+            messagePayment = $"No {firstPart.ToLower()} payments are currently available.";
+            query = query.Where(x => x.PaymentStatusName?.Contains(FilterBy, StringComparison.OrdinalIgnoreCase) ?? false);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                x.BillId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+                (x.PaymentStatusName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        FilteredPayments = query.ToList();
     }
 
     public async Task Back()
@@ -156,29 +263,9 @@
     {
         searchString = text;
         isSearchLoading = true;
-        await Task.Delay(500);
-
-        if (string.IsNullOrWhiteSpace(FilterBy))
-        {
-            FilteredPayments = AllPayments?.Where(x => x.BillId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) || x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) /* x.PaymentModeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) */).ToList() ?? new();
-            messagePayment = "Staffs are not avalible!";
-            firstPart = "Staff";
-        }
-        else
-        {
-            firstPart = FilterBy.Substring(2);
-            messagePayment = $"{firstPart}s are not avalible!";
-
-            if (FilterBy != null)
-            {
-                FilteredPayments = AllPayments?.Where(x => x.PaymentStatusName.Contains(FilterBy, StringComparison.OrdinalIgnoreCase) && x.Amount.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase) /* x.PaymentModeName.Contains(searchString, StringComparison.OrdinalIgnoreCase) */).ToList() ?? new();
-            }
-            else
-            {
-                FilteredPayments = new();
-            }
-        }
+        ApplyFilterAndSearch();
         isSearchLoading = false;
+        await Task.CompletedTask;
     }
 
     public async Task OpenRegisterModal()
@@ -186,7 +273,7 @@
         var dialog = await Dialog.ShowAsync<PaymentDetails>("Register New Payment", _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }
@@ -201,7 +288,7 @@
         var dialog = await Dialog.ShowAsync<PaymentDetails>("Payment Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }

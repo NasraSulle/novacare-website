@@ -1,98 +1,149 @@
 ﻿@using NovaCare.Shared.DTOs.StaffDTOs
 @inject IDialogService Dialog
 
-<MudGrid>
-    <MudItem md="12" Class="pa-0" Style="text-align: center;">
+<MudGrid Spacing="3">
+    <MudItem xs="12">
         @if (isLoading)
         {
-            <MudItem Class="pa-6">
+            <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
-            </MudItem>
+            </div>
         }
-        else if (!isLoading && !FilteredStaffTitleGroups!.Any() && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredStaffTitleGroups == null || !FilteredStaffTitleGroups.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudGrid Class="pa-6">
-                <MudItem md="12" Class="d-flex align-center">
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
                     <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
-                    <MudSpacer />
-
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-                </MudItem>
-                <MudItem md="12">
-                    <NoDataNotice NoDataMessage="@messageStaffTitleGroup" />
-                </MudItem>
-            </MudGrid>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
+                        Add Title Group
+                    </MudButton>
+                </div>
+                <NoDataNotice NoDataMessage="@messageStaffTitleGroup" />
+            </MudPaper>
         }
         else if (FilteredStaffTitleGroups != null)
         {
-            <MudGrid Class="ps-6 pt-6" Justify="Justify.Center">
-                <MudItem md="12">
-                    <MudDataGrid Loading="@isSearchLoading" Hover="true" T="StaffTitleGroupDto" Items="@FilteredStaffTitleGroups" ReadOnly="@_readOnly" Class="ps-6 pe-6 pb-6"
-                                 Bordered="false" Dense="true" RowClick="@((args) => PreviewStaffTitleGroupProfile(args.Item))">
-                        <ToolBarContent>
-                            <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
-                            <MudSpacer />
-                            <!--Filters & Search Panel Later OnDebounceIntervalElapsed="wekaAti-HandleIntervalElapsed"-->
-
-                            <MudItem>
-                                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
-                                              Margin="Margin.Dense" Variant="Variant.Outlined"
-                                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Class="me-1"></MudTextField>
-                            </MudItem>
-                            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" Size="Size.Medium" OnClick="OpenRegisterModal">Add</MudButton>
-
-                        </ToolBarContent>
-
-                        <Columns>
-                            <PropertyColumn Property="x => x.GroupName" Title="Staff Title Group" />
-                            <PropertyColumn Property="x => x.GroupsCount" Title="Total Tiles" />
-                        </Columns>
-
-                        <PagerContent>
-                            <MudDataGridPager T="StaffTitleGroupDto" />
-                        </PagerContent>
-                    </MudDataGrid>
+            @* Summary Metric Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Title Groups</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredStaffTitleGroups.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.AccountTree" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-info);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Mapped Titles</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info" Style="font-weight:700;">
+                                @FilteredStaffTitleGroups.Sum(x => x.GroupsCount)
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Badge" />
+                        </MudAvatar>
+                    </MudPaper>
                 </MudItem>
             </MudGrid>
+
+            @* Title Groups Data Table *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="StaffTitleGroupDto"
+                         Items="@FilteredStaffTitleGroups"
+                         ReadOnly="@_readOnly"
+                         RowStyle="cursor: pointer;"
+                         Class="rounded-lg"
+                         Bordered="false"
+                         Dense="false"
+                         RowClick="@((args) => PreviewStaffTitleGroupProfile(args.Item))">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart}s")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredStaffTitleGroups.Count} groups")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search title group..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 240px;" />
+
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       OnClick="OpenRegisterModal"
+                                       Style="text-transform:none; white-space:nowrap;">
+                                Add Title Group
+                            </MudButton>
+                        </div>
+                    </div>
+                </ToolBarContent>
+
+                <Columns>
+                    <TemplateColumn Title="Staff Title Group" SortBy="@(x => x.GroupName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Class="me-3">
+                                    <MudIcon Icon="@Icons.Material.Outlined.AccountTree" Size="Size.Small" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@context.Item.GroupName</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Role Hierarchy Group</MudText>
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Total Titles" SortBy="@(x => x.GroupsCount)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">
+                                @($"{context.Item.GroupsCount} titles")
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="Edit Title Group">
+                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => PreviewStaffTitleGroupProfile(context.Item))" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="StaffTitleGroupDto" />
+                </PagerContent>
+            </MudDataGrid>
         }
     </MudItem>
 </MudGrid>
 
 @code {
-
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
-    private bool _readOnly;
-
-    private bool _isCellEditMode;
-    private bool _editTriggerRowClick; //!!?
-
-    private void StartedEditingItem(StaffTitleGroupDto item)
-    {
-        isEdit = true;
-    }
-
-    private void CanceledEditingItem(StaffTitleGroupDto item)
-    {
-        isEdit = false;
-    }
-
-    private async Task PreviewStaffTitleGroupProfile(StaffTitleGroupDto item)
-    {
-        var Parameters = new DialogParameters
-        {
-            {"CurrentGroup" , item}
-        };
-        var dialog = await Dialog.ShowAsync<EditTitleGroup>("Title Group Details", Parameters, _maxWidth);
-        var result = await dialog.Result;
-
-        if (!result.Canceled)
-        {
-            await OnInitializedAsync();
-        }
-    }
-
-    //=====================HERE===============================
+    private bool _readOnly = true;
 
     List<StaffTitleGroupDto>? AllStaffTitleGroups;
     List<StaffTitleGroupDto>? FilteredStaffTitleGroups;
@@ -112,33 +163,61 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        await Task.Delay(500);
+        await Task.Delay(300);
 
         AllStaffTitleGroups = await staffService.GetAllStaffTitleGroupssAsync();
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<StaffTitleGroupDto> query = AllStaffTitleGroups ?? Enumerable.Empty<StaffTitleGroupDto>();
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            FilteredStaffTitleGroups = AllStaffTitleGroups;
-            messageStaffTitleGroup = $"{Genre} Staff Title Groups are not avalible!";
             firstPart = "Title Group";
+            messageStaffTitleGroup = "No staff title groups are currently configured.";
         }
         else
         {
-
             firstPart = FilterBy;
-            messageStaffTitleGroup = $"{Genre} {firstPart}s are not avalible!";
-
-            if (FilterBy != null && Genre != null)
-            {
-                FilteredStaffTitleGroups = AllStaffTitleGroups?.Where(x => x.GroupName == FilterBy).ToList();
-            }
-            else
-            {
-                FilteredStaffTitleGroups = null;
-            }
+            messageStaffTitleGroup = $"No {firstPart.ToLower()} records are currently available.";
+            query = query.Where(x => string.Equals(x.GroupName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
         }
-        isLoading = false;
-        StateHasChanged();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x => x.GroupName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false);
+        }
+
+        FilteredStaffTitleGroups = query.ToList();
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
+    }
+
+    private async Task PreviewStaffTitleGroupProfile(StaffTitleGroupDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentGroup" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditTitleGroup>("Title Group Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
     }
 
     public async Task Back()
@@ -148,41 +227,12 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task OnSearch(string text)
-    {
-        searchString = text;
-        isSearchLoading = true;
-        await Task.Delay(500);
-
-        if (string.IsNullOrWhiteSpace(FilterBy))
-        {
-            FilteredStaffTitleGroups = AllStaffTitleGroups?.Where(x => x.GroupName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-            messageStaffTitleGroup = "Staffs are not avalible!";
-            firstPart = "Staff";
-        }
-        else
-        {
-            firstPart = FilterBy.Substring(2);
-            messageStaffTitleGroup = $"{firstPart}s are not avalible!";
-
-            if (searchString != null)
-            {
-                FilteredStaffTitleGroups = AllStaffTitleGroups?.Where(x => x.GroupName.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-            else
-            {
-                FilteredStaffTitleGroups = null;
-            }
-        }
-        isSearchLoading = false;
-    }
-
     public async Task OpenRegisterModal()
     {
         var dialog = await Dialog.ShowAsync<NewGroup>("Register New Staff Title Group", _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (result != null && !result.Canceled)
         {
             await OnInitializedAsync();
         }

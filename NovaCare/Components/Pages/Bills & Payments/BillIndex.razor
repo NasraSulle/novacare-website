@@ -1,7 +1,5 @@
 ﻿@page "/BillsIndex"
 
-<PageTitle>BillIndex - NovaCare</PageTitle>
-
 @using Microsoft.AspNetCore.Authorization
 @inject IDialogService Dialog
 
@@ -11,90 +9,98 @@
 <MudSnackbarProvider />
 
 @attribute [Authorize]
-<PageTitle>Payments - NovaCare</PageTitle>
+<PageTitle>Billing & Payments - NovaCare</PageTitle>
 
-<MudGrid Class="pa-3" Justify="Justify.FlexStart">
-    <SectionTitle Icon="@icon" Title="@title" />
-</MudGrid>
-<MudGrid Justify="Justify.Center" Class="ps-8 pt-3 pe-1">
-    <MudItem Class="pa-0" md="12">
-            <MudTabs Outlined="true" Position="Position.Start" Rounded="false" Border="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-1">
-                <MudTabPanel Style="text-transform: none;" Text="Bills" OnClick="@(() => { genre = "Bills"; StateHasChanged(); })">
-                    <MudItem md="12" Class="">
-                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
-                            <MudTabPanel Text="All Bills" Style="text-transform: none;">
-                                <Bills CurrentUser="currentUser" Genre="@genre" />
-                            </MudTabPanel>
-                            <MudTabPanel Text="Interim Bills" Style="text-transform: none;">
-                                <Bills CurrentUser="currentUser" FilterBy="Interim" Genre="@genre" />
-                            </MudTabPanel>
-                            <MudTabPanel Text="Advance Bills" Style="text-transform: none;">
-                                <Bills CurrentUser="currentUser" FilterBy="Advance" Genre="@genre" />
-                            </MudTabPanel>
-                            <MudTabPanel Text="Final Bills" Style="text-transform: none;">
-                                <Bills CurrentUser="currentUser" FilterBy="Final" Genre="@genre" />
-                            </MudTabPanel>
-                        </MudTabs>
-                    </MudItem>
-                </MudTabPanel>
-                <MudTabPanel Style="text-transform: none;" Text="Payments" OnClick="@(() => { genre = "Payments"; StateHasChanged(); })">
-                    <MudItem md="12" Class="">
-                        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
-                            <MudTabPanel Style="text-transform: none;" Text="All Payment">
-                                <Payments CurrentUser="currentUser" Genre="@genre" />
-                            </MudTabPanel>
-                            <MudTabPanel Style="text-transform: none;" Text="Partial Payments">
-                                <Payments CurrentUser="currentUser" FilterBy="Partial" Genre="@genre" />
-                            </MudTabPanel>
-                            <MudTabPanel Style="text-transform: none;" Text="Full Payments">
-                                <Payments CurrentUser="currentUser" FilterBy="Full" Genre="@genre" />
-                            </MudTabPanel>
-                        </MudTabs>
-                    </MudItem>
-                </MudTabPanel>
-            <MudTabPanel Style="text-transform: none;" Text="Insurance Claims" OnClick="@(() => { genre = "Claims"; StateHasChanged(); })">
-                <MudItem md="12">
-                    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="ps-3 pt-6" Centered="true">
-                        <MudTabPanel Text="All Claims" Style="text-transform: none;">
-                            <InsuranceClaims CurrentUser="currentUser" />
-                        </MudTabPanel>
-                        <MudTabPanel Text="Drafts" Style="text-transform: none;"><InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Draft" /></MudTabPanel>
-                        <MudTabPanel Text="Submitted" Style="text-transform: none;">
-                            <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Submitted" />
-                        </MudTabPanel>
-                        <MudTabPanel Text="Queried" Style="text-transform: none;">
-                            <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Queried" />
-                        </MudTabPanel>
-                        <MudTabPanel Text="Approved" Style="text-transform: none;">
-                            <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Approved" />
-                        </MudTabPanel>
-                        <MudTabPanel Text="Settled" Style="text-transform: none;">
-                            <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Settled" />
-                        </MudTabPanel>
-                    </MudTabs>
-                </MudItem>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4 px-3 px-sm-6">
+    @* Page Header *@
+    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4">
+        <SectionTitle Icon="@icon" Title="@title" />
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
+            Manage patient invoices, payment receipts, and insurance claims
+        </MudText>
+    </div>
+
+    @* Main Elevated Card Container *@
+    <MudPaper Elevation="2" Outlined="true" Class="rounded-lg overflow-hidden">
+        <MudTabs Elevation="0"
+                 Rounded="false"
+                 ApplyEffectsToContainer="true"
+                 Color="Color.Primary"
+                 SliderColor="Color.Primary"
+                 PanelClass="pa-3 pa-sm-6"
+                 Centered="false">
+
+            @* Tab 1: Patient Bills *@
+            <MudTabPanel Text="Patient Bills" Icon="@Icons.Material.Outlined.ReceiptLong" Style="text-transform: none; font-weight: 500;">
+                <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pt-4" Color="Color.Secondary" SliderColor="Color.Secondary">
+                    <MudTabPanel Text="All Bills" Style="text-transform: none;">
+                        <Bills CurrentUser="currentUser" Genre="Bills" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Interim Bills" Style="text-transform: none;">
+                        <Bills CurrentUser="currentUser" FilterBy="Interim" Genre="Bills" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Advance Bills" Style="text-transform: none;">
+                        <Bills CurrentUser="currentUser" FilterBy="Advance" Genre="Bills" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Final Bills" Style="text-transform: none;">
+                        <Bills CurrentUser="currentUser" FilterBy="Final" Genre="Bills" />
+                    </MudTabPanel>
+                </MudTabs>
             </MudTabPanel>
 
-            </MudTabs>
-        </MudItem>
-</MudGrid>
+            @* Tab 2: Payment Transactions *@
+            <MudTabPanel Text="Payments" Icon="@Icons.Material.Outlined.Payments" Style="text-transform: none; font-weight: 500;">
+                <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pt-4" Color="Color.Secondary" SliderColor="Color.Secondary">
+                    <MudTabPanel Text="All Payments" Style="text-transform: none;">
+                        <Payments CurrentUser="currentUser" Genre="Payments" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Partial Payments" Style="text-transform: none;">
+                        <Payments CurrentUser="currentUser" FilterBy="Partial" Genre="Payments" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Full Payments" Style="text-transform: none;">
+                        <Payments CurrentUser="currentUser" FilterBy="Full" Genre="Payments" />
+                    </MudTabPanel>
+                </MudTabs>
+            </MudTabPanel>
 
-    @code {
+            @* Tab 3: Insurance Claims *@
+            <MudTabPanel Text="Insurance Claims" Icon="@Icons.Material.Outlined.HealthAndSafety" Style="text-transform: none; font-weight: 500;">
+                <MudTabs Elevation="0" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pt-4" Color="Color.Secondary" SliderColor="Color.Secondary">
+                    <MudTabPanel Text="All Claims" Style="text-transform: none;">
+                        <InsuranceClaims CurrentUser="currentUser" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Drafts" Style="text-transform: none;">
+                        <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Draft" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Submitted" Style="text-transform: none;">
+                        <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Submitted" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Queried" Style="text-transform: none;">
+                        <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Queried" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Approved" Style="text-transform: none;">
+                        <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Approved" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Settled" Style="text-transform: none;">
+                        <InsuranceClaims CurrentUser="currentUser" StatusFilter="ClaimStatus.Settled" />
+                    </MudTabPanel>
+                </MudTabs>
+            </MudTabPanel>
 
+        </MudTabs>
+    </MudPaper>
+</MudContainer>
+
+@code {
     StaffDto currentUser = new();
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
 
-    string genre = string.Empty;
     public string icon = Icons.Material.Filled.Payments;
-    public string title = "Bills & Payments Section";
+    public string title = "Bills & Payments";
 
     protected override async Task OnInitializedAsync()
     {
         currentUser = await userService.GetLoggedInUserAsync();
-
-        genre = "Bills";
         await InvokeAsync(StateHasChanged);
     }
-
 }
-

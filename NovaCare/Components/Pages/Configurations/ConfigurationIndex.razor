@@ -7,35 +7,47 @@
 
 <PageTitle>Configurations - NovaCare</PageTitle>
 
-<MudGrid Class="pa-3">
-    <SectionTitle Icon="@icon" Title="@title" />
-</MudGrid>
-<MudGrid Class="ps-8 pt-3 pe-1">
-    <MudItem md="12" Class="pa-0" Style="">
-        <MudTabs Class="mt-0" Outlined="true" Position="Position.Start" Rounded="false" Border="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-1">
-            <MudTabPanel Text="Rooms" Style="text-transform: none;">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4 px-3 px-sm-6">
+    @* Page Header *@
+    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4">
+        <SectionTitle Icon="@icon" Title="@title" />
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
+            Manage hospital wards, staff roles, diagnostic catalogs, and insurer tariffs
+        </MudText>
+    </div>
+
+    @* Main Elevated Card Container *@
+    <MudPaper Elevation="2" Outlined="true" Class="rounded-lg overflow-hidden">
+        <MudTabs Elevation="0"
+                 Rounded="false"
+                 ApplyEffectsToContainer="true"
+                 Color="Color.Primary"
+                 SliderColor="Color.Primary"
+                 PanelClass="pa-3 pa-sm-6"
+                 Centered="false">
+            <MudTabPanel Text="Rooms" Icon="@Icons.Material.Outlined.MeetingRoom" Style="text-transform: none; font-weight: 500;">
                 <Rooms />
             </MudTabPanel>
-            <MudTabPanel Text="Staff Titles" Style="text-transform: none;">
+            <MudTabPanel Text="Staff Titles" Icon="@Icons.Material.Outlined.Badge" Style="text-transform: none; font-weight: 500;">
                 <StaffTitles />
             </MudTabPanel>
-            <MudTabPanel Text="Staff Title Groups" Style="text-transform: none;">
+            <MudTabPanel Text="Staff Title Groups" Icon="@Icons.Material.Outlined.AccountTree" Style="text-transform: none; font-weight: 500;">
                 <StaffTitleGroups />
             </MudTabPanel>
-            <MudTabPanel Text="Staff Departments" Style="text-transform: none;">
+            <MudTabPanel Text="Staff Departments" Icon="@Icons.Material.Outlined.Domain" Style="text-transform: none; font-weight: 500;">
                 <StaffDepartments />
             </MudTabPanel>
-            <MudTabPanel Text="Lab Test Diseases" Style="text-transform: none;">
+            <MudTabPanel Text="Lab Test Diseases" Icon="@Icons.Material.Outlined.Biotech" Style="text-transform: none; font-weight: 500;">
                 <Diseases />
             </MudTabPanel>
-            <MudTabPanel Text="Insurer Tariffs" Style="text-transform: none;">
+            <MudTabPanel Text="Insurer Tariffs" Icon="@Icons.Material.Outlined.PriceChange" Style="text-transform: none; font-weight: 500;">
                 <InsurerTariffs />
             </MudTabPanel>
         </MudTabs>
-    </MudItem>
-</MudGrid>
+    </MudPaper>
+</MudContainer>
 
 @code {
     public string icon = Icons.Material.Filled.SettingsApplications;
-    public string title = "Configurations Section";
+    public string title = "System Configurations";
 }

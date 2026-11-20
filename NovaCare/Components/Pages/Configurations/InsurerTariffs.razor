@@ -5,16 +5,21 @@
 
 <PageTitle>Insurer Tariffs - NovaCare</PageTitle>
 
-<MudGrid Class="pa-4" Spacing="3">
+<MudGrid Spacing="3">
     <MudItem xs="12">
-        <SectionTitle Icon="@Icons.Material.Filled.PriceChange" Title="Insurer Tariffs & Coverage Rules" />
+        <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-2">
+            <div>
+                <MudText Typo="Typo.h6" Style="font-weight:600;">Insurer Tariffs & Coverage Rules</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Configure agreed pricing, co-pay coverage percentages, and pre-approval rules per insurer</MudText>
+            </div>
+        </div>
     </MudItem>
 
-    <!-- FILTER & ADD TARIFF CARD -->
+    @* Filter & Action Card *@
     <MudItem xs="12">
-        <MudPaper Class="pa-4" Outlined="true">
+        <MudPaper Elevation="0" Class="pa-4 rounded-lg border" Style="background-color: rgba(63,81,181,0.02);">
             <MudGrid Spacing="2" AlignItems="Center">
-                <MudItem md="4" xs="12">
+                <MudItem xs="12" sm="6" md="4">
                     <MudSelect T="int" Value="@selectedInsuranceId" ValueChanged="@OnInsuranceChanged"
                                Label="Insurance Provider" Variant="Variant.Outlined" Margin="Margin.Dense">
                         <MudSelectItem Value="0" Disabled>Select Insurer (NHIF, ZHIF, Jubilee...)</MudSelectItem>
@@ -25,7 +30,7 @@
                     </MudSelect>
                 </MudItem>
 
-                <MudItem md="4" xs="12">
+                <MudItem xs="12" sm="6" md="4">
                     <MudSelect T="int?" Value="@selectedSchemeId" ValueChanged="@OnSchemeChanged"
                                Disabled="@(selectedInsuranceId == 0)"
                                Label="Scheme (Optional)" Variant="Variant.Outlined" Margin="Margin.Dense">
@@ -37,9 +42,13 @@
                     </MudSelect>
                 </MudItem>
 
-                <MudItem md="4" xs="12" Class="text-end">
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add"
-                               Disabled="@(selectedInsuranceId == 0)" OnClick="OpenNewTariffModal">
+                <MudItem xs="12" md="4" Class="d-flex justify-start justify-md-end">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               Disabled="@(selectedInsuranceId == 0)"
+                               OnClick="OpenNewTariffModal"
+                               Style="text-transform:none;">
                         Add / Map Tariff Item
                     </MudButton>
                 </MudItem>
@@ -47,37 +56,101 @@
         </MudPaper>
     </MudItem>
 
-    <!-- TARIFF LIST TABLE -->
+    @* Tariff List Table *@
     <MudItem xs="12">
         @if (isLoading)
         {
-            <GlobalLoader />
+            <div class="d-flex justify-center align-center py-10">
+                <GlobalLoader />
+            </div>
         }
         else if (!Tariffs.Any())
         {
-            <NoDataNotice NoDataMessage="No custom tariff rules configured for this insurer yet. Scheme default coverage % will apply." />
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center">
+                <NoDataNotice NoDataMessage="No custom tariff rules configured for this insurer yet. Scheme default coverage % will apply." />
+            </MudPaper>
         }
         else
         {
-            <MudDataGrid T="InsurerTariffDto" Items="@Tariffs" Hover="true" Dense="true" Bordered="false">
+            @* Summary Metrics *@
+            <MudGrid Spacing="2" Class="mb-3">
+                <MudItem xs="12" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase;">Mapped Tariffs</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@Tariffs.Count</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Outlined.ReceiptLong" Color="Color.Primary" />
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase;">Covered Items</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">@Tariffs.Count(t => t.IsCovered)</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Outlined.VerifiedUser" Color="Color.Success" />
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="6" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-warning);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase;">Pre-Approval Req.</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight:700;">@Tariffs.Count(t => t.RequiresPreApproval)</MudText>
+                        </div>
+                        <MudIcon Icon="@Icons.Material.Outlined.Rule" Color="Color.Warning" />
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            <MudDataGrid T="InsurerTariffDto"
+                         Items="@Tariffs"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         Dense="false"
+                         Bordered="false"
+                         Class="rounded-lg">
                 <Columns>
-                    <PropertyColumn Property="x => x.ServiceType" Title="Category" />
-                    <PropertyColumn Property="x => x.InsurerItemCode" Title="Insurer Code" />
-                    <PropertyColumn Property="x => x.InsurerItemName" Title="Tariff Item Name" />
+                    <TemplateColumn Title="Category" SortBy="@(x => x.ServiceType)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">@context.Item.ServiceType</MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Tariff Item" SortBy="@(x => x.InsurerItemName)">
+                        <CellTemplate>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@context.Item.InsurerItemName</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">Code: @context.Item.InsurerItemCode</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
                     <PropertyColumn Property="x => x.InsuranceSchemeName" Title="Scheme" />
                     <PropertyColumn Property="x => x.AgreedPrice" Title="Agreed Price" Format="N2" />
                     <PropertyColumn Property="x => x.CoveragePercent" Title="Coverage %" Format="0.##" />
-                    <TemplateColumn Title="Covered?">
+
+                    <TemplateColumn Title="Coverage Status">
                         <CellTemplate>
-                            <MudChip T="string" Size="Size.Small" Color="@(context.Item.IsCovered ? Color.Success : Color.Error)">
-                                @(context.Item.IsCovered ? "Covered" : "Excluded (Patient Pays)")
-                            </MudChip>
+                            <div class="d-flex flex-wrap gap-1">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="@(context.Item.IsCovered ? Color.Success : Color.Error)">
+                                    @(context.Item.IsCovered ? "Covered" : "Excluded")
+                                </MudChip>
+                                @if (context.Item.RequiresPreApproval)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Warning">Pre-Auth</MudChip>
+                                }
+                            </div>
                         </CellTemplate>
                     </TemplateColumn>
-                    <TemplateColumn Title="Edit">
+
+                    <TemplateColumn Title="Edit" CellStyle="width: 60px; text-align: right;">
                         <CellTemplate>
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                                           OnClick="@(() => OpenEditTariffModal(context.Item))" />
+                            <MudTooltip Text="Edit Tariff Rule">
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Outlined.Edit" Color="Color.Primary"
+                                               OnClick="@(() => OpenEditTariffModal(context.Item))" />
+                            </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
@@ -89,113 +162,60 @@
     </MudItem>
 </MudGrid>
 
-<!-- ADD / EDIT TARIFF DIALOG -->
-@* <MudDialog @bind-Visible="showDialog">
+<MudDialog @bind-Visible="showDialog" Options="_maxWidth">
     <DialogContent>
-        <MudText Typo="Typo.h6" Class="mb-3">Configure Insurer Tariff Rule</MudText>
-        <MudGrid Spacing="2">
-            <MudItem xs="6">
-                <MudSelect T="string" Value="@editTariff.ServiceType" ValueChanged="@OnServiceTypeChanged"
-                           Label="Service Category" Variant="Variant.Outlined" Margin="Margin.Dense">
-                    <MudSelectItem Value="@("Consultation")">Consultation</MudSelectItem>
-                    <MudSelectItem Value="@("LabTest")">LabTest</MudSelectItem>
-                    <MudSelectItem Value="@("Prescription")">Prescription (Medicine)</MudSelectItem>
-                    <MudSelectItem Value="@("Treatment")">Treatment (Surgery/Therapy/Ward)</MudSelectItem>
-                </MudSelect>
-            </MudItem>
-            <MudItem xs="6">
-                <MudSelect T="int" @bind-Value="editTariff.ServiceItemId" Label="Hospital Item" Variant="Variant.Outlined" Margin="Margin.Dense">
-                    <MudSelectItem Value="0" Disabled>Select Hospital Service/Item</MudSelectItem>
-                    @foreach (var opt in ServiceItemOptions)
-                    {
-                        <MudSelectItem Value="@opt.Id">@opt.Name</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
-            <MudItem xs="4">
-                <MudTextField @bind-Value="editTariff.InsurerItemCode" Label="Insurer Official Code" Placeholder="e.g. NHIF-101" Variant="Variant.Outlined" Margin="Margin.Dense" />
-            </MudItem>
-            <MudItem xs="8">
-                <MudTextField @bind-Value="editTariff.InsurerItemName" Label="Insurer Tariff Name" Placeholder="e.g. General OPD Consultation" Variant="Variant.Outlined" Margin="Margin.Dense" />
-            </MudItem>
-            <MudItem xs="6">
-                <MudNumericField @bind-Value="editTariff.AgreedPrice" Label="Agreed Insurer Price (0 = Hospital Price)" Variant="Variant.Outlined" Margin="Margin.Dense" />
-            </MudItem>
-            <MudItem xs="6">
-                <MudNumericField @bind-Value="editTariff.CoveragePercent" Label="Coverage % (e.g. 100 or 80)" Min="0" Max="100" Variant="Variant.Outlined" Margin="Margin.Dense" />
-            </MudItem>
-            <MudItem xs="6">
-                <MudSwitch @bind-Value="editTariff.IsCovered" Color="Color.Success" Label="Covered by Insurer" />
-            </MudItem>
-            <MudItem xs="6">
-                <MudSwitch @bind-Value="editTariff.RequiresPreApproval" Color="Color.Warning" Label="Requires Pre-Approval" />
+        <MudGrid Spacing="3" Class="pa-2">
+            <MudItem xs="12">
+                <div style="border:1px solid rgba(63,81,181,0.9); border-radius:6px; overflow:hidden;">
+                    <MudText Typo="Typo.h6" Class="py-2 px-4" Style="background-color: rgba(63,81,181,0.9); color:white;">
+                        Configure Insurer Tariff Rule
+                    </MudText>
+                    <MudGrid Class="pa-4" Spacing="2">
+                        <MudItem xs="12" sm="6">
+                            <MudSelect T="string" Value="@editTariff.ServiceType" ValueChanged="@OnServiceTypeChanged"
+                                       Label="Service Category" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudSelectItem Value="@("Consultation")">Consultation</MudSelectItem>
+                                <MudSelectItem Value="@("LabTest")">LabTest</MudSelectItem>
+                                <MudSelectItem Value="@("Prescription")">Prescription (Medicine)</MudSelectItem>
+                                <MudSelectItem Value="@("Treatment")">Treatment (Surgery/Therapy/Ward)</MudSelectItem>
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudSelect T="int" @bind-Value="editTariff.ServiceItemId" Label="Hospital Item" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudSelectItem Value="0" Disabled>Select Hospital Service/Item</MudSelectItem>
+                                @foreach (var opt in ServiceItemOptions)
+                                {
+                                    <MudSelectItem Value="@opt.Id">@opt.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" sm="4">
+                            <MudTextField @bind-Value="editTariff.InsurerItemCode" Label="Insurer Official Code" Placeholder="e.g. NHIF-101" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="8">
+                            <MudTextField @bind-Value="editTariff.InsurerItemName" Label="Insurer Tariff Name" Placeholder="e.g. General OPD Consultation" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudNumericField @bind-Value="editTariff.AgreedPrice" Label="Agreed Insurer Price (0 = Hospital Price)" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudNumericField @bind-Value="editTariff.CoveragePercent" Label="Coverage % (e.g. 100 or 80)" Min="0" Max="100" Variant="Variant.Outlined" Margin="Margin.Dense" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudSwitch @bind-Value="editTariff.IsCovered" Color="Color.Success" Label="Covered by Insurer" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudSwitch @bind-Value="editTariff.RequiresPreApproval" Color="Color.Warning" Label="Requires Pre-Approval" />
+                        </MudItem>
+                    </MudGrid>
+                </div>
             </MudItem>
         </MudGrid>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="@(() => showDialog = false)">Cancel</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveTariffAsync">Save Tariff</MudButton>
-    </DialogActions>
-</MudDialog> *@
-
-<MudDialog @bind-Visible="showDialog" Options="_maxWidth">
-    <DialogContent>
-            <MudGrid Spacing="3" Class="pa-3">
-                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
-                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
-                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
-                        <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;">Configure Insurer Tariff Rule</MudText>
-                            <MudGrid Class="pa-3">
-                                <MudItem md="12">
-                                    <MudGrid Spacing="2">
-                                        <MudItem xs="6">
-                                            <MudSelect T="string" Value="@editTariff.ServiceType" ValueChanged="@OnServiceTypeChanged"
-                                                       Label="Service Category" Variant="Variant.Outlined" Margin="Margin.Dense">
-                                                <MudSelectItem Value="@("Consultation")">Consultation</MudSelectItem>
-                                                <MudSelectItem Value="@("LabTest")">LabTest</MudSelectItem>
-                                                <MudSelectItem Value="@("Prescription")">Prescription (Medicine)</MudSelectItem>
-                                                <MudSelectItem Value="@("Treatment")">Treatment (Surgery/Therapy/Ward)</MudSelectItem>
-                                            </MudSelect>
-                                        </MudItem>
-                                        <MudItem xs="6">
-                                            <MudSelect T="int" @bind-Value="editTariff.ServiceItemId" Label="Hospital Item" Variant="Variant.Outlined" Margin="Margin.Dense">
-                                                <MudSelectItem Value="0" Disabled>Select Hospital Service/Item</MudSelectItem>
-                                                @foreach (var opt in ServiceItemOptions)
-                                                {
-                                                    <MudSelectItem Value="@opt.Id">@opt.Name</MudSelectItem>
-                                                }
-                                            </MudSelect>
-                                        </MudItem>
-                                        <MudItem xs="4">
-                                            <MudTextField @bind-Value="editTariff.InsurerItemCode" Label="Insurer Official Code" Placeholder="e.g. NHIF-101" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                                        </MudItem>
-                                        <MudItem xs="8">
-                                            <MudTextField @bind-Value="editTariff.InsurerItemName" Label="Insurer Tariff Name" Placeholder="e.g. General OPD Consultation" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                                        </MudItem>
-                                        <MudItem xs="6">
-                                            <MudNumericField @bind-Value="editTariff.AgreedPrice" Label="Agreed Insurer Price (0 = Hospital Price)" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                                        </MudItem>
-                                        <MudItem xs="6">
-                                            <MudNumericField @bind-Value="editTariff.CoveragePercent" Label="Coverage % (e.g. 100 or 80)" Min="0" Max="100" Variant="Variant.Outlined" Margin="Margin.Dense" />
-                                        </MudItem>
-                                        <MudItem xs="6">
-                                            <MudSwitch @bind-Value="editTariff.IsCovered" Color="Color.Success" Label="Covered by Insurer" />
-                                        </MudItem>
-                                        <MudItem xs="6">
-                                            <MudSwitch @bind-Value="editTariff.RequiresPreApproval" Color="Color.Warning" Label="Requires Pre-Approval" />
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudItem>
-                            </MudGrid>
-                        </MudItem>
-                    </MudItem>
-                </MudGrid>
-            </MudGrid>
-    </DialogContent>
-    <DialogActions>
-        <MudGrid Spacing="1" Class="pe-7" Justify="Justify.FlexEnd">
+        <MudGrid Spacing="1" Class="pe-4 pb-2" Justify="Justify.FlexEnd">
             <MudItem>
-                <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error"  OnClick="@(() => showDialog = false)">Cancel</MudButton>
+                <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Error" OnClick="@(() => showDialog = false)">Cancel</MudButton>
                 <MudButton Variant="Variant.Filled" Size="Size.Medium" Color="Color.Success" OnClick="SaveTariffAsync">Save Tariff</MudButton>
             </MudItem>
         </MudGrid>
