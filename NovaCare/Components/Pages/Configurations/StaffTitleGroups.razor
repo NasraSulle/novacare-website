@@ -26,7 +26,7 @@
             @* Summary Metric Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="6">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Title Groups</MudText>
                             <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredStaffTitleGroups.Count</MudText>
@@ -37,7 +37,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-info);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-info);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Mapped Titles</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Info" Style="font-weight:700;">
@@ -60,9 +60,9 @@
                          Items="@FilteredStaffTitleGroups"
                          ReadOnly="@_readOnly"
                          RowStyle="cursor: pointer;"
-                         Class="rounded-lg"
+                         Class="bg-transparent"
                          Bordered="false"
-                         Dense="false"
+                         Dense="true"
                          RowClick="@((args) => PreviewStaffTitleGroupProfile(args.Item))">
                 <ToolBarContent>
                     <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">

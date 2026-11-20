@@ -12,7 +12,7 @@
         }
         else if (!isLoading && (FilteredDiseases == null || !FilteredDiseases.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
-            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+            <MudPaper Elevation="0" Class="pa-6 border bg-transparent text-center" Style="background-color: rgba(63,81,181,0.02);">
                 <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
                     <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
@@ -27,7 +27,7 @@
             @* Summary Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="6">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Diagnostic Tests</MudText>
                             <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredDiseases.Count</MudText>
@@ -38,7 +38,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-info);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-info);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Disease Categories</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Info" Style="font-weight:700;">
@@ -60,9 +60,9 @@
                          T="DiseaseDto"
                          Items="@FilteredDiseases"
                          ReadOnly="@_readOnly"
-                         Class="rounded-lg"
+                         Class="bg-transparent"
                          Bordered="false"
-                         Dense="false"
+                         Dense="true"
                          RowStyle="cursor: pointer;"
                          RowClick="@((args) => PreviewDiseaseProfile(args.Item))">
                 <ToolBarContent>

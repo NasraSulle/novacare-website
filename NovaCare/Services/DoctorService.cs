@@ -76,9 +76,17 @@ namespace NovaCare.Services
                     DoctorCode = doc.DoctorCode,
                     MedicalLicenseNumber = doc.MedicalLicenseNumber,
                     DoctorTypeId = doc.DoctorTypeId,
+                    DoctorType = new DoctorTypeDto
+                    {
+                        DoctorTypeName = doc.DoctorType!.DoctorTypeName
+                    },
                     DoctorStatusId = doc.DoctorStatusId,
                     RoomId = doc.RoomId,
                     StaffId = doc.StaffId,
+                    Staff = new StaffDto 
+                                {
+                                    StaffStatusId = doc.Staff!.StaffStatusId
+                                },
                     DoctorFullName = doc.Staff != null ? $"{doc.Staff.FisrtName ?? string.Empty} {doc.Staff.MiddleName ?? string.Empty} {doc.Staff.LastName ?? string.Empty}" : string.Empty,
                     LicenceExpDate = doc.LicenceExpDate,
                     DoctorConsultationFee = doc.DoctorConsultationFee,
@@ -100,9 +108,17 @@ namespace NovaCare.Services
                     DoctorCode = doc.DoctorCode,
                     MedicalLicenseNumber = doc.MedicalLicenseNumber,
                     DoctorTypeId = doc.DoctorTypeId,
+                    DoctorType = new DoctorTypeDto
+                    {
+                        DoctorTypeName = doc.DoctorType!.DoctorTypeName
+                    },
                     DoctorStatusId = doc.DoctorStatusId,
                     RoomId = doc.RoomId,
                     StaffId = doc.StaffId,
+                    Staff = new StaffDto
+                    {
+                        StaffStatusId = doc.Staff!.StaffStatusId
+                    },
                     DoctorFullName = doc.Staff != null ? $"{doc.Staff.FisrtName ?? string.Empty} {doc.Staff.MiddleName ?? string.Empty} {doc.Staff.LastName ?? string.Empty}" : string.Empty,
                     LicenceExpDate = doc.LicenceExpDate,
                     DoctorConsultationFee = doc.DoctorConsultationFee,

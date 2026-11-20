@@ -17,7 +17,7 @@
 
     @* Filter & Action Card *@
     <MudItem xs="12">
-        <MudPaper Elevation="0" Class="pa-4 rounded-lg border" Style="background-color: rgba(63,81,181,0.02);">
+        <MudPaper Elevation="0" Class="pa-4 bg-transparent border">
             <MudGrid Spacing="2" AlignItems="Center">
                 <MudItem xs="12" sm="6" md="4">
                     <MudSelect T="int" Value="@selectedInsuranceId" ValueChanged="@OnInsuranceChanged"
@@ -66,7 +66,7 @@
         }
         else if (!Tariffs.Any())
         {
-            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center">
+            <MudPaper Elevation="0" Class="pa-6 border bg-transparent text-center">
                 <NoDataNotice NoDataMessage="No custom tariff rules configured for this insurer yet. Scheme default coverage % will apply." />
             </MudPaper>
         }
@@ -75,7 +75,7 @@
             @* Summary Metrics *@
             <MudGrid Spacing="2" Class="mb-3">
                 <MudItem xs="12" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase;">Mapped Tariffs</MudText>
                             <MudText Typo="Typo.h5" Style="font-weight:700;">@Tariffs.Count</MudText>
@@ -84,7 +84,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="6" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-success);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase;">Covered Items</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">@Tariffs.Count(t => t.IsCovered)</MudText>
@@ -93,7 +93,7 @@
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="6" sm="4">
-                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-warning);">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-warning);">
                         <div>
                             <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase;">Pre-Approval Req.</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight:700;">@Tariffs.Count(t => t.RequiresPreApproval)</MudText>
@@ -108,9 +108,9 @@
                          Hover="true"
                          Elevation="0"
                          Outlined="true"
-                         Dense="false"
+                         Dense="true"
                          Bordered="false"
-                         Class="rounded-lg">
+                         Class="bg-transparent">
                 <Columns>
                     <TemplateColumn Title="Category" SortBy="@(x => x.ServiceType)">
                         <CellTemplate>

@@ -1,105 +1,165 @@
 ﻿@page "/PaymentDetails"
+@using Microsoft.Extensions.Options
 @using NovaCare.Shared.DTOs.PaymentDTOs
+@using NovaCare.Shared.Enums
+@inject IOptions<HospitalInfoSettings> HospitalOptions
 @inject IJSRuntime JS
+@* Uncomment and match your actual Bill/Patient service interface *@
+@* @inject IBillService billService *@
 
-<div class="d-flex justify-center pa-4">
-    <!-- Thermal Receipt Paper Container (80mm standard width ~350px) -->
-    <MudPaper id="printable-receipt" Elevation="3" Class="thermal-receipt pa-5 position-relative">
+<MudDialog>
+    <DialogContent>
+        @if (_isLoading)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-2" />
+        }
 
-        <!-- Receipt Number (Top Right) -->
-        <div class="d-flex justify-end mb-2">
-            <MudText Typo="Typo.caption" Class="font-weight-bold">Receipt No. @ReceiptNo</MudText>
-        </div>
+        <div class="d-flex justify-center pa-2">
+            <!-- Thermal Receipt Paper Container (80mm standard width ~350px) -->
+            <MudPaper id="printable-receipt" Elevation="3" Class="thermal-receipt pa-5 position-relative">
 
-        <!-- Hospital Header -->
-        <div class="text-center mb-3">
-            <MudImage Src="@Hospital.LogoPath" Height="100" />
+                <!-- Receipt & Bill Numbers (Top Row) -->
+                <div class="d-flex justify-space-between align-center mb-2">
+                    @if (!string.IsNullOrWhiteSpace(BillNumber))
+                    {
+                        <MudText Typo="Typo.caption" Class="text-muted">Bill: @BillNumber</MudText>
+                    }
+                    else
+                    {
+                        <span></span>
+                    }
+                    <MudText Typo="Typo.caption" Class="font-weight-bold">
+                        Receipt No. @ReceiptNo
+                    </MudText>
+                </div>
 
-            <MudText Typo="Typo.subtitle1" Class="font-weight-bold text-uppercase" Style="letter-spacing: 0.5px;">
-                @Hospital.Name
-            </MudText>
-            <MudText Typo="Typo.caption" Class="d-block font-italic text-muted mb-1">
-                @Hospital.Tagline
-            </MudText>
-            <MudText Typo="Typo.caption" Class="d-block">@Hospital.AddressLine1</MudText>
-            <MudText Typo="Typo.caption" Class="d-block">@Hospital.AddressLine2</MudText>
-            <MudText Typo="Typo.caption" Class="d-block">
-                Tel: @Hospital.Phone | Emergency: @Hospital.EmergencyPhone
-            </MudText>
-            <MudText Typo="Typo.caption" Class="d-block">Email: @Hospital.Email</MudText>
-        </div>
+                <!-- Hospital Header (Loaded from appsettings.json) -->
+                <div class="text-center mb-3">
+                    <MudImage Src="@Hospital.LogoPath" Height="85" Class="mb-1" />
 
-        <MudDivider Class="my-2 border-dashed" />
+                    <MudText Typo="Typo.subtitle1" Class="font-weight-bold text-uppercase" Style="letter-spacing: 0.5px;">
+                        @Hospital.Name
+                    </MudText>
+                    <MudText Typo="Typo.caption" Class="d-block font-italic text-muted mb-1">
+                        @Hospital.Tagline
+                    </MudText>
+                    <MudText Typo="Typo.caption" Class="d-block">@Hospital.AddressLine1</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block">@Hospital.AddressLine2</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block">
+                        Tel: @Hospital.Phone | Emergency: @Hospital.EmergencyPhone
+                    </MudText>
+                    <MudText Typo="Typo.caption" Class="d-block">Email: @Hospital.Email</MudText>
+                </div>
 
-        <!-- Patient Info Header Row -->
-        <div class="d-flex justify-space-between align-center my-2">
-            <MudText Typo="Typo.caption" Class="font-weight-bold">Patient Info</MudText>
-            <MudText Typo="Typo.caption">Date: @PrintDate.ToString("yyyy-MM-dd HH:mm:ss")</MudText>
-        </div>
+                <MudDivider Class="my-2 border-dashed" />
 
-        <!-- Patient Details -->
-        <div class="patient-details mb-3">
-            <MudText Typo="Typo.caption" Class="d-block"><strong>Name:</strong> @PatientName</MudText>
-            <MudText Typo="Typo.caption" Class="d-block"><strong>MRNo:</strong> @MrNo</MudText>
-            <MudText Typo="Typo.caption" Class="d-block"><strong>Address:</strong> @Address</MudText>
-            <MudText Typo="Typo.caption" Class="d-block"><strong>Phone:</strong> @Phone</MudText>
-            <MudText Typo="Typo.caption" Class="d-block"><strong>Clinic:</strong> @Clinic</MudText>
-            <MudText Typo="Typo.caption" Class="d-block"><strong>Doctor:</strong> @DoctorName</MudText>
-            <MudText Typo="Typo.caption" Class="d-block"><strong>Date:</strong> @VisitDate.ToString("yyyy-MM-dd HH:mm:ss")</MudText>
-        </div>
+                <!-- Patient Info Header Row -->
+                <div class="d-flex justify-space-between align-center my-2">
+                    <MudText Typo="Typo.caption" Class="font-weight-bold">Patient Info</MudText>
+                    <MudText Typo="Typo.caption">Printed: @PrintDate.ToString("yyyy-MM-dd HH:mm:ss")</MudText>
+                </div>
 
-        <!-- Bordered Itemized Table -->
-        <table class="receipt-table mb-3">
-            <thead>
-                <tr>
-                    <th style="width: 12%;">S/N</th>
-                    <th style="width: 48%;">Item</th>
-                    <th style="width: 12%; text-align: center;">Qty</th>
-                    <th style="width: 28%; text-align: right;">Sub Total</th>
-                </tr>
-            </thead>
-            <tbody>
+                <!-- Patient Details -->
+                <div class="patient-details mb-3">
+                    <MudText Typo="Typo.caption" Class="d-block"><strong>Name:</strong> @PatientName</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block"><strong>MRNo:</strong> @MrNo</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block"><strong>Address:</strong> @Address</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block"><strong>Phone:</strong> @Phone</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block"><strong>Clinic:</strong> @Clinic</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block"><strong>Doctor:</strong> @DoctorName</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block"><strong>Paid Date:</strong> @VisitDate.ToString("yyyy-MM-dd HH:mm:ss")</MudText>
+                </div>
 
-                @foreach (var item in BillItems)
+                <!-- Bordered Itemized Table -->
+                <table class="receipt-table mb-3">
+                    <thead>
+                        <tr>
+                            <th style="width: 12%;">S/N</th>
+                            <th style="width: 48%;">Item</th>
+                            <th style="width: 12%; text-align: center;">Qty</th>
+                            <th style="width: 28%; text-align: right;">Sub Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Items.Count; i++)
+                        {
+                            var item = Items[i];
+                            <tr>
+                                <td>@(i + 1)</td>
+                                <td>@item.Description</td>
+                                <td style="text-align: center;">@item.Qty</td>
+                                <td style="text-align: right;">@item.SubTotal.ToString("N2") Tsh</td>
+                            </tr>
+                        }
+                        <tr class="total-row">
+                            <td></td>
+                            <td class="font-weight-bold">Total</td>
+                            <td></td>
+                            <td style="text-align: right;" class="font-weight-bold">
+                                @Items.Sum(x => x.SubTotal).ToString("N2") Tsh
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Payment Method & Reference Summary -->
+                @if (CurrentPayment != null)
                 {
-                    <tr>
-                        <td>@(i)</td>
-                        <td>@($"{item.ItemName}")</td>
-                        <td style="text-align: center;">@item.Quantity</td>
-                        <td style="text-align: right;">@item.PatientPayableAmount.ToString("N2") Tsh</td>
-                    </tr>
+                    <div class="mb-3">
+                        <MudText Typo="Typo.caption" Class="d-block">
+                            <strong>Payment Method:</strong> @CurrentPayment.PayTypeName
+                            @if (!string.IsNullOrWhiteSpace(CurrentPayment.MNOOperator))
+                            {
+                                <span> (@CurrentPayment.MNOOperator)</span>
+                            }
+                        </MudText>
 
-                    ++i;
+                        @if (!string.IsNullOrWhiteSpace(PaymentReference))
+                        {
+                            <MudText Typo="Typo.caption" Class="d-block">
+                                <strong>Ref No:</strong> @PaymentReference
+                            </MudText>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(CurrentPayment.PaymentStatusName))
+                        {
+                            <MudText Typo="Typo.caption" Class="d-block">
+                                <strong>Status:</strong> @CurrentPayment.PaymentStatusName
+                            </MudText>
+                        }
+                    </div>
                 }
-                <tr class="total-row">
-                    <td></td>
-                    <td class="font-weight-bold">Total</td>
-                    <td></td>
-                    <td style="text-align: right;" class="font-weight-bold">
-                        @CurrentBill.TotalPatientAmount.ToString("N2") Tsh
-                    </td>
-                </tr>
-            </tbody>
-        </table>
 
-        <!-- Issued By & System Footer -->
-        <div class="d-flex justify-end">
-            <MudText Typo="Typo.caption">Billed by: <strong>@CurrentBill.StaffFullName</strong></MudText>
+                <!-- Issued By & System Footer -->
+                <div class="d-flex justify-end mb-3">
+                    <MudText Typo="Typo.caption">Issued by: <strong>@IssuedBy</strong></MudText>
+                </div>
+
+                <MudDivider Class="my-2 border-dashed" />
+
+                <div class="text-center mt-2">
+                    <MudText Typo="Typo.caption" Class="text-muted" Style="font-size: 10px;">
+                        @Hospital.FooterCopyright
+                    </MudText>
+                </div>
+
+            </MudPaper>
         </div>
-        <div class="d-flex justify-end mb-3">
-            <MudText Typo="Typo.caption">Receipt by: <strong>@CurrentBill.StaffFullName</strong></MudText>
-        </div>
+    </DialogContent>
 
-        <MudDivider Class="my-2 border-dashed" />
-
-        <div class="text-center mt-2">
-            <MudText Typo="Typo.caption" Class="text-muted" Style="font-size: 10px;">
-                &copy; NovaCare Health Systems Ltd
-            </MudText>
-        </div>
-
-    </MudPaper>
-</div>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="Cancel">
+            Close
+        </MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Print"
+                   Disabled="@_isLoading"
+                   OnClick="PrintReceiptAsync">
+            Print Receipt
+        </MudButton>
+    </DialogActions>
+</MudDialog>
 
 <style>
     /* Standard 80mm thermal receipt paper look */
@@ -107,7 +167,6 @@
         width: 350px;
         background-color: #ffffff;
         color: #1a1a1a;
-        font-family: 'Courier New', Courier, monospace;
         border-radius: 2px;
         overflow: hidden;
     }
@@ -148,7 +207,7 @@
         border-top: 1.5px solid #000;
     }
 
-    /* Print Media Query: Hides dashboard UI and prints only the receipt */
+    /* Print Media Query: Hides dialog backdrop and buttons when printing */
     @@media print {
         body * {
             visibility: hidden;
@@ -159,55 +218,140 @@
         }
 
         .thermal-receipt {
-            position: absolute;
+            position: fixed;
             left: 0;
             top: 0;
             box-shadow: none !important;
             width: 80mm;
+            margin: 0;
+            padding: 4mm !important;
         }
     }
 </style>
 
 @code {
-    private HospitalInfoSettings Hospital => HospitalOptions.Value;
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    [Parameter] public string HospitalName { get; set; } = "NOVACARE MEDICAL CENTER";
-    [Parameter] public string ReceiptNo { get; set; } = "214164";
-    [Parameter] public DateTime PrintDate { get; set; } = DateTime.Now;
-    [Parameter] public DateTime VisitDate { get; set; } = DateTime.Now;
-
-    [Parameter] public string PatientName { get; set; } = "Nasra Abubakar Said";
-    [Parameter] public string MrNo { get; set; } = "NMC/2026/86964";
-    [Parameter] public string Address { get; set; } = "Mtoni Kidatu, Mjini Magharibi";
-    [Parameter] public string Phone { get; set; } = "+255 777 123 456";
-    [Parameter] public string Clinic { get; set; } = "GENERAL OPD";
-    [Parameter] public string DoctorName { get; set; } = "Dr. Amina Abdalla";
-    [Parameter] public string IssuedBy { get; set; } = "Cashier Desk 1";
+    // Passed from Payment.razor DialogParameters
     [Parameter] public PaymentDto? CurrentPayment { get; set; }
-    public BillDto CurrentBill = new();
 
-    int i = 1;
+    // Optional overrides if passed directly
+    [Parameter] public string PatientName { get; set; } = "—";
+    [Parameter] public string MrNo { get; set; } = "—";
+    [Parameter] public string Address { get; set; } = "—";
+    [Parameter] public string Phone { get; set; } = "—";
+    [Parameter] public string Clinic { get; set; } = "GENERAL OPD";
+    [Parameter] public string DoctorName { get; set; } = "—";
+    [Parameter] public List<ReceiptItem> Items { get; set; } = new();
 
+    private HospitalInfoSettings Hospital => HospitalOptions.Value;
+    private bool _isLoading = false;
 
-    [Parameter]
-    public List<ReceiptItem> Items { get; set; } = new()
-    {
-        new ReceiptItem { Description = "X-Ray (Chest) PA", Qty = 1, SubTotal = 27500.00m }
-    };
-
-    List<BillItemDto> BillItems = new();
+    public string ReceiptNo { get; set; } = "000000";
+    public string BillNumber { get; set; } = string.Empty;
+    public string PaymentReference { get; set; } = string.Empty;
+    public DateTime PrintDate { get; set; } = DateTime.Now;
+    public DateTime VisitDate { get; set; } = DateTime.Now;
+    public string IssuedBy { get; set; } = "Cashier Desk";
 
     protected override async Task OnInitializedAsync()
     {
-        CurrentBill = await paymentService.GetBillByIdAsync(CurrentPayment.BillId);
+        if (CurrentPayment != null && CurrentPayment.BillId > 0)
+        {
+            _isLoading = true;
+            try
+            {
+                /*
+                 * Fetch full Bill & Patient details using CurrentPayment.BillId:
+                 *
+                 * var bill = await billService.GetBillByIdAsync(CurrentPayment.BillId);
+                 * if (bill != null)
+                 * {
+                 *     PatientName = bill.PatientName;
+                 *     MrNo = bill.MRNumber;
+                 *     Address = bill.PatientAddress;
+                 *     Phone = bill.PatientPhone;
+                 *     Clinic = bill.ClinicName ?? "GENERAL OPD";
+                 *     DoctorName = bill.DoctorName ?? "—";
+                 *
+                 *     if (bill.BillItems != null && bill.BillItems.Any())
+                 *     {
+                 *         Items = bill.BillItems.Select(bi => new ReceiptItem
+                 *         {
+                 *             Description = bi.ServiceName,
+                 *             Qty = bi.Quantity,
+                 *             SubTotal = bi.SubTotal
+                 *         }).ToList();
+                 *     }
+                 * }
+                 */
+            }
+            finally
+            {
+                _isLoading = false;
+            }
+        }
 
-        BillItems = CurrentBill.BillItems.ToList();
+        EnsureFallbackItem();
     }
+
+    protected override void OnParametersSet()
+    {
+        if (CurrentPayment != null)
+        {
+            ReceiptNo = CurrentPayment.Id.ToString("D6");
+            BillNumber = CurrentPayment.BillNumber;
+            VisitDate = CurrentPayment.PaymentDate.Kind == DateTimeKind.Utc
+                ? CurrentPayment.PaymentDate.ToLocalTime()
+                : CurrentPayment.PaymentDate;
+
+            if (!string.IsNullOrWhiteSpace(CurrentPayment.CashReceivedBy))
+            {
+                IssuedBy = CurrentPayment.CashReceivedBy;
+            }
+
+            // Pick the active transaction reference based on payment method
+            PaymentReference = CurrentPayment.PayType switch
+            {
+                PaymentType.Cash => CurrentPayment.CashReferenceNumber ?? string.Empty,
+                PaymentType.MNO => CurrentPayment.MNOReference ?? CurrentPayment.MNONumber ?? string.Empty,
+                PaymentType.Wire_Transfer or PaymentType.Wire_Transfer => CurrentPayment.WireReferenceNo ?? string.Empty,
+                PaymentType.Cheque => CurrentPayment.ChequeNumber ?? string.Empty,
+                PaymentType.Insurance => CurrentPayment.InsurerSettlementReference ?? CurrentPayment.SettlementBatchNumber ?? string.Empty,
+                _ => CurrentPayment.CashReferenceNumber ?? CurrentPayment.MNOReference ?? CurrentPayment.WireReferenceNo ?? string.Empty
+            };
+
+            EnsureFallbackItem();
+        }
+    }
+
+    private void EnsureFallbackItem()
+    {
+        if (CurrentPayment != null && (Items == null || Items.Count == 0))
+        {
+            var itemTitle = !string.IsNullOrWhiteSpace(CurrentPayment.BillTypeName)
+                ? $"{CurrentPayment.BillTypeName} ({CurrentPayment.BillNumber})"
+                : $"Bill Payment ({CurrentPayment.BillNumber})";
+
+            Items = new List<ReceiptItem>
+            {
+                new ReceiptItem
+                {
+                    Description = itemTitle.Trim(),
+                    Qty = 1,
+                    SubTotal = CurrentPayment.Amount
+                }
+            };
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
 
     public async Task PrintReceiptAsync()
     {
         await Task.Delay(100);
         await JS.InvokeVoidAsync("printReferralElement", "printable-receipt");
+        MudDialog.Close(DialogResult.Ok(true));
     }
 
     public class ReceiptItem

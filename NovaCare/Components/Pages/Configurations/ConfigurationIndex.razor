@@ -7,9 +7,9 @@
 
 <PageTitle>Configurations - NovaCare</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="py-4 px-3 px-sm-6">
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-3 px-sm-6">
     @* Page Header *@
-    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center mb-4">
+    <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center">
         <SectionTitle Icon="@icon" Title="@title" />
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
             Manage hospital wards, staff roles, diagnostic catalogs, and insurer tariffs
@@ -17,31 +17,42 @@
     </div>
 
     @* Main Elevated Card Container *@
-    <MudPaper Elevation="2" Outlined="true" Class="rounded-lg overflow-hidden">
+    <MudPaper Elevation="0" Class="pa-0 w-100" Style="background-color: rgba(246,246,246,1) !important;">
         <MudTabs Elevation="0"
                  Rounded="false"
                  ApplyEffectsToContainer="true"
-                 Color="Color.Primary"
-                 SliderColor="Color.Primary"
-                 PanelClass="pa-3 pa-sm-6"
-                 Centered="false">
+                 TabHeaderClass="bg-secondary-subtle"
+                 SliderColor="Color.Error"
+                 TabPanelsClass="pa-0">
             <MudTabPanel Text="Rooms" Icon="@Icons.Material.Outlined.MeetingRoom" Style="text-transform: none; font-weight: 500;">
-                <Rooms />
+                <div class="pa-3 pa-sm-6">
+                    <Rooms />
+                </div>
             </MudTabPanel>
             <MudTabPanel Text="Staff Titles" Icon="@Icons.Material.Outlined.Badge" Style="text-transform: none; font-weight: 500;">
+                <div class="pa-3 pa-sm-6">
                 <StaffTitles />
+                </div>
             </MudTabPanel>
             <MudTabPanel Text="Staff Title Groups" Icon="@Icons.Material.Outlined.AccountTree" Style="text-transform: none; font-weight: 500;">
+            <div class="pa-3 pa-sm-6">
                 <StaffTitleGroups />
+                </div>
             </MudTabPanel>
             <MudTabPanel Text="Staff Departments" Icon="@Icons.Material.Outlined.Domain" Style="text-transform: none; font-weight: 500;">
+            <div class="pa-3 pa-sm-6">
                 <StaffDepartments />
+                </div>
             </MudTabPanel>
             <MudTabPanel Text="Lab Test Diseases" Icon="@Icons.Material.Outlined.Biotech" Style="text-transform: none; font-weight: 500;">
+            <div class="pa-3 pa-sm-6">
                 <Diseases />
+                </div>
             </MudTabPanel>
             <MudTabPanel Text="Insurer Tariffs" Icon="@Icons.Material.Outlined.PriceChange" Style="text-transform: none; font-weight: 500;">
+            <div class="pa-3 pa-sm-6">
                 <InsurerTariffs />
+                </div>
             </MudTabPanel>
         </MudTabs>
     </MudPaper>

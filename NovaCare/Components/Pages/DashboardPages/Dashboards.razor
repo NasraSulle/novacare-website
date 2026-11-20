@@ -252,6 +252,7 @@
             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Weekly Patients By Type</MudText>
             <MudChart T="double" ChartType="ChartType.Bar"
                       ChartSeries="@_weeklyPatientsByType"
+                      ChartOptions="@_typeOptions"
                       ChartLabels="@_labels"
                       LegendPosition="Position.Bottom"
                       Width="100%" Height="230px" CanHideSeries MatchBoundsToSize />
@@ -261,15 +262,11 @@
     <MudItem xs="12" md="4">
         <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Weekly Patients By Age</MudText>
-            @* <MudChart T="double" ChartType="ChartType.Line"
-                      ChartSeries="@_weeklyPatientsByAge"
-                      ChartLabels="@_labels"
-                      LegendPosition="Position.Bottom"
-                      Width="100%" Height="230px" CanHideSeries MatchBoundsToSize /> *@
+ 
             <MudChart T="double" ChartType="ChartType.Line"
                       ChartSeries="@_weeklyPatientsByAge"
                       ChartLabels="@_labels"
-                      ChartOptions="@_options"
+                      ChartOptions="@_ageOptions"
                       LegendPosition="Position.Bottom"
                       Width="100%" Height="230px" CanHideSeries MatchBoundsToSize />
 
@@ -598,8 +595,9 @@
         <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Doctors By Clinical Role</MudText>
             <MudChart T="double" ChartType="ChartType.Bar"
+                      ChartOptions="@_options"
                       ChartSeries="@_weeklyDoctorsBySpecialization"
-                      ChartLabels="@(new string[] { "MD", "Specialists" })"
+                      ChartLabels="@_docLabels"
                       LegendPosition="Position.Bottom"
                       Width="100%" Height="260px" CanHideSeries MatchBoundsToSize />
         </MudPaper>
@@ -694,6 +692,7 @@
 
 @code {
     private string[] _labels = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
+    private string[]? _docLabels;
 
     List<DoctorDto> allDoctors = new();
     List<StaffDto> allStaffs = new();
@@ -710,7 +709,9 @@
     List<ChartSeries<double>> _weeklyAvailableDoctors = new();
     List<ChartSeries<double>> _weeklyDoctorsBySpecialization = new();
 
-    private LineChartOptions _options = new();
+    private BarChartOptions _options = new();
+    private LineChartOptions _ageOptions = new();
+    private BarChartOptions  _typeOptions = new();
 
     StaffDto StaffOfTheWeek = new();
     DateTime sevenDaysAgo = DateTime.Now.AddDays(-7);
@@ -762,7 +763,22 @@
         WeeklyDoctorsBySpecialization();
         WeeklyDoctorsAvailability();
 
+        _ageOptions.YAxisTicks = CalculateMaxTick(_weeklyPatientsByAge);
+        _typeOptions.YAxisTicks = CalculateMaxTick(_weeklyPatientsByType);
+        _options.YAxisTicks = CalculateMaxTick(_weeklyDoctorsBySpecialization);
+
         StateHasChanged();
+    }
+
+    private int CalculateMaxTick(List<ChartSeries<double>>? series)
+    {
+        var maxValue = series?
+            .Where(s => s.Data != null)
+            .SelectMany(s => s.Data)
+            .DefaultIfEmpty(20)
+            .Max() ?? 20;
+
+        return Math.Max(1, (int)Math.Ceiling(maxValue));
     }
 
     private void PatientFlowMonitorData()
@@ -878,7 +894,7 @@
             new ChartSeries<double> { Name = "Above 45", Data = dataAbove45 }
         };
 
-        _options.SeriesDisplayOverrides = new Dictionary<IChartSeries, SeriesDisplayOverride>()
+        _ageOptions.SeriesDisplayOverrides = new Dictionary<IChartSeries, SeriesDisplayOverride>()
         {
             { _weeklyPatientsByAge[0], new SeriesDisplayOverride { LineDisplayType = LineDisplayType.Area } },
             { _weeklyPatientsByAge[1], new SeriesDisplayOverride { LineDisplayType = LineDisplayType.Area } },
@@ -886,49 +902,50 @@
         };
     }
 
-
-
-    // private void WeeklyPatientsByAge()
-    // {
-    //     var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
-    //     DayOfWeek[] daysOrder = { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday };
-
-    //     double[] data0To14 = new double[7];
-    //     double[] data15To45 = new double[7];
-    //     double[] dataAbove45 = new double[7];
-
-    //     for (int i = 0; i < daysOrder.Length; i++)
-    //     {
-    //         var patientsOnDay = weeklyPatients.Where(x => x.RegisteredDate.DayOfWeek == daysOrder[i]).ToList();
-    //         data0To14[i] = patientsOnDay.Count(x => x.Age >= 0 && x.Age <= 14);
-    //         data15To45[i] = patientsOnDay.Count(x => x.Age >= 15 && x.Age <= 45);
-    //         dataAbove45[i] = patientsOnDay.Count(x => x.Age > 45);
-    //     }
-
-    //     _weeklyPatientsByAge = new List<ChartSeries<double>>
-    //     {
-    //         new ChartSeries<double> { Name = "0-14", Data = data0To14 },
-    //         new ChartSeries<double> { Name = "15-45", Data = data15To45 },
-    //         new ChartSeries<double> { Name = "Above 45", Data = dataAbove45 }
-    //     };
-    // }
-
     private void WeeklyDoctorsBySpecialization()
     {
-        var availableDoctors = allStaffs.Where(x =>
-            string.Equals(x.StaffStatusName, "available", StringComparison.OrdinalIgnoreCase) &&
-            (string.Equals(x.ClinicalTitleName, "doctor", StringComparison.OrdinalIgnoreCase) ||
-             string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase) ||
-             string.Equals(x.ClinicalTitleName, "specialist", StringComparison.OrdinalIgnoreCase))).ToList();
+        // var availableDoctors = allStaffs.Where(x =>
+        //     string.Equals(x.StaffStatusName, "available", StringComparison.OrdinalIgnoreCase) &&
+        //     (string.Equals(x.ClinicalTitleName, "doctor", StringComparison.OrdinalIgnoreCase) ||
+        //      string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase) ||
+        //      string.Equals(x.ClinicalTitleName, "specialist", StringComparison.OrdinalIgnoreCase))).ToList();
 
-        double countMd = availableDoctors.Count(x => string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase));
-        double countSpecialist = availableDoctors.Count(x => !string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase));
+        // double countMd = availableDoctors.Count(x => string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase));
+        // double countSpecialist = availableDoctors.Count(x => !string.Equals(x.ClinicalTitleName, "md", StringComparison.OrdinalIgnoreCase));
 
-        _weeklyDoctorsBySpecialization = new List<ChartSeries<double>>
+        // _weeklyDoctorsBySpecialization = new List<ChartSeries<double>>
+        // {
+        //     new ChartSeries<double> { Name = "MD", Data = new double[] { countMd, 0 } },
+        //     new ChartSeries<double> { Name = "Specialists", Data = new double[] { 0, countSpecialist } }
+        // };
+
+        //=============================================
+        var avFocs = allDoctors.Where(doc => doc.Staff!.StaffStatusId == 1).ToList();
+
+        var distinctTypes = avFocs.DistinctBy(x => x.DoctorTypeId).ToList();
+
+        _docLabels = distinctTypes
+            .Select(t => t.DoctorType!.DoctorTypeName)
+            .ToArray();
+
+        _weeklyDoctorsBySpecialization = distinctTypes
+        .Select((typeDoc, index) =>
         {
-            new ChartSeries<double> { Name = "MD", Data = new double[] { countMd, 0 } },
-            new ChartSeries<double> { Name = "Specialists", Data = new double[] { 0, countSpecialist } }
-        };
+            // Create an array of 0s matching the total number of distinct doctor types
+            var dataArray = new double[distinctTypes.Count];
+
+            // Set the count at the specific index for this doctor type
+            dataArray[index] = avFocs.Count(d => d.DoctorTypeId == typeDoc.DoctorTypeId);
+
+
+            return new ChartSeries<double>
+            {
+                // Replace 'DoctorType?.Name' with your actual navigation/name property
+                Name = typeDoc.DoctorType?.DoctorTypeName ?? $"Type {typeDoc.DoctorType!.DoctorTypeName}",
+                Data = dataArray
+            };
+        })
+        .ToList();
     }
 
     private void WeeklyDoctorsAvailability()
@@ -952,4 +969,5 @@
             _weeklyAvailableDoctors.Add(new ChartSeries<double> { Name = typeGroup.Key, Data = weeklyData });
         }
     }
+
 }
