@@ -451,7 +451,8 @@
                 { "TitleIcon", Icons.Material.Filled.AssistWalker }
             };
 
-            var dialog = await Dialog.ShowAsync<EditPatient>("Patient Profile & New Visit", parameters, _maxWidth);
+            // var dialog = await Dialog.ShowAsync<EditPatient>("Patient Profile & New Visit", parameters, _maxWidth);
+            var dialog = await Dialog.ShowAsync<PatientProfile>("Patient Profile & History", parameters, _maxWidth);
             var result = await dialog.Result;
             if (result != null && !result.Canceled)
             {
