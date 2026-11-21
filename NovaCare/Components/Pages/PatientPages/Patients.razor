@@ -15,7 +15,7 @@
             <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
                 <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
                     <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
-                    @if (CurrentUser != null && CurrentUser.IsCreateNewPatient && !isReport)
+                    @if (CurrentUser != null && CurrentUser.IsCreateNewPatient && !isReport && (PatientGenre != "Consultation Requests" && PatientGenre != "Vitals Requests"))
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToNewPatientPage" StartIcon="@Icons.Material.Filled.PersonAdd" Style="text-transform:none;">
                             Register Patient
@@ -103,7 +103,7 @@
                                           IconSize="Size.Small"
                                           Style="min-width: 270px;" />
 
-                            @if (CurrentUser != null && CurrentUser.IsCreateNewPatient && !isReport)
+                            @if (CurrentUser != null && CurrentUser.IsCreateNewPatient && !isReport && (PatientGenre != "Consultation Requests" && PatientGenre != "Vitals Requests"))
                             {
                                 <MudButton Variant="Variant.Filled"
                                            Color="Color.Primary"
@@ -413,6 +413,7 @@
     private async Task PreviewPatientProfile(int patientId, string mrn)
     {
         MRNn = mrn;
+        CurrentPatient = await patientService.GetPatientByIdAsync(patientId);
 
         if (PatientGenre == "Vitals Requests")
         {
@@ -424,7 +425,6 @@
         }
         else if (PatientGenre == "Consultation Requests")
         {
-            CurrentPatient = await patientService.GetPatientByIdAsync(patientId);
 
             var parameters = new DialogParameters
             {
@@ -442,7 +442,6 @@
         }
         else
         {
-            CurrentPatient = await patientService.GetPatientByIdAsync(patientId);
 
             var parameters = new DialogParameters
             {

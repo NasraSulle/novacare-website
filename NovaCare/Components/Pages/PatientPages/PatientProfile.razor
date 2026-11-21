@@ -22,15 +22,22 @@
                 <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
                     <MudGrid Class="pa-3">
                         <MudItem md="12">
-                            <MudText>
-                                <MudText Inline="true">
-                                    <MudText Typo="Typo.h5">@($"{CurrentPatient.PatientFullName}")</MudText>
-                                    <MudText Typo="Typo.caption">MRN: @CurrentPatient.PatientCode</MudText>
-                                </MudText>
-                                <MudText Inline="false">
-                                    <MudText Typo="Typo.caption">@CurrentPatient.Age YRS - @CurrentPatient.Gender - @CurrentPatient.PhoneNumber</MudText>
-                                </MudText>
-                            </MudText>
+                            <MudGrid>
+                                <MudItem md="11">
+                                    <MudText>
+                                        <MudText Inline="true">
+                                            <MudText Typo="Typo.h5">@($"{CurrentPatient.PatientFullName}")</MudText>
+                                            <MudText Typo="Typo.caption">MRN: @CurrentPatient.PatientCode</MudText>
+                                        </MudText>
+                                        <MudText Inline="false">
+                                            <MudText Typo="Typo.caption">@CurrentPatient.Age YRS - @CurrentPatient.Gender - @CurrentPatient.PhoneNumber</MudText>
+                                        </MudText>
+                                    </MudText>
+                                </MudItem>
+                                <MudItem md="1" Class="text-end">
+                                    <MudIconButton OnClick="@(() => isPersonalDetails = true)" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                                </MudItem>
+                           </MudGrid>
                         </MudItem>
                     </MudGrid>
                 </MudPaper>
@@ -40,99 +47,138 @@
                         <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@CurrentPatient.PatientTypeName | @CurrentPatient.PatientStatusName</MudChip>
                     </MudText>
                     <MudSpacer />
-                <MudText Typo="Typo.subtitle2" Align="Align.Center">
-                    <MudIcon Icon="@Icons.Material.Outlined.MonitorHeart" /> Current Vitals -
-                    <MudChip T="string" Variant="Variant.Text" Color="Color.Info">Weight: @(CurrentVisit.PreliminaryTest?.PreliminaryWeight ?? 0) | Height: @(CurrentVisit.PreliminaryTest?.PreliminaryHeight ?? 0) | Pressure: @(CurrentVisit.PreliminaryTest?.PreliminaryPressure ?? 0)</MudChip>
-                </MudText>
+                <MudPaper Elevation="0" Class="d-flex align-content-center bg-transparent">
+                    <MudText Typo="Typo.subtitle2" Align="Align.Center">
+                        <MudIcon Icon="@Icons.Material.Outlined.MonitorHeart" /> Current Vitals -
+                        <MudChip T="string" Variant="Variant.Text" Color="Color.Info">Weight: @(CurrentVisit.PreliminaryTest?.PreliminaryWeight ?? 0) | Height: @(CurrentVisit.PreliminaryTest?.PreliminaryHeight ?? 0) | Pressure: @(CurrentVisit.PreliminaryTest?.PreliminaryPressure ?? 0)</MudChip>
+                    </MudText>
+                    <MudText Typo="Typo.subtitle2" Align="Align.Center" Class="align-content-center">
+                        <MudButton OnClick="@(() => isVisitModal = true)" Variant="Variant.Outlined" EndIcon=@Icons.Material.Filled.Edit Size="Size.Small">Active Visit</MudButton>
+                    </MudText>
+                </MudPaper>
             </MudItem>
             <MudItem md="12" Class="ps-0 pt-0">
                 <MudGrid Spacing="1">
                     <MudItem md="8">
                         <MudGrid Spacing="1">
-                            <MudItem md="12">
-                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
-                                    <MudGrid Class="pa-3">
-                                        <MudItem md="12">
-                                            <MudGrid Class="pa-1 ps-2">
-                                                <MudItem md="12" Class="d-flex flex-column">
-                                                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary"><MudIcon Icon="@Icons.Material.Outlined.Medication" /> Previous Prescriptions</MudText>
-                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
-                                                        @if (PreviousPrescription.Any())
-                                                        {
-                                                            foreach (var presc in PreviousPrescription)
-                                                            {
-                                                                <MudStack Spacing="0" Class="mb-1">
-                                                                    <MudText Typo="Typo.body2"><b>@presc.MedicineName</b></MudText>
-                                                                    <MudText Typo="Typo.caption">@($"Dose:{presc.Dosage} - Quantity:{presc.Quantity} - Prescribed On. {presc.PrescribedDate} - Taken:{(presc.IsDispensed ? "Yes" : "No")}")</MudText>
-                                                                    <em><b>@presc.Notes</b></em>
-                                                                </MudStack>
-                                                            }
-                                                        }
-                                                    </MudListItem>
-                                                </MudItem>
-                                            </MudGrid>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudPaper>
+                            <MudItem md="12" Class="">
+                                    <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden" Style="background-color: rgba(246,246,246,1) !important;">
+                                        <MudText Class="pa-3" Typo="Typo.subtitle2" Color="Color.Secondary"><MudIcon Icon="@Icons.Material.Outlined.History" /> Medical History</MudText>
+                                        <MudTabs Elevation="0"
+                                                 Rounded="false"
+                                                 ApplyEffectsToContainer="true"
+                                                 TabHeaderClass="bg-secondary-subtle"
+                                                 SliderColor="Color.Error"
+                                                 TabPanelsClass=""
+                                                 Centered="false">
+                                            <MudTabPanel Text="Prescriptions" Icon="@Icons.Material.Outlined.Medication" Style="text-transform: none; font-weight: 500;">
+                                            <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                                <MudGrid Class="pa-3">
+                                                    <MudItem md="12">
+                                                        <MudGrid Class="pa-1 ps-2">
+                                                            <MudItem md="12" Class="d-flex flex-column">
+                                                                <MudText Typo="Typo.subtitle2" Color="Color.Secondary"><MudIcon Icon="@Icons.Material.Outlined.Medication" /> Previous Prescriptions</MudText>
+                                                                <MudListItem T="string" Style="height:325px;" Class="overflow-auto pt-16">
+                                                                    @if (PreviousPrescription.Any())
+                                                                    {
+                                                                        foreach (var presc in PreviousPrescription)
+                                                                        {
+                                                                            <MudStack Spacing="0" Class="mb-1">
+                                                                                <MudText Typo="Typo.body2"><b>@presc.MedicineName</b></MudText>
+                                                                                <MudText Typo="Typo.caption">@($"Dose:{presc.Dosage} - Quantity:{presc.Quantity} - Prescribed On. {presc.PrescribedDate} - Taken:{(presc.IsDispensed ? "Yes" : "No")}")</MudText>
+                                                                                <em><b>@presc.Notes</b></em>
+                                                                            </MudStack>
+                                                                        }
+                                                                    }
+                                                                </MudListItem>
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                            </MudTabPanel>
+                                        <MudTabPanel Text="Lab Tests" Icon="@Icons.Material.Outlined.Biotech" Style="text-transform: none; font-weight: 500;">
+                                            <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                                <MudGrid Class="pa-3">
+                                                    <MudItem md="12">
+                                                        <MudGrid Class="pa-1 ps-2">
+                                                            <MudItem md="12" Class="d-flex flex-column">
+                                                                <MudText Typo="Typo.subtitle2" Color="Color.Info"><MudIcon Icon="@Icons.Material.Outlined.Biotech" /> Previous Lab Tests</MudText>
+                                                                <MudListItem T="string" Style="height:325px;" Class="overflow-auto pt-16">
+                                                                    @if (PreviousLabTests.Any())
+                                                                    {
+                                                                        foreach (var presc in PreviousLabTests)
+                                                                        {
+                                                                            <MudStack Spacing="0" Class="mb-1">
+                                                                                <MudText Typo="Typo.body2"><b>@presc.DiseaseName</b></MudText>
+                                                                                <MudText Typo="Typo.caption">@($"Checked On. {presc.CreatedDate} - Results:{(string.IsNullOrWhiteSpace(presc.TestResult) ? "Not Out" : $"{presc.TestResult}")}")</MudText>
+                                                                            </MudStack>
+                                                                        }
+                                                                    }
+                                                                </MudListItem>
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                            </MudTabPanel>
+                                        <MudTabPanel Text="Treatments" Icon="@Icons.Material.Outlined.PendingActions" Style="text-transform: none; font-weight: 500;">
+                                            <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                                <MudGrid Class="pa-3">
+                                                    <MudItem md="12">
+                                                        <MudGrid Class="pa-1 ps-2">
+                                                            <MudItem md="12" Class="d-flex flex-column">
+                                                                <MudText Typo="Typo.subtitle2" Color="Color.Warning"><MudIcon Icon="@Icons.Material.Outlined.AssistWalker" /> Previous Treatments</MudText>
+                                                                <MudListItem T="string" Style="height:325px;" Class="overflow-auto pt-16">
+                                                                    @if (PreviousTreatments.Any())
+                                                                    {
+                                                                        foreach (var treat in PreviousTreatments)
+                                                                        {
+                                                                            <MudStack Spacing="0" Class="mb-1">
+                                                                                <MudText Typo="Typo.body2"><b>@($"{(!string.IsNullOrWhiteSpace(treat.TherapyName) ? $"{treat.TherapyName} - " : "")} {(!string.IsNullOrWhiteSpace(treat.SurgeryName) ? $"{treat.SurgeryName} - " : "")} {treat.TreatmentTypeName}")</b></MudText>
+                                                                                <MudText Typo="Typo.caption">@($"From:{treat.StartDate} - To. {treat.FinishDate}")</MudText>
+                                                                            </MudStack>
+                                                                        }
+                                                                    }
+                                                                </MudListItem>
+                                                            </MudItem>
+                                                        </MudGrid>
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudPaper>
+                                            </MudTabPanel>
+                                        </MudTabs>
+                                    </MudPaper>
                             </MudItem>
-                            
-                            <MudItem md="12">
-                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
-                                    <MudGrid Class="pa-3">
-                                        <MudItem md="12">
-                                            <MudGrid Class="pa-1 ps-2">
-                                                <MudItem md="12" Class="d-flex flex-column">
-                                                    <MudText Typo="Typo.subtitle2" Color="Color.Info"><MudIcon Icon="@Icons.Material.Outlined.Biotech" /> Previous Lab Tests</MudText>
-                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
-                                                        @if (PreviousLabTests.Any())
-                                                        {
-                                                            foreach (var presc in PreviousLabTests)
-                                                            {
-                                                                <MudStack Spacing="0" Class="mb-1">
-                                                                    <MudText Typo="Typo.body2"><b>@presc.DiseaseName</b></MudText>
-                                                                    <MudText Typo="Typo.caption">@($"Checked On. {presc.CreatedDate} - Results:{(string.IsNullOrWhiteSpace(presc.TestResult) ? "Not Out" : $"{presc.TestResult}")}")</MudText>
-                                                                </MudStack>
-                                                            }
-                                                        }
-                                                    </MudListItem>
-                                                </MudItem>
-                                            </MudGrid>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudPaper>
-                            </MudItem>
-
-                            <MudItem md="12">
-                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
-                                    <MudGrid Class="pa-3">
-                                        <MudItem md="12">
-                                            <MudGrid Class="pa-1 ps-2">
-                                                <MudItem md="12" Class="d-flex flex-column">
-                                                    <MudText Typo="Typo.subtitle2" Color="Color.Warning"><MudIcon Icon="@Icons.Material.Outlined.AssistWalker" /> Previous Treatments</MudText>
-                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
-                                                        @if (PreviousTreatments.Any())
-                                                        {
-                                                            foreach (var treat in PreviousTreatments)
-                                                            {
-                                                                <MudStack Spacing="0" Class="mb-1">
-                                                                    <MudText Typo="Typo.body2"><b>@($"{(!string.IsNullOrWhiteSpace(treat.TherapyName) ? $"{treat.TherapyName} - " : "")} {(!string.IsNullOrWhiteSpace(treat.SurgeryName) ? $"{treat.SurgeryName} - " : "")} {treat.TreatmentTypeName}")</b></MudText>
-                                                                    <MudText Typo="Typo.caption">@($"From:{treat.StartDate} - To. {treat.FinishDate}")</MudText>
-                                                                </MudStack>
-                                                            }
-                                                        }
-                                                    </MudListItem>
-                                                </MudItem>
-                                            </MudGrid>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudPaper>
-                            </MudItem>
-
                         </MudGrid>
                     </MudItem>
                     <MudItem md="4">
-
                         <MudGrid Spacing="1">
+                            <MudItem md="12">
+                                <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
+                                    <MudGrid Class="pa-3">
+                                        <MudItem md="12">
+                                            <MudGrid Class="pa-1 ps-2">
+                                                <MudItem md="12" Class="d-flex flex-column">
+                                                    <MudPaper Class="align-start d-flex" Elevation="0">
+                                                        <MudText Typo="Typo.subtitle2" Align="Align.Center" Color="Color.Default"><MudIcon Icon="@Icons.Material.Outlined.ContactEmergency" /> Emergency Contact</MudText>
+                                                        <MudSpacer />
+                                                    </MudPaper>
+                                                    <MudText>
+                                                        <MudText Inline="true">
+                                                            <MudText Typo="Typo.subtitle2">@($"{CurrentPatient.KinFullName}")</MudText>
+                                                            <MudText Typo="Typo.caption">Phonenumber: @CurrentPatient.KinPhoneNumber</MudText>
+                                                        </MudText>
+                                                        <MudText Inline="false">
+                                                            <MudText Typo="Typo.caption">Home Address : @CurrentPatient.KinHomeAddress</MudText>
+                                                        </MudText>
+                                                    </MudText>
+                                                </MudItem>
+                                            </MudGrid>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudPaper>
+                            </MudItem>
                             <MudItem md="12">
                                 <MudPaper Elevation="0" Class="border-1 border-opacity-10 border-secondary-subtle">
                                     <MudGrid Class="pa-3">
@@ -142,7 +188,7 @@
                                                     <MudPaper Class="align-start d-flex" Elevation="0">
                                                         <MudText Typo="Typo.subtitle2" Align="Align.Center" Color="Color.Error"><MudIcon Icon="@Icons.Material.Outlined.Warning" /> Known Allergies</MudText>
                                                         <MudSpacer />
-                                                        <MudIconButton Color="Color.Success" OnClick="@(() => showAddAllergyDialog = true)" Icon="@Icons.Material.Filled.Add" Class="p-0" title="Add To Allergy" />
+                                                        @* <MudIconButton Color="Color.Success" OnClick="@(() => showAddAllergyDialog = true)" Icon="@Icons.Material.Filled.Add" Class="p-0" title="Add To Allergy" /> *@
                                                     </MudPaper>
                                                     <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
                                                         @if (AllAllergies.Any())
@@ -204,7 +250,7 @@
                                             <MudGrid Class="pa-1 ps-2">
                                                 <MudItem md="12" Class="d-flex flex-column">
                                                     <MudText Typo="Typo.subtitle2" Color="Color.Primary"><MudIcon Icon="@Icons.Material.Outlined.People" /> Care Team | Doctors Attended</MudText>
-                                                    <MudListItem T="string" Style="max-height:80px;" Class="overflow-auto pt-16">
+                                                    <MudListItem T="string" Style="height:150px;" Class="overflow-auto pt-16">
                                                         @if (OtherDoctor.Any())
                                                         {
                                                             foreach (var treat in OtherDoctor)
@@ -227,7 +273,7 @@
             </MudItem>
 
             <!--PERSONAL DETAILS DIALOG-->
-            <MudDialog @bind-Visible="isPersonalDetails" Style="background-color: rgba(246,246,246,1) !important;">
+            <MudDialog @bind-Visible="isPersonalDetails"  Options="_maxWidthAddAllergyBox" Style="background-color: rgba(246,246,246,1) !important;">
                 <TitleContent>
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudGrid Justify="Justify.SpaceBetween">
@@ -364,7 +410,7 @@
 
                                         <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit"
                                                          Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentPatient.PatientStatusId == 0 || CurrentPatient.PatientTypeId == 0)">Update  Patient Details</MudStaticButton>
-                                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToPatientsPage" Class="">Back</MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => isPersonalDetails = false)" Class="">Back</MudButton>
                                     </MudItem>
                                 </MudGrid>
                             </EditForm>
@@ -374,7 +420,7 @@
             </MudDialog>
 
             <!--VISIT DIALOG-->
-            <MudDialog @bind-Visible="isVisitModal" Style="background-color: rgba(246,246,246,1) !important;">
+            <MudDialog @bind-Visible="isVisitModal" Options="_maxWidthAddAllergyBox" Style="background-color: rgba(246,246,246,1) !important;">
                 <TitleContent>
                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                         <MudGrid Justify="Justify.SpaceBetween">
@@ -1022,7 +1068,7 @@
                                         <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit"
                                                          Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentPatient.PatientStatusId == 0 || CurrentPatient.PatientTypeId == 0)">Save  Patient Details</MudStaticButton>
                                         <MudButton Disabled="!string.IsNullOrWhiteSpace(CurrentPatient.PatientCode)" Variant="Variant.Filled" Color="Color.Primary" OnClick="ResetPage" Class="">Reset Page</MudButton>
-                                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToPatientsPage" Class="">Back</MudButton>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Error"  OnClick="@(() => isVisitModal = false)" Class="">Back</MudButton>
                                     </MudItem>
                                 </MudGrid>
                             </EditForm>
@@ -1097,7 +1143,7 @@
     AllergyDto CurrentAllergy = new();
     DoctorDto CurrentDoctor = new();
 
-    private readonly DialogOptions _maxWidthAddAllergyBox = new() { MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
+    private readonly DialogOptions _maxWidthAddAllergyBox = new() { MaxWidth = MaxWidth.Medium, FullWidth = true, BackdropClick = false };
     private void Cancel() => MudDialog.Cancel();
 
     int selectedMedGenreId = 0;
@@ -1292,58 +1338,17 @@
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(CurrentPatient.PatientCode))
+        
+        try
         {
-            try
+            saveMessage = string.Empty;
+            var savedpatient = await patientService.GetPatientByCodeAsync(CurrentPatient.PatientCode);
+
+            if (!string.IsNullOrWhiteSpace(selectedDocStaffId))
             {
-                saveMessage = string.Empty;
-                CurrentPatient.RegisteredDate = DateTime.Now;
+                var currentDoc = await doctorService.GetDoctorByStaffId(selectedDocStaffId);
 
-                var patientCode = await patientService.AddPatientAsync(CurrentPatient);
-
-                if (!string.IsNullOrWhiteSpace(patientCode))
-                {
-                    var code = Convert.ToInt32(patientCode.Substring(3));
-                    var savedpatient = await patientService.GetPatientByCodeAsync(patientCode);
-
-                    await patientService.UpdatePatientCodeAsync(savedpatient.Id, code);
-                    CurrentPatient.Id = savedpatient.Id;
-
-                    saveMessage = $"{CurrentPatient.FisrtName} registered sucessfully";
-                    Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
-                        { "Text", $"{saveMessage}" },
-                        { "Color", Color.Success }
-                    });
-                    Console.WriteLine(saveMessage);
-                    //isCreatedSuccessfully = true;
-                    CurrentPatient.PatientCode = patientCode;
-                    _step1Complete = true;
-                    StateHasChanged();
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                saveMessage = "Save failed: " + ex.Message;
-            }
-            finally
-            {
-                isSaving = false;
-            }
-        }
-        else
-        {
-            try
-            {
-                saveMessage = string.Empty;
-                var savedpatient = await patientService.GetPatientByCodeAsync(CurrentPatient.PatientCode);
-
-                if (!string.IsNullOrWhiteSpace(selectedDocStaffId))
-                {
-                    var currentDoc = await doctorService.GetDoctorByStaffId(selectedDocStaffId);
-
-                    CurrentPatient.DoctorPatients = new List<DoctorPatientDto>
+                CurrentPatient.DoctorPatients = new List<DoctorPatientDto>
                     {
                         new DoctorPatientDto
                         {
@@ -1351,138 +1356,141 @@
                             PatientId = savedpatient.Id,
                         }
                     };
-                }
+            }
 
-                var success = await patientService.UpdatePatientAsync(CurrentPatient, savedpatient.Id);
-                if (success)
-                {
-                    saveMessage = $"{CurrentPatient.FisrtName} updated sucessfully";
-                    Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+            var success = await patientService.UpdatePatientAsync(CurrentPatient, savedpatient.Id);
+            if (success)
+            {
+                saveMessage = $"{CurrentPatient.FisrtName} updated sucessfully";
+                Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
                         { "Text", $"{saveMessage}" },
                         { "Color", Color.Success }
                     });
-                    Console.WriteLine(saveMessage);
-                    //isCreatedSuccessfully = true;
+                Console.WriteLine(saveMessage);
+                //isCreatedSuccessfully = true;
 
-                    int addedVisitId = 0;
-                    //PreliminaryTestDto? result;
+                int addedVisitId = 0;
+                //PreliminaryTestDto? result;
 
 
-                    if (CurrentVisit.Id == 0 && CurrentVisit.VisitTypeId > 0)
+                if (CurrentVisit.Id == 0 && CurrentVisit.VisitTypeId > 0)
+                {
+                    CurrentVisit.VisitDate = DateTime.UtcNow;
+                    CurrentVisit.PatientId = CurrentPatient.Id;
+                    CurrentVisit.VisitStatusId = 1;
+
+                    // If Visit is Insurance (2), save/link PatientInsuarance first
+                    if (CurrentVisit.PaymentModeId == 2 && CurrentPolicy.InsuaranceId > 0 && !string.IsNullOrWhiteSpace(CurrentPolicy.MemberCardNumber))
                     {
-                        CurrentVisit.VisitDate = DateTime.UtcNow;
-                        CurrentVisit.PatientId = CurrentPatient.Id;
-                        CurrentVisit.VisitStatusId = 1;
+                        CurrentPolicy.PatientId = CurrentPatient.Id;
+                        int policyId = CurrentPolicy.PatientInsuaranceId > 0
+                            ? CurrentPolicy.PatientInsuaranceId
+                            : await patientService.AddPatientInsuranceAsync(CurrentPolicy);
 
-                        // If Visit is Insurance (2), save/link PatientInsuarance first
-                        if (CurrentVisit.PaymentModeId == 2 && CurrentPolicy.InsuaranceId > 0 && !string.IsNullOrWhiteSpace(CurrentPolicy.MemberCardNumber))
-                        {
-                            CurrentPolicy.PatientId = CurrentPatient.Id;
-                            int policyId = CurrentPolicy.PatientInsuaranceId > 0
-                                ? CurrentPolicy.PatientInsuaranceId
-                                : await patientService.AddPatientInsuranceAsync(CurrentPolicy);
-
-                            CurrentPolicy.PatientInsuaranceId = policyId;
-                            CurrentVisit.PatientInsuaranceId = policyId;
-                            CurrentVisit.PatientFullName = $"{CurrentPatient.FisrtName} {CurrentPatient.MiddleName} {CurrentPatient.LastName}";
-                        }
-
-                        addedVisitId = await patientService.AddVisitAsync(CurrentVisit);
-
-                        // Save NHIF / ZHIF / TPA Authorization Number if provided
-                        if (addedVisitId > 0 && CurrentVisit.PaymentModeId == 2 && CurrentVisit.PatientInsuaranceId.HasValue
-                            && !string.IsNullOrWhiteSpace(CurrentVisitAuth.AuthorizationNumber))
-                        {
-                            CurrentVisitAuth.VisitId = addedVisitId;
-                            CurrentVisitAuth.PatientInsuaranceId = CurrentVisit.PatientInsuaranceId.Value;
-                            CurrentVisitAuth.CardNumber = CurrentPolicy.MemberCardNumber;
-                            CurrentVisitAuth.IsVerified = true;
-                            await patientService.SaveVisitInsuranceAuthAsync(CurrentVisitAuth);
-                        }
+                        CurrentPolicy.PatientInsuaranceId = policyId;
+                        CurrentVisit.PatientInsuaranceId = policyId;
+                        CurrentVisit.PatientFullName = $"{CurrentPatient.FisrtName} {CurrentPatient.MiddleName} {CurrentPatient.LastName}";
                     }
 
+                    addedVisitId = await patientService.AddVisitAsync(CurrentVisit);
+
+                    // Save NHIF / ZHIF / TPA Authorization Number if provided
+                    if (addedVisitId > 0 && CurrentVisit.PaymentModeId == 2 && CurrentVisit.PatientInsuaranceId.HasValue
+                        && !string.IsNullOrWhiteSpace(CurrentVisitAuth.AuthorizationNumber))
+                    {
+                        CurrentVisitAuth.VisitId = addedVisitId;
+                        CurrentVisitAuth.PatientInsuaranceId = CurrentVisit.PatientInsuaranceId.Value;
+                        CurrentVisitAuth.CardNumber = CurrentPolicy.MemberCardNumber;
+                        CurrentVisitAuth.IsVerified = true;
+                        await patientService.SaveVisitInsuranceAuthAsync(CurrentVisitAuth);
+                    }
 
                     CurrentVisit.Id = addedVisitId;
 
-                    if (CurrentVisit.Id > 0)
-                    {
-                        if (LabTestsBatch != null && LabTestsBatch.Any())
-                        {
-                            foreach (var test in LabTestsBatch)
-                            {
-                                test.VisitId = CurrentVisit.Id;
-                            }
-
-                            await SaveLabTestAsync();
-
-                            CurrentVisit.LabTests = LabTestsBatch;
-                        }
-
-                        if (ConsultationsBatch != null && ConsultationsBatch.Any())
-                        {
-                            foreach (var test in ConsultationsBatch)
-                            {
-                                test.VisitId = CurrentVisit.Id;
-                            }
-
-                            await SaveConsultationsAsync();
-
-                            CurrentVisit.Consultations = ConsultationsBatch;
-                        }
-
-                        if (TreatmentsBatch != null && TreatmentsBatch.Any())
-                        {
-
-                            foreach (var test in TreatmentsBatch)
-                            {
-                                test.VisitId = CurrentVisit.Id;
-                            }
-
-                            await SaveTreatmentsAsync();
-
-                            CurrentVisit.Treatments = TreatmentsBatch;
-                        }
-
-                        if (PrescriptionsBatch != null && PrescriptionsBatch.Any())
-                        {
-
-                            foreach (var test in PrescriptionsBatch)
-                            {
-                                test.VisitId = CurrentVisit.Id;
-                            }
-
-                            await SavePrescriptionsAsync();
-                            CurrentVisit.Prescriptions = PrescriptionsBatch;
-                        }
-
-                        await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
-
-                        // Automatically generate Interim Bill & calculate Insurance vs. Patient split
-                        await AutoGenerateVisitBillAsync(CurrentVisit.Id);
-
-                    }
-
-                    // if (CurrentPreliminaryTest.Id == 0)
-                    // {
-                    //     result = await patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
-                    //     if (result != null)
-                    //         CurrentVisit.PreliminaryTest = result;
-                    // }
-                    var visitUpdateResponse = await patientService.UpdateVisitAsync(CurrentVisit, addedVisitId);
-
-                    _step2TextInput = true;
-                    StateHasChanged();
                 }
 
+
+                if (CurrentVisit.Id > 0)
+                {
+                    if (LabTestsBatch != null && LabTestsBatch.Any())
+                    {
+                        foreach (var test in LabTestsBatch)
+                        {
+                            test.VisitId = CurrentVisit.Id;
+                        }
+
+                        await SaveLabTestAsync();
+
+                        CurrentVisit.LabTests = LabTestsBatch;
+                    }
+
+                    if (ConsultationsBatch != null && ConsultationsBatch.Any())
+                    {
+                        foreach (var test in ConsultationsBatch)
+                        {
+                            test.VisitId = CurrentVisit.Id;
+                        }
+
+                        await SaveConsultationsAsync();
+
+                        CurrentVisit.Consultations = ConsultationsBatch;
+                    }
+
+                    if (TreatmentsBatch != null && TreatmentsBatch.Any())
+                    {
+
+                        foreach (var test in TreatmentsBatch)
+                        {
+                            test.VisitId = CurrentVisit.Id;
+                        }
+
+                        await SaveTreatmentsAsync();
+
+                        CurrentVisit.Treatments = TreatmentsBatch;
+                    }
+
+                    if (PrescriptionsBatch != null && PrescriptionsBatch.Any())
+                    {
+
+                        foreach (var test in PrescriptionsBatch)
+                        {
+                            test.VisitId = CurrentVisit.Id;
+                        }
+
+                        await SavePrescriptionsAsync();
+                        CurrentVisit.Prescriptions = PrescriptionsBatch;
+                    }
+
+                    await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
+
+                    // Automatically generate Interim Bill & calculate Insurance vs. Patient split
+                    await AutoGenerateVisitBillAsync(CurrentVisit.Id);
+
+                }
+
+                // if (CurrentPreliminaryTest.Id == 0)
+                // {
+                //     result = await patientService.AddPreliminaryTestAsync(CurrentPreliminaryTest);
+                //     if (result != null)
+                //         CurrentVisit.PreliminaryTest = result;
+                // }
+                var visitUpdateResponse = await patientService.UpdateVisitAsync(CurrentVisit, addedVisitId);
+
+                _step2TextInput = true;
+                StateHasChanged();
             }
-            catch (Exception ex)
-            {
-                saveMessage = "Save failed: " + ex.Message;
-            }
-            finally
-            {
-                isSaving = false;
-            }
+
+            await UpdateSideBar();
+
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
         }
 
     }

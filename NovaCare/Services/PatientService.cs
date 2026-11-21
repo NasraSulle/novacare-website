@@ -467,6 +467,9 @@ namespace NovaCare.Services
                                 RoomId = c.RoomId,
                                 DoctorId = c.DoctorId,
                                 DoctorStaffId = c.Doctor != null ? c.Doctor.StaffId : null,
+                                DoctorFullName = c.Doctor != null && c.Doctor.Staff != null
+                                        ? $"{c.Doctor.Staff.FisrtName} {c.Doctor.Staff.MiddleName} {c.Doctor.Staff.LastName}".Replace("  ", " ").Trim()
+                                        : string.Empty,
                                 MedicalDepartmentId = c.MedicalDepartmentId,
                                 BillItemId = c.BillItemId,
                                 MedicalDepartmentName = c.MedicalDepartment != null ? c.MedicalDepartment.MedicalDepartmentName : string.Empty,
@@ -1216,7 +1219,7 @@ namespace NovaCare.Services
                 var result = context.PreliminaryTests.Add(preliminaryTest);
                 await context.SaveChangesAsync();
 
-                dto.Id = preliminaryTest.Id;
+                dto.Id = result.Entity.Id;
                 return dto;
             }
             catch (Exception ex)
