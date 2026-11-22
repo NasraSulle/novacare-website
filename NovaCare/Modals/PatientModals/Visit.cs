@@ -25,6 +25,12 @@ namespace NovaCare.Modals.PatientModals
 
         [ForeignKey(nameof(Patient))]
         public int PatientId { get; set; }
+        [ForeignKey(nameof(PatientStatus))]
+        public int PatientStatusId { get; set; }
+
+        [ForeignKey(nameof(PatientType))]
+        public int PatientTypeId { get; set; }
+
 
         // Intended payment mode at check-in (1 = Cash, 2 = Insurance)
         [ForeignKey(nameof(PaymentMode))]
@@ -36,6 +42,8 @@ namespace NovaCare.Modals.PatientModals
 
         // Single Navigation Properties
         public Patient? Patient { get; set; }
+        public PatientStatus? PatientStatus { get; set; }
+        public PatientType? PatientType { get; set; }
         public VisitStatus? VisitStatus { get; set; }
         public VisitType? VisitType { get; set; }
         public PaymentMode? PaymentMode { get; set; }

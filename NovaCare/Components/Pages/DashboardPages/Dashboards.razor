@@ -787,7 +787,7 @@
         admittedPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() != "cancelled" && v.VisitDate.ToShortDateString() == DateTime.Now.ToShortDateString()).Count();
 
         //Triaged Patients
-        triagedPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() != "cancelled" && v.VisitDate.ToShortDateString() == DateTime.Now.ToShortDateString() && v.Patient?.PatientTypeName.ToLower().Trim() != "emergency").Count();
+        triagedPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() != "cancelled" && v.VisitDate.ToShortDateString() == DateTime.Now.ToShortDateString() && v?.PatientTypeName.ToLower().Trim() != "emergency").Count();
         
         //In Treatment Patients
         inTreatmentPatientsCount = allVisits.Where(v => v.VisitStatusName.ToLower().Trim() != "cancelled" && v.VisitDate.ToShortDateString() == DateTime.Now.ToShortDateString() && v.Treatments.Any()).Count();
@@ -841,8 +841,8 @@
 
     private void WeeklyPatients()
     {
-        var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
-        var countByDay = weeklyPatients.GroupBy(x => x.RegisteredDate.DayOfWeek)
+        var weeklyPatients = allVisits.Where(x => x.VisitDate >= sevenDaysAgo && x.VisitDate <= DateTime.Now).ToList();
+        var countByDay = weeklyPatients.GroupBy(x => x.VisitDate.DayOfWeek)
             .ToDictionary(g => g.Key == DayOfWeek.Sunday ? 6 : (int)g.Key - 1, g => (double)g.Count());
 
         _weeklyPatients = new List<ChartSeries<double>>();
@@ -855,13 +855,13 @@
 
     private void WeeklyPatientsByType()
     {
-        var weeklyPatients = allPatients.Where(x => x.RegisteredDate >= sevenDaysAgo && x.RegisteredDate <= DateTime.Now).ToList();
+        var weeklyPatients = allVisits.Where(x => x.VisitDate >= sevenDaysAgo && x.VisitDate <= DateTime.Now).ToList();
         var groupedByType = weeklyPatients.GroupBy(x => x.PatientTypeName ?? "General");
 
         _weeklyPatientsByType = new List<ChartSeries<double>>();
         foreach (var typeGroup in groupedByType)
         {
-            var countByDay = typeGroup.GroupBy(x => x.RegisteredDate.DayOfWeek)
+            var countByDay = typeGroup.GroupBy(x => x.VisitDate.DayOfWeek)
                 .ToDictionary(g => g.Key == DayOfWeek.Sunday ? 6 : (int)g.Key - 1, g => (double)g.Count());
 
             double[] weeklyData = Enumerable.Range(0, 7).Select(i => countByDay.ContainsKey(i) ? countByDay[i] : 0.0).ToArray();

@@ -44,7 +44,7 @@
             </MudItem>
             <MudItem md="12" Class="d-flex ps-0 pt-0">
                     <MudText Typo="Typo.subtitle2" Align="Align.Center"><MudIcon Icon="@Icons.Material.Outlined.AssistWalker" /> Current Condition -
-                        <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@CurrentPatient.PatientTypeName | @CurrentPatient.PatientStatusName</MudChip>
+                    <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@CurrentVisit.PatientTypeName | @CurrentVisit.PatientStatusName</MudChip>
                     </MudText>
                     <MudSpacer />
                 <MudPaper Elevation="0" Class="d-flex align-content-center bg-transparent">
@@ -345,32 +345,6 @@
                                                                             UserAttributes="@(new() { { "autocomplete", "employeeid" }, { "aria-required", "true" } } )" />
                                                     </MudItem>
                                                     <MudItem md="2">
-                                                        <MudSelect For="@(() => CurrentPatient.PatientTypeId)"
-                                                                   @bind-Value="CurrentPatient.PatientTypeId"
-                                                                   Label="Patient State" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient Type"
-                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                            <MudSelectItem Value="0" Disabled>Patient Type</MudSelectItem>
-
-                                                            @foreach (var item in PatientTypes)
-                                                            {
-                                                                <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
-                                                            }
-                                                        </MudSelect>
-                                                    </MudItem>
-                                                    <MudItem md="2">
-                                                        <MudSelect For="@(() => CurrentPatient.PatientStatusId)"
-                                                                   @bind-Value="CurrentPatient.PatientStatusId"
-                                                                   Label="Patient Type" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient State"
-                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                            <MudSelectItem Value="0" Disabled>Patient State</MudSelectItem>
-
-                                                            @foreach (var item in PatientStatus)
-                                                            {
-                                                                <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
-                                                            }
-                                                        </MudSelect>
-                                                    </MudItem>
-                                                    <MudItem md="2">
                                                         <MudStaticTextField For="@(() => CurrentPatient.PhoneNumber)" @bind-Value="CurrentPatient.PhoneNumber" Margin="Margin.Dense"
                                                                             Label="Phonenumber" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Phonenumber"
                                                                             UserAttributes="@(new() { { "autocomplete", "Phonenumber" }, { "aria-required", "true" } } )" />
@@ -409,7 +383,7 @@
                                     <MudItem md="12" Style="text-align:end" Class="pt-0">
 
                                         <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit"
-                                                         Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentPatient.PatientStatusId == 0 || CurrentPatient.PatientTypeId == 0)">Update  Patient Details</MudStaticButton>
+                                                         Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentVisit.PatientStatusId == 0 || CurrentVisit.PatientTypeId == 0)">Update  Patient Details</MudStaticButton>
                                         <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@(() => isPersonalDetails = false)" Class="">Back</MudButton>
                                     </MudItem>
                                 </MudGrid>
@@ -450,6 +424,34 @@
 
                                                         Visit & Payment Plan Details
                                                     </MudText>
+                                                </MudItem>
+                                                <MudItem md="12">
+                                                    <MudItem md="6">
+                                                        <MudSelect For="@(() => CurrentVisit.PatientTypeId)"
+                                                                   @bind-Value="CurrentVisit.PatientTypeId"
+                                                                   Label="Patient State" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient Type"
+                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                            <MudSelectItem Value="0" Disabled>Patient Type</MudSelectItem>
+
+                                                            @foreach (var item in PatientTypes)
+                                                            {
+                                                                <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
+                                                            }
+                                                        </MudSelect>
+                                                    </MudItem>
+                                                    <MudItem md="6">
+                                                        <MudSelect For="@(() => CurrentVisit.PatientStatusId)"
+                                                                   @bind-Value="CurrentVisit.PatientStatusId"
+                                                                   Label="Patient Type" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient State"
+                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                            <MudSelectItem Value="0" Disabled>Patient State</MudSelectItem>
+
+                                                            @foreach (var item in PatientStatus)
+                                                            {
+                                                                <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
+                                                            }
+                                                        </MudSelect>
+                                                    </MudItem>
                                                 </MudItem>
                                                 <MudItem md="3">
                                                     <MudPaper Class="pa-3" Outlined="true">
@@ -1066,7 +1068,7 @@
                                     <MudItem md="12" Style="text-align:end" Class="pt-0">
 
                                         <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit"
-                                                         Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentPatient.PatientStatusId == 0 || CurrentPatient.PatientTypeId == 0)">Save  Patient Details</MudStaticButton>
+                                                         Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentVisit.PatientStatusId == 0 || CurrentVisit.PatientTypeId == 0)">Save  Patient Details</MudStaticButton>
                                         <MudButton Disabled="!string.IsNullOrWhiteSpace(CurrentPatient.PatientCode)" Variant="Variant.Filled" Color="Color.Primary" OnClick="ResetPage" Class="">Reset Page</MudButton>
                                         <MudButton Variant="Variant.Filled" Color="Color.Error"  OnClick="@(() => isVisitModal = false)" Class="">Back</MudButton>
                                     </MudItem>
@@ -1091,7 +1093,7 @@
 @code {
     [Parameter] public EventCallback<bool> OnBack { get; set; }
     [Parameter] public StaffDto CurrentUser { get; set; } = new();
-    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public int PatientId { get; set; }
     [Parameter] public string? TitleIcon { get; set; }
 
@@ -1104,21 +1106,21 @@
     List<DoctorDto> AllDoctors = new();
     List<DoctorDto> FilteredDoctors = new();
     List<DoctorTypeDto> AllDoctorTypes = new();
-    List<ConsultationDto>? ConsultationsBatch = new();
-    List<LabTestDto>? LabTestsBatch = new();
-    List<TreatmentDto>? TreatmentsBatch = new();
-    List<PrescriptionDto>? PrescriptionsBatch = new();
-    List<TreatmentTypeDto>? AllTreatmentTypes = new();
-    List<SurgeryDto>? AllSurgeries = new();
-    List<TherapyDto>? AllTherapies = new();
-    List<MedicalDepartmentDto>? AllMedicalDepts = new();
-    List<MedicineGenreDto>? AllMedicineGenres = new();
-    List<MedicineTypeDto>? AllMedicineTypes = new();
-    List<MedicineTypeDto>? FilteredMedicineTypes = new();
-    List<MedicineDto>? AllMedicines = new();
-    List<MedicineDto>? FilteredMedicines = new();
-    List<WardDto>? AllWards = new();
-    List<RoomDto>? AllRooms = new();
+    List<ConsultationDto> ConsultationsBatch = new();
+    List<LabTestDto> LabTestsBatch = new();
+    List<TreatmentDto> TreatmentsBatch = new();
+    List<PrescriptionDto> PrescriptionsBatch = new();
+    List<TreatmentTypeDto> AllTreatmentTypes = new();
+    List<SurgeryDto> AllSurgeries = new();
+    List<TherapyDto> AllTherapies = new();
+    List<MedicalDepartmentDto> AllMedicalDepts = new();
+    List<MedicineGenreDto> AllMedicineGenres = new();
+    List<MedicineTypeDto> AllMedicineTypes = new();
+    List<MedicineTypeDto> FilteredMedicineTypes = new();
+    List<MedicineDto> AllMedicines = new();
+    List<MedicineDto> FilteredMedicines = new();
+    List<WardDto> AllWards = new();
+    List<RoomDto> AllRooms = new();
     
 
     List<PrescriptionDto> PreviousPrescription = new();
@@ -1251,7 +1253,7 @@
 
     public async Task OnMedicineTypeChange()
     {
-        FilteredMedicines = AllMedicines?.Where(gen => gen.MedicineGenreId == selectedMedGenreId && gen.MedicineTypeId == selectedMedTypeId && gen.MedicineStatusName.ToLower().Trim() == "instock").ToList();
+        FilteredMedicines = AllMedicines?.Where(gen => gen.MedicineGenreId == selectedMedGenreId && gen.MedicineTypeId == selectedMedTypeId && gen.MedicineStatusName.ToLower().Trim() == "instock").ToList() ?? new();
     }
 
     public async Task OnMedicineChoose()
@@ -1331,7 +1333,7 @@
 
         isSaving = true;
 
-        if (string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentPatient.PatientStatusId == 0 || CurrentPatient.PatientTypeId == 0)
+        if (string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentVisit.PatientStatusId == 0 || CurrentVisit.PatientTypeId == 0)
         {
             saveMessage = "Please fill patient details";
             isSaving = false;

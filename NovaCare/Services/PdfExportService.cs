@@ -255,7 +255,7 @@ namespace NovaCare.Services
                                 if (dto.Data is IEnumerable<StaffDto>)
                                 { html.Append("<th class='sn-col'>Sn.</th><th>Full Name</th><th>Employee Id</th><th>Title</th><th>Availability</th>"); }
                                 else if (dto.Data is IEnumerable<PatientDto>)
-                                { html.Append("<th class='sn-col'>Sn.</th><th>Full Name</th><th>Patient Type</th><th>Phone Number</th>"); }
+                                { html.Append("<th class='sn-col'>Sn.</th><th>Full Name</th><th>Phone Number</th>"); }
                                 else if (dto.Data is IEnumerable<LabTestDto>)
                                 { html.Append("<th class='sn-col'>Sn.</th><th>Disease Name</th><th>Patient Full Name</th><th>Date</th>"); }
                                 else if (dto.Data is IEnumerable<MedicineDto>)
@@ -285,7 +285,7 @@ namespace NovaCare.Services
                                 {
                                     foreach (PatientDto patient in patientList)
                                     {
-                                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td><strong>{patient.FisrtName} {patient.MiddleName} {patient.LastName}</strong></td><td>{patient.PatientTypeName}</td><td>{patient.PhoneNumber}</td></tr>");
+                                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td><strong>{patient.FisrtName} {patient.MiddleName} {patient.LastName}</strong></td><td>{patient.PhoneNumber}</td></tr>");
                                     }
                                 }
                                 else if (dto.Data is IEnumerable<LabTestDto> labList)

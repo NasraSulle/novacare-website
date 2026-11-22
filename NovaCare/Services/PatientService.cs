@@ -1,23 +1,16 @@
-﻿using Humanizer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client.NativeInterop;
-using NovaCare.Components.Pages.PatientPages;
+﻿using Microsoft.EntityFrameworkCore;
 using NovaCare.Data;
 using NovaCare.Interfaces;
-using NovaCare.Modals.DoctorModals;
 using NovaCare.Modals.InsuranceModals;
 using NovaCare.Modals.JoinTables;
 using NovaCare.Modals.PatientModals;
-using NovaCare.Modals.StaffModals;
 using NovaCare.Shared.DTOs.DoctorDTOs;
 using NovaCare.Shared.DTOs.InsuranceDTOs;
 using NovaCare.Shared.DTOs.JoinDto;
 using NovaCare.Shared.DTOs.JoinDTOs;
 using NovaCare.Shared.DTOs.LabTestDTOs;
 using NovaCare.Shared.DTOs.PatientDTOs;
-using NovaCare.Shared.DTOs.PaymentDTOs;
 using NovaCare.Shared.DTOs.ReportDTOs;
-using NovaCare.Shared.DTOs.StaffDTOs;
 using NovaCare.Shared.DTOs.TreatmentDTOs;
 
 namespace NovaCare.Services
@@ -47,10 +40,6 @@ namespace NovaCare.Services
                     PhoneNumber = patient.PhoneNumber,
                     PatientCode = patient.PatientCode,
                     RegisteredDate = patient.RegisteredDate,
-                    PatientStatusId = patient.PatientStatusId,
-                    PatientTypeId = patient.PatientTypeId,
-                    PatientStatusName = patient.PatientStatus != null ? patient.PatientStatus.PatientStatusName : string.Empty,
-                    PatientTypeName = patient.PatientType != null ? patient.PatientType.PatientTypeName : string.Empty,
                     Gender = patient.Gender,
                     Age = patient.Age,
                     DoctorPatients = patient.DoctorPatients
@@ -68,8 +57,10 @@ namespace NovaCare.Services
                             // UI Helpers
                             VisitStatusName = v.VisitStatus != null ? v.VisitStatus.VisitStatusName : string.Empty,
                             PreliminaryTestId = v.PreliminaryTest != null ? v.PreliminaryTest.Id : null,
+                            PatientTypeName = v.PatientType != null ? v.PatientType.PatientTypeName : string.Empty,
+                            PatientStatusName = v.PatientStatus != null ? v.PatientStatus.PatientStatusName : string.Empty,
 
-                            
+
                             // 2. Preliminary Test (Vitals)
                             PreliminaryTest = v.PreliminaryTest == null ? null : new PreliminaryTestDto
                             {
@@ -241,8 +232,6 @@ namespace NovaCare.Services
                     KinPhoneNumber = dto.KinPhoneNumber,
                     PatientFullName = $"{dto.FisrtName} {dto.MiddleName} {dto.LastName}".Replace("  ", " ").Trim(),
                     KinHomeAddress = dto.KinHomeAddress,
-                    PatientStatusId = dto.PatientStatusId,
-                    PatientTypeId = dto.PatientTypeId,
                     PatientInsuarances = dto.PatientInsuarances?
                         .Where(pi => pi.InsuaranceId > 0 && !string.IsNullOrWhiteSpace(pi.MemberCardNumber))
                         .Select(pi => new PatientInsuarance
@@ -289,8 +278,6 @@ namespace NovaCare.Services
                     PhoneNumber = patient.PhoneNumber,
                     RegisteredDate = patient.RegisteredDate,
                     PatientFullName = patient.PatientFullName,
-                    PatientStatusName = patient.PatientStatus!.PatientStatusName,
-                    PatientTypeName = patient.PatientType!.PatientTypeName,
                     Gender = patient.Gender,
                     Age = patient.Age,
                     DoctorPatients = patient.DoctorPatients == null
@@ -342,11 +329,6 @@ namespace NovaCare.Services
                     KinPhoneNumber = patient.KinPhoneNumber,
                     KinHomeAddress = patient.KinHomeAddress,
 
-                    // Status & Type
-                    PatientStatusId = patient.PatientStatusId,
-                    PatientTypeId = patient.PatientTypeId,
-                    PatientStatusName = patient.PatientStatus != null ? patient.PatientStatus.PatientStatusName : string.Empty,
-                    PatientTypeName = patient.PatientType != null ? patient.PatientType.PatientTypeName : string.Empty,
 
                     // Doctors
                     DoctorPatients = patient.DoctorPatients
@@ -385,6 +367,11 @@ namespace NovaCare.Services
                             VisitTypeId = v.VisitTypeId,
                             PatientId = v.PatientId,
                             VisitStatusId = v.VisitStatusId,
+
+                            PatientStatusId = v.PatientStatusId,
+                            PatientTypeId = v.PatientTypeId,
+                            PatientStatusName = v.PatientStatus != null ? v.PatientStatus.PatientStatusName : string.Empty,
+                            PatientTypeName = v.PatientType != null ? v.PatientType.PatientTypeName : string.Empty,
 
                             // Payment Mode & Insurance Info
                             PaymentModeId = v.PaymentModeId,
@@ -577,12 +564,8 @@ namespace NovaCare.Services
                 Gender = patient.Gender,
                 KinFullName = patient.KinFullName,
                 KinPhoneNumber = patient.KinPhoneNumber,
-                KinHomeAddress = patient.KinHomeAddress,
-                PatientStatusId = patient.PatientStatusId,
-                PatientTypeId = patient.PatientTypeId,
                 PatientFullName = patient.PatientFullName,
-                PatientStatusName = patient.PatientStatusName,
-                PatientTypeName = patient.PatientTypeName,
+                KinHomeAddress = patient.KinHomeAddress,
                 PatientInsuarances = patient.PatientInsuarances.Where(pi => pi.IsActive).ToList()
             };
 
@@ -646,6 +629,12 @@ namespace NovaCare.Services
                     PatientId = v.PatientId,
                     VisitStatusId = v.VisitStatusId,
 
+                    // Status & Type
+                    PatientStatusId = v.PatientStatusId,
+                    PatientTypeId = v.PatientTypeId,
+                    PatientStatusName = v.PatientStatus != null ? v.PatientStatus.PatientStatusName : string.Empty,
+                    PatientTypeName = v.PatientType != null ? v.PatientType.PatientTypeName : string.Empty,
+
                     // Payment Mode & Insurance Info
                     PaymentModeId = v.PaymentModeId,
                     PatientInsuaranceId = v.PatientInsuaranceId,
@@ -682,12 +671,8 @@ namespace NovaCare.Services
                         Gender = v.Patient.Gender,
                         KinFullName = v.Patient.KinFullName,
                         KinPhoneNumber = v.Patient.KinPhoneNumber,
-                        KinHomeAddress = v.Patient.KinHomeAddress,
-                        PatientStatusId = v.Patient.PatientStatusId,
-                        PatientTypeId = v.Patient.PatientTypeId,
                         PatientFullName = v.Patient.PatientFullName,
-                        PatientStatusName = v.Patient.PatientStatus != null ? v.Patient.PatientStatus.PatientStatusName : string.Empty,
-                        PatientTypeName = v.Patient.PatientType != null ? v.Patient.PatientType.PatientTypeName : string.Empty,
+                        KinHomeAddress = v.Patient.KinHomeAddress,
                         PatientInsuarances = v.Patient.PatientInsuarances
                             .Where(pi => pi.IsActive)
                             .Select(pi => new PatientInsuaranceDto
@@ -895,8 +880,6 @@ namespace NovaCare.Services
                 existingPatient.KinFullName = dto.KinFullName;
                 existingPatient.KinPhoneNumber = dto.KinPhoneNumber;
                 existingPatient.KinHomeAddress = dto.KinHomeAddress;
-                existingPatient.PatientStatusId = dto.PatientStatusId;
-                existingPatient.PatientTypeId = dto.PatientTypeId;
 
                 if (dto.PatientDiseases != null)
                 {
@@ -1003,6 +986,10 @@ namespace NovaCare.Services
                     VisitStatusId = visit.VisitStatusId,
                     VisitStatusName = visit.VisitStatus != null ? visit.VisitStatus.VisitStatusName : string.Empty,
                     DischargedDate = visit.DischargedDate,
+                    PatientStatusId = visit.PatientStatusId,
+                    PatientTypeId = visit.PatientTypeId,
+                    PatientStatusName = visit.PatientStatus != null ? visit.PatientStatus.PatientStatusName : string.Empty,
+                    PatientTypeName = visit.PatientType != null ? visit.PatientType.PatientTypeName : string.Empty,
 
                     // Payment Mode & Insurance Details
                     PaymentModeId = visit.PaymentModeId,
@@ -1037,9 +1024,7 @@ namespace NovaCare.Services
                     {
                         Id = visit.Patient.Id,
                         PatientCode = visit.Patient.PatientCode,
-                        PatientTypeName = visit.Patient.PatientType != null ? visit.Patient.PatientType.PatientTypeName : string.Empty,
                         PatientFullName = visit.Patient.PatientFullName,
-                        PatientStatusName = visit.Patient.PatientStatus != null ? visit.Patient.PatientStatus.PatientStatusName : string.Empty
                     }
                 }).ToListAsync();
 
@@ -1060,6 +1045,8 @@ namespace NovaCare.Services
                     VisitTypeId = dto.VisitTypeId,
                     PatientId = dto.PatientId,
                     FullName = dto.PatientFullName,
+                    PatientStatusId = dto.PatientStatusId,
+                    PatientTypeId = dto.PatientTypeId,
                     VisitStatusId = 1, // 1 = Active
                     PaymentModeId = effectivePaymentModeId,
                     PatientInsuaranceId = effectivePaymentModeId == 2 ? dto.PatientInsuaranceId : null
@@ -1094,6 +1081,9 @@ namespace NovaCare.Services
                 existingVisit.DischargedDate = dto.DischargedDate;
                 existingVisit.VisitStatusId = dto.VisitStatusId;
                 existingVisit.FullName = dto.PatientFullName;
+
+                existingVisit.PatientStatusId = dto.PatientStatusId;
+                existingVisit.PatientTypeId = dto.PatientTypeId;
 
                 if (dto.PaymentModeId > 0)
                 {
@@ -1193,8 +1183,6 @@ namespace NovaCare.Services
                     PhoneNumber = patient.PhoneNumber,
                     RegisteredDate = patient.RegisteredDate,
                     PatientFullName = patient.PatientFullName,
-                    PatientStatusName = patient.PatientStatus!.PatientStatusName,
-                    PatientTypeName = patient.PatientType!.PatientTypeName,
                     Gender = patient.Gender,
                     Age = patient.Age,
                     PatientCode = patient.PatientCode

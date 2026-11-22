@@ -27,21 +27,14 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public string KinPhoneNumber { get; set; } = string.Empty;
         public string KinHomeAddress { get; set; } = string.Empty;
 
-        // Foreign keys
-        public int PatientStatusId { get; set; }
-        public int PatientTypeId { get; set; }
 
         // Navigation properties
-        public PatientStatusDto? PatientStatus { get; set; }
-        public PatientTypeDto? PatientType { get; set; }
         public List<PatientDiseaseDto>? PatientDiseases { get; set; }
         public List<DoctorPatientDto>? DoctorPatients { get; set; }
         public List<PatientInsuaranceDto>? PatientInsuarances { get; set; }
         public List<VisitDto>? Visits { get; set; }
 
         // For display
-        public string PatientStatusName { get; set; } = string.Empty;
-        public string PatientTypeName { get; set; } = string.Empty;
         public string PatientFullName { get; set; } = string.Empty;
     }
 }

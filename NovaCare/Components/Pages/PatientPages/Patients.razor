@@ -43,9 +43,9 @@
                 <MudItem xs="6" sm="4">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-error);background-color: rgba(246,246,246,0.01) !important;">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Emergency</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Female</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Error" Style="font-weight:700;">
-                                @FilteredPatients.Count(x => string.Equals(x.PatientStatusName, "Emergency", StringComparison.OrdinalIgnoreCase))
+                                @FilteredPatients.Count(x => string.Equals(x.Gender.ToString().ToLower(), "female", StringComparison.OrdinalIgnoreCase))
                             </MudText>
                         </div>
                         <MudAvatar Color="Color.Error" Variant="Variant.Outlined" Size="Size.Medium">
@@ -56,9 +56,9 @@
                 <MudItem xs="6" sm="4">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);background-color: rgba(246,246,246,0.01) !important;">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Standard / Active</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Male</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
-                                @FilteredPatients.Count(x => !string.Equals(x.PatientStatusName, "Emergency", StringComparison.OrdinalIgnoreCase))
+                                @FilteredPatients.Count(x => !string.Equals(x.Gender.ToString().ToLower(), "female", StringComparison.OrdinalIgnoreCase))
                             </MudText>
                         </div>
                         <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
@@ -148,13 +148,13 @@
                     </TemplateColumn>
 
                     @* Patient Type Pill *@
-                    <TemplateColumn Title="Patient Type" SortBy="@(x => x.PatientTypeName)">
+    @*                 <TemplateColumn Title="Patient Type" SortBy="@(x => x.PatientTypeName)">
                         <CellTemplate>
                             <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">
                                 @(string.IsNullOrWhiteSpace(context.Item.PatientTypeName) ? "General" : context.Item.PatientTypeName)
                             </MudChip>
                         </CellTemplate>
-                    </TemplateColumn>
+                    </TemplateColumn> *@
 
                     @* Phone Number *@
                     <TemplateColumn Title="Phone Number" SortBy="@(x => x.PhoneNumber)">
@@ -167,7 +167,7 @@
                     </TemplateColumn>
 
                     @* Status Indicator *@
-                    <TemplateColumn Title="Status" SortBy="@(x => x.PatientStatusName)">
+                @*     <TemplateColumn Title="Status" SortBy="@(x => x.PatientStatusName)">
                         <CellTemplate>
                             @{
                                 bool isEmergency = string.Equals(context.Item.PatientStatusName, "Emergency", StringComparison.OrdinalIgnoreCase);
@@ -181,7 +181,7 @@
                                 @(string.IsNullOrWhiteSpace(context.Item.PatientStatusName) ? "Active" : context.Item.PatientStatusName)
                             </MudChip>
                         </CellTemplate>
-                    </TemplateColumn>
+                    </TemplateColumn> *@
 
                     @* Registered Date *@
                     <PropertyColumn Property="x => x.RegisteredDate.ToShortDateString()" Title="Registered Date" />
@@ -325,7 +325,7 @@
         {
             firstPart = FilterBy;
             messagePatient = $"{firstPart} Patients are not available!";
-            query = query.Where(p => string.Equals(p.PatientTypeName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
+            query = query.Where(p => string.Equals(p.Gender.ToString().ToLower()?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
         }
         else
         {
@@ -335,19 +335,19 @@
 
         if (PatientGenre == "My Patients" && currentDoc != null)
         {
-            query = query.Where(p => p.DoctorPatients?.Any(dp => dp.DoctorId == currentDoc.Id) == true);
+            query = query.Where(p => p.DoctorPatients?.Any(dp => dp.DoctorId == currentDoc?.Id) == true);
         }
         else if (PatientGenre == "Consultation Requests" && currentDoc != null)
         {
             if (string.IsNullOrWhiteSpace(FilterBy))
             {
                 query = query.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0
-                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.IsReadyForService == true && avc.FinishDate == null) == true) == true);
+                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc?.Id && avc.IsReadyForService == true && avc.FinishDate == null) == true) == true);
             }
             else
             {
                 query = query.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0
-                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.IsReadyForService == true && avc.FinishDate == null) == true) == true);
+                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc?.Id && avc.IsReadyForService == true && avc.FinishDate == null) == true) == true);
             }
         }
         else if (PatientGenre == "Vitals Requests")
@@ -366,8 +366,6 @@
                 (x.MiddleName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (x.LastName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (x.PhoneNumber?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.PatientStatusName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.PatientTypeName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (x.PatientCode?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
         }
 

@@ -1811,12 +1811,6 @@ namespace NovaCare.Migrations
                     b.Property<byte[]>("PatientPhoto")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<int>("PatientStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PatientTypeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1825,10 +1819,6 @@ namespace NovaCare.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PatientStatusId");
-
-                    b.HasIndex("PatientTypeId");
 
                     b.ToTable("Patients");
                 });
@@ -2018,6 +2008,12 @@ namespace NovaCare.Migrations
                     b.Property<int?>("PatientInsuaranceId")
                         .HasColumnType("int");
 
+                    b.Property<int>("PatientStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PatientTypeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("PaymentModeId")
                         .HasColumnType("int");
 
@@ -2035,6 +2031,10 @@ namespace NovaCare.Migrations
                     b.HasIndex("PatientId");
 
                     b.HasIndex("PatientInsuaranceId");
+
+                    b.HasIndex("PatientStatusId");
+
+                    b.HasIndex("PatientTypeId");
 
                     b.HasIndex("PaymentModeId");
 
@@ -4157,25 +4157,6 @@ namespace NovaCare.Migrations
                     b.Navigation("Visit");
                 });
 
-            modelBuilder.Entity("NovaCare.Modals.PatientModals.Patient", b =>
-                {
-                    b.HasOne("NovaCare.Modals.PatientModals.PatientStatus", "PatientStatus")
-                        .WithMany("Patients")
-                        .HasForeignKey("PatientStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NovaCare.Modals.PatientModals.PatientType", "PatientType")
-                        .WithMany("Patients")
-                        .HasForeignKey("PatientTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("PatientStatus");
-
-                    b.Navigation("PatientType");
-                });
-
             modelBuilder.Entity("NovaCare.Modals.PatientModals.PatientCode", b =>
                 {
                     b.HasOne("NovaCare.Modals.PatientModals.Patient", "Patient")
@@ -4220,6 +4201,18 @@ namespace NovaCare.Migrations
                         .HasForeignKey("PatientInsuaranceId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("NovaCare.Modals.PatientModals.PatientStatus", "PatientStatus")
+                        .WithMany("Visits")
+                        .HasForeignKey("PatientStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NovaCare.Modals.PatientModals.PatientType", "PatientType")
+                        .WithMany("Visits")
+                        .HasForeignKey("PatientTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("NovaCare.Modals.PaymentModals.PaymentMode", "PaymentMode")
                         .WithMany("Visits")
                         .HasForeignKey("PaymentModeId")
@@ -4241,6 +4234,10 @@ namespace NovaCare.Migrations
                     b.Navigation("Patient");
 
                     b.Navigation("PatientInsuarance");
+
+                    b.Navigation("PatientStatus");
+
+                    b.Navigation("PatientType");
 
                     b.Navigation("PaymentMode");
 
@@ -4617,12 +4614,12 @@ namespace NovaCare.Migrations
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.PatientStatus", b =>
                 {
-                    b.Navigation("Patients");
+                    b.Navigation("Visits");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.PatientType", b =>
                 {
-                    b.Navigation("Patients");
+                    b.Navigation("Visits");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.PatientModals.Visit", b =>

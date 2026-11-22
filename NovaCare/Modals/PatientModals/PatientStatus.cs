@@ -14,7 +14,7 @@ namespace NovaCare.Modals.PatientModals
         public string PatientStatusName { get; set; } = string.Empty;
 
         //navigation properties
-        public List<Patient>? Patients { get; set; }
+        public List<Visit>? Visits { get; set; }
 
     }
 }

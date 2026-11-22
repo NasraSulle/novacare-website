@@ -10,6 +10,10 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public DateTime VisitDate { get; set; }
         public DateTime? DischargedDate { get; set; } // Nullable until discharged
 
+
+        // Foreign keys
+        public int PatientStatusId { get; set; }
+        public int PatientTypeId { get; set; }
         public int VisitTypeId { get; set; }
         public int PatientId { get; set; }
         public int VisitStatusId { get; set; }
@@ -20,6 +24,8 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
 
         // Core navigation contracts using pure DTOs
         public PatientDto? Patient { get; set; }
+        public PatientStatusDto? PatientStatus { get; set; }
+        public PatientTypeDto? PatientType { get; set; }
         public VisitTypeDto? VisitType { get; set; }
         public PreliminaryTestDto? PreliminaryTest { get; set; }
         public VisitStatusDto? VisitStatus { get; set; }
@@ -33,6 +39,8 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
 
         // UI Helpers
         public string VisitTypeName { get; set; } = string.Empty;
+        public string PatientStatusName { get; set; } = string.Empty;
+        public string PatientTypeName { get; set; } = string.Empty;
         public string PatientFullName { get; set; } = string.Empty;
         public int? PreliminaryTestId { get; set; }
         public string VisitStatusName { get; set; } = string.Empty;

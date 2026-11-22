@@ -11,7 +11,7 @@ namespace NovaCare.Shared.DTOs.PatientDTOs
         public string PatientStatusName { get; set; } = string.Empty;
 
         //navigation properties
-        public List<PatientDto>? Patients { get; set; }
+        public List<VisitDto>? Visits { get; set; }
 
     }
 }

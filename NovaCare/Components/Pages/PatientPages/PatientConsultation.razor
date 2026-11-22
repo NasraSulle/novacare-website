@@ -51,7 +51,7 @@
             </MudItem>
             <MudItem md="12" Class="d-flex ps-0 pt-0">
                     <MudText Typo="Typo.subtitle2" Align="Align.Center"><MudIcon Icon="@Icons.Material.Outlined.AssistWalker" /> Patient Condition -
-                        <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@CurrentPatient.PatientTypeName | @CurrentPatient.PatientStatusName</MudChip>
+                    <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@CurrentVisit.PatientTypeName | @CurrentVisit.PatientStatusName</MudChip>
                     </MudText>
                     <MudSpacer />
                 <MudPaper Elevation="0" Class="align-content-center bg-transparent">
@@ -127,8 +127,8 @@
                                                     </MudText>
 
                                                     <MudItem md="12" Class="mt-3">
-                                                        <MudSelect For="@(() => CurrentPatient.PatientTypeId)"
-                                                                   @bind-Value="CurrentPatient.PatientTypeId"
+                                                        <MudSelect For="@(() => CurrentVisit.PatientTypeId)"
+                                                                   @bind-Value="CurrentVisit.PatientTypeId"
                                                                    Label="Patient State" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient Type"
                                                                    UserAttributes="@(new() { { "aria-required", "true" } } )">
                                                             <MudSelectItem Value="0" Disabled>Patient Type</MudSelectItem>
@@ -140,8 +140,8 @@
                                                         </MudSelect>
                                                     </MudItem>
                                                     <MudItem md="12">
-                                                        <MudSelect For="@(() => CurrentPatient.PatientStatusId)"
-                                                                   @bind-Value="CurrentPatient.PatientStatusId"
+                                                        <MudSelect For="@(() => CurrentVisit.PatientStatusId)"
+                                                                   @bind-Value="CurrentVisit.PatientStatusId"
                                                                    Label="Patient Type" Variant="Variant.Outlined" Margin="Margin.Dense" Placeholder="Patient State"
                                                                    UserAttributes="@(new() { { "aria-required", "true" } } )">
                                                             <MudSelectItem Value="0" Disabled>Patient State</MudSelectItem>
@@ -841,20 +841,20 @@
 
     List<DiseaseDto> AllDiseases = new();
     List<LabTestDto>? LabTestsBatch = new();
-    List<MedicineGenreDto>? AllMedicineGenres = new();
-    List<MedicineTypeDto>? AllMedicineTypes = new();
-    List<MedicineDto>? AllMedicines = new();
-    List<MedicineTypeDto>? FilteredMedicineTypes = new();
-    List<MedicineDto>? FilteredMedicines = new();
-    List<PrescriptionDto>? PrescriptionsBatch = new();
-    List<TreatmentTypeDto>? AllTreatmentTypes = new();
-    List<TreatmentDto>? TreatmentsBatch = new();
-    List<MedicalDepartmentDto>? AllMedicalDepts = new();
+    List<MedicineGenreDto> AllMedicineGenres = new();
+    List<MedicineTypeDto> AllMedicineTypes = new();
+    List<MedicineDto> AllMedicines = new();
+    List<MedicineTypeDto> FilteredMedicineTypes = new();
+    List<MedicineDto> FilteredMedicines = new();
+    List<PrescriptionDto> PrescriptionsBatch = new();
+    List<TreatmentTypeDto> AllTreatmentTypes = new();
+    List<TreatmentDto> TreatmentsBatch = new();
+    List<MedicalDepartmentDto> AllMedicalDepts = new();
     List<DoctorDto> AllDoctors = new();
-    List<SurgeryDto>? AllSurgeries = new();
-    List<TherapyDto>? AllTherapies = new();
-    List<WardDto>? AllWards = new();
-    List<RoomDto>? AllRooms = new();
+    List<SurgeryDto> AllSurgeries = new();
+    List<TherapyDto> AllTherapies = new();
+    List<WardDto> AllWards = new();
+    List<RoomDto> AllRooms = new();
     List<PatientStatusDto> PatientTypes = new();
     List<PatientTypeDto> PatientStatus = new();
 
@@ -969,7 +969,7 @@
         var dialog = await DialogService.ShowAsync<EditLabTest>("Lab Test Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (!result.Canceled)
+        if (!result!.Canceled)
         {
             await OnInitializedAsync();
         }
@@ -1074,7 +1074,7 @@
 
     public async Task OnMedicineTypeChange()
     {
-        FilteredMedicines = AllMedicines?.Where(gen => gen.MedicineGenreId == selectedMedGenreId && gen.MedicineTypeId == selectedMedTypeId && gen.MedicineStatusName.ToLower().Trim() == "instock").ToList();
+        FilteredMedicines = AllMedicines?.Where(gen => gen.MedicineGenreId == selectedMedGenreId && gen.MedicineTypeId == selectedMedTypeId && gen.MedicineStatusName.ToLower().Trim() == "instock").ToList() ?? new();
     }
 
     public async Task AddPrescriptionToBatch()
@@ -1579,7 +1579,7 @@
             var dialog = await DialogService.ShowAsync<ConfirmationModal>("Confirm", parameters);
             var result = await dialog.Result;
 
-            if (!result.Canceled)
+            if (!result!.Canceled)
             {
                 // await patientService.UpdatePatientAsync(CurrentPatient, CurrentPatient.Id);
                 CurrentConsultation.FinishDate = DateTime.UtcNow;
@@ -1590,7 +1590,7 @@
 
     public async Task SaveConditionAsync()
     {
-        var result = await patientService.UpdatePatientAsync(CurrentPatient, CurrentPatient.Id);
+        var result = await patientService.UpdateVisitAsync(CurrentVisit, CurrentVisit.Id);
 
         if (result)
         {
@@ -1598,7 +1598,8 @@
 
             Snackbar.Add(saveMessage, Severity.Success);
 
-            CurrentPatient = await patientService.GetPatientByCodeAsync(CurrentPatient.PatientCode);
+            // CurrentPatient = await patientService.GetPatientByCodeAsync(CurrentPatient.PatientCode);
+            CurrentVisit = await patientService.GetVisitByPCodeOrFullNameAsync(CurrentPatient.PatientCode);
             StateHasChanged();
         }
         else
@@ -1612,36 +1613,35 @@
     }
 
 
-public async Task SaveReferralAsync()
-{
-    var existingReferral = await patientService.GetReferralByConsultationIdAsync(CurrentConsultation.Id);
-
-    if (existingReferral != null)
+    public async Task SaveReferralAsync()
     {
-        StateHasChanged();
-        if (_referralPrintRef != null)
+        var existingReferral = await patientService.GetReferralByConsultationIdAsync(CurrentConsultation.Id);
+
+        if (existingReferral != null)
         {
-            await _referralPrintRef.GenerateReferralPdfAsync();
+            StateHasChanged();
+            if (_referralPrintRef != null)
+            {
+                await _referralPrintRef.GenerateReferralPdfAsync();
+            }
+        }
+        else
+        {
+
+            CurrentReferral.DoctorFullName = CurrentConsultation.DoctorFullName;
+            CurrentReferral.PatientFullName = CurrentPatient.PatientFullName;
+            CurrentReferral.ConsultationId = CurrentConsultation.Id;
+
+            var result = await patientService.AddReferralLetterAsync(CurrentReferral);
+            saveMessage = "Referral letter issued successfully!";
+
+            Snackbar.Add(saveMessage, Severity.Success);
+            StateHasChanged();
+
+            if (_referralPrintRef != null)
+            {
+                await _referralPrintRef.GenerateReferralPdfAsync();
+            }
         }
     }
-    else
-    {
-
-        CurrentReferral.DoctorFullName = CurrentConsultation.DoctorFullName;
-        CurrentReferral.PatientFullName = CurrentPatient.PatientFullName;
-        CurrentReferral.ConsultationId = CurrentConsultation.Id;
-
-        var result = await patientService.AddReferralLetterAsync(CurrentReferral);
-        saveMessage = "Referral letter issued successfully!";
-
-        Snackbar.Add(saveMessage, Severity.Success);
-        StateHasChanged();
-
-        if (_referralPrintRef != null)
-        {
-            await _referralPrintRef.GenerateReferralPdfAsync();
-        }
-    }
-}
-
 }

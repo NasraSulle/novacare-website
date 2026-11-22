@@ -31,16 +31,7 @@ namespace NovaCare.Modals.PatientModals
         public string KinPhoneNumber { get; set; } = string.Empty;
         public string KinHomeAddress { get; set; } = string.Empty;
 
-        // Foreign keys
-        [ForeignKey(nameof(PatientStatus))]
-        public int PatientStatusId { get; set; }
-
-        [ForeignKey(nameof(PatientType))]
-        public int PatientTypeId { get; set; }
-
         // Navigation properties
-        public PatientStatus? PatientStatus { get; set; }
-        public PatientType? PatientType { get; set; }
         public List<PatientDisease> PatientDiseases { get; set; } = new();
         public List<DoctorPatient> DoctorPatients { get; set; } = new();
         public List<PatientInsuarance> PatientInsuarances { get; set; } = new();
