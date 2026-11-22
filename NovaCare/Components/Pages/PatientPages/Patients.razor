@@ -342,12 +342,12 @@
             if (string.IsNullOrWhiteSpace(FilterBy))
             {
                 query = query.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0
-                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.IsReadyForService == true) == true) == true);
+                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.IsReadyForService == true && avc.FinishDate == null) == true) == true);
             }
             else
             {
                 query = query.Where(v => v.Visits?.Any(av => av.VisitStatusId == 1 && av.PreliminaryTestId > 0
-                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.BillItemId != null) == true) == true);
+                    && av.Consultations?.Any(avc => avc.DoctorId == currentDoc.Id && avc.IsReadyForService == true && avc.FinishDate == null) == true) == true);
             }
         }
         else if (PatientGenre == "Vitals Requests")

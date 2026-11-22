@@ -1,32 +1,44 @@
 ﻿@rendermode InteractiveServer
 
-@* <MudPopoverProvider />
-<MudDialogProvider />
-<MudSnackbarProvider /> *@
+<MudCarousel Class="mud-width-full"
+             Style="height: 100vh; width: 100vw;"
+             ShowArrows="@arrows"
+             ShowBullets="@bullets"
+             EnableSwipeGesture="@enableSwipeGesture"
+             AutoCycle="@autocycle"
+             AutoCycleTime="@TimeSpan.FromSeconds(6)"
+             TData="object">
 
-<MudCarousel Class="mud-width-full" Style="height:100%;" ShowArrows="@arrows" ShowBullets="@bullets" EnableSwipeGesture="@enableSwipeGesture" AutoCycle="@autocycle" TData="object">
-    <MudCarouselItem Transition="transition" Color="@Color.Secondary">
-        <MudPaper Class="d-flex" Style="height:100%">
-            <MudImage Src="Images/carousel5.jpg" Height="1000" />
-        </MudPaper>
+    <MudCarouselItem Transition="@transition">
+        <MudImage Src="Images/carousel5.jpg"
+                  ObjectFit="ObjectFit.Cover"
+                  ObjectPosition="ObjectPosition.Center"
+                  Style="width: 100%; height: 100%; display: block;"
+                  Alt="NovaCare Facility" />
     </MudCarouselItem>
-    <MudCarouselItem Transition="transition" Color="@Color.Secondary">
-        <MudPaper Class="d-flex" Style="height:100%">
-            <MudImage Src="Images/carousel3.jpg" Height="1000" />
-        </MudPaper>
+
+    <MudCarouselItem Transition="@transition">
+        <MudImage Src="Images/carousel3.jpg"
+                  ObjectFit="ObjectFit.Cover"
+                  ObjectPosition="ObjectPosition.Center"
+                  Style="width: 100%; height: 100%; display: block;"
+                  Alt="NovaCare Clinical Care" />
     </MudCarouselItem>
-    <MudCarouselItem Transition="transition" Color="@Color.Secondary">
-        <MudPaper Class="d-flex" Style="height:100%">
-            <MudImage Src="Images/carousel6.webp" Height="1000" />
-        </MudPaper>
+
+    <MudCarouselItem Transition="@transition">
+        <MudImage Src="Images/carousel6.webp"
+                  ObjectFit="ObjectFit.Cover"
+                  ObjectPosition="ObjectPosition.Center"
+                  Style="width: 100%; height: 100%; display: block;"
+                  Alt="NovaCare Team" />
     </MudCarouselItem>
+
 </MudCarousel>
 
 @code {
-
     private bool arrows = false;
     private bool bullets = false;
     private bool enableSwipeGesture = true;
     private bool autocycle = true;
-    private Transition transition = Transition.Slide;
+    private Transition transition = Transition.Fade;
 }

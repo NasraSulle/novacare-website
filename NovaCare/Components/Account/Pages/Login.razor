@@ -10,117 +10,305 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Log in</PageTitle>
+<PageTitle>Sign in | NovaCare</PageTitle>
 
-@* <MudText Typo="Typo.h3" GutterBottom="true">Log in</MudText> *@
+<style>
+    /* Full-Viewport Bright Daylight Stage */
+    .nc-daylight-stage {
+        min-height: 100vh;
+        width: 100%;
+        position: relative;
+        overflow-x: hidden;
+        background-color: #F8FAFC;
+    }
 
-<MudGrid Spacing="0" Style="min-height: 100vh;">
+    /* Full-Screen Background Carousel Layer */
+    .nc-bg-carousel {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        width: 100vw;
+        height: 100vh;
+    }
 
-    @* Left Column: Carousel Section *@
-    <MudItem xs="12" md="7" Class="d-none d-md-flex flex-column justify-center p-0" Style="background-color: #FFFFFF;">
+        .nc-bg-carousel > *,
+        .nc-bg-carousel .mud-carousel {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .nc-bg-carousel img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    /* Crystal-Clear Scrim (Shows Carousel Pictures Clearly) */
+    .nc-daylight-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        background: linear-gradient( 180deg, rgba(15, 23, 42, 0.14) 0%, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0) 75%, rgba(15, 23, 42, 0.14) 100% );
+        pointer-events: none;
+    }
+
+    /* Bright Frosted-Glass Login Card */
+    .nc-light-glass-card {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 440px;
+        background: rgba(255, 255, 255, 0.90) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.95) !important;
+        border-bottom: 1px solid rgba(203, 213, 225, 0.6) !important;
+        border-radius: 24px !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25), 0 8px 24px -6px rgba(15, 23, 42, 0.12) !important;
+    }
+
+    /* Light-Theme MudBlazor Static Inputs */
+    .nc-light-glass-form .mud-input-outlined {
+        background-color: rgba(255, 255, 255, 0.85) !important;
+        border-radius: 12px !important;
+        transition: all 0.2s ease;
+    }
+
+        .nc-light-glass-form .mud-input-outlined .mud-input-outlined-border {
+            border-color: #CBD5E1 !important;
+            border-radius: 12px !important;
+        }
+
+    .nc-light-glass-form .mud-input-control:hover .mud-input-outlined {
+        background-color: #FFFFFF !important;
+    }
+
+    .nc-light-glass-form .mud-input-control:hover .mud-input-outlined-border {
+        border-color: #94A3B8 !important;
+    }
+
+    .nc-light-glass-form .mud-input-outlined.mud-input-focused {
+        background-color: #FFFFFF !important;
+    }
+
+        .nc-light-glass-form .mud-input-outlined.mud-input-focused .mud-input-outlined-border {
+            border-color: #162368 !important;
+            border-width: 1.5px !important;
+            box-shadow: 0 0 0 4px rgba(22, 35, 104, 0.10) !important;
+        }
+
+    .nc-light-glass-form .mud-input-slot,
+    .nc-light-glass-form input {
+        color: #0F172A !important;
+        padding-top: 11px !important;
+        padding-bottom: 11px !important;
+    }
+
+        .nc-light-glass-form .mud-input-slot::placeholder,
+        .nc-light-glass-form input::placeholder {
+            color: #94A3B8 !important;
+            opacity: 1 !important;
+        }
+
+    .nc-light-glass-form .mud-input-adornment .mud-icon-root {
+        color: #475569 !important;
+    }
+
+    /* Brand Navy Primary CTA */
+    .nc-navy-glow-btn {
+        background: linear-gradient(135deg, #162368 0%, #1E3A8A 100%) !important;
+        color: #FFFFFF !important;
+        border-radius: 12px !important;
+        height: 48px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.02em !important;
+        box-shadow: 0 10px 22px -5px rgba(22, 35, 104, 0.35) !important;
+        transition: transform 0.15s ease, box-shadow 0.2s ease !important;
+    }
+
+        .nc-navy-glow-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px -5px rgba(22, 35, 104, 0.45) !important;
+            filter: brightness(1.06);
+        }
+
+    /* Light Frosted Passkey Button */
+    .nc-light-passkey-btn {
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        border: 1px solid #CBD5E1 !important;
+        color: #1E293B !important;
+        border-radius: 12px !important;
+        height: 44px !important;
+        transition: all 0.2s ease !important;
+    }
+
+        .nc-light-passkey-btn:hover {
+            background-color: #FFFFFF !important;
+            border-color: #162368 !important;
+            color: #162368 !important;
+        }
+
+    /* Distinct Live Blink + Beacon Pulse */
+    @@keyframes nc-beacon-pulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.75);
+        }
+
+        50% {
+            opacity: 0.25;
+            transform: scale(0.85);
+            box-shadow: 0 0 0 6px rgba(22, 35, 104, 0);
+        }
+    }
+
+    .nc-live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: red;
+        display: inline-block;
+        flex-shrink: 0;
+        animation: nc-beacon-pulse 1.5s infinite ease-in-out;
+    }
+</style>
+
+<div class="nc-daylight-stage d-flex flex-column justify-space-between align-center pa-4 pa-sm-6">
+
+    @* Full-Screen Background Carousel *@
+    <div class="nc-bg-carousel">
         <LoginCarousel />
-        @*
-        <MudText GutterBottom="true" Typo="Typo.body1">Use another service to log in.</MudText>
-        <ExternalLoginPicker />
-        *@
-    </MudItem>
+    </div>
 
-    @* Right Column: Login Card Section *@
-    <MudItem xs="12" md="5"
-             Class="d-flex flex-column align-center justify-center pa-6"
-             Style="min-height: 100vh; background-color: #F8FAFC; background-image: radial-gradient(circle at 20% 25%, rgba(22, 35, 104, 0.08) 0%, transparent 50%), radial-gradient(circle at 85% 80%, rgba(22, 35, 104, 0.05) 0%, transparent 50%);">
+    @* Crystal-Clear Edge Scrim Overlay *@
+    <div class="nc-daylight-scrim"></div>
 
-        @* Top Brand Logo *@
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mb-6">
-            <MudImage Src="Images/logo2.png" Height="55" ObjectFit="ObjectFit.Contain" />
+    @* Top Frosted Status Pill *@
+    <MudPaper Elevation="0" Class="px-4 py-1.5 rounded-pill mt-2 d-flex align-center"
+              Style="position: relative; z-index: 2; background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10); gap: 8px;">
+        <span class="nc-live-dot"></span>
+        <MudText Typo="Typo.caption" Style="color: red; letter-spacing: 0.08em; font-weight: 700;">
+            NOVACARE MEDICAL HOSPITAL
+        </MudText>
+    </MudPaper>
+
+    @* Centered Bright Frosted-Glass Login Card *@
+    <MudPaper Elevation="0" Class="nc-light-glass-card pa-7 pa-sm-9 my-6">
+
+        @* Logo & Clean Header *@
+        <MudStack AlignItems="AlignItems.Center" Class="mb-6">
+            <MudImage Src="Images/logo2.png" Height="48" ObjectFit="ObjectFit.Contain" Alt="NovaCare" Class="mb-4" />
+
+            <MudText Typo="Typo.h5" Align="Align.Center" Class="font-weight-bold" Style="color: #0F172A; letter-spacing: -0.02em;">
+                Staff Portal Access
+            </MudText>
+            <MudText Typo="Typo.body2" Align="Align.Center" Style="color: #475569;">
+                Sign in to continue to your clinical workspace
+            </MudText>
         </MudStack>
 
-        @* Centered White Card *@
-        <MudPaper Elevation="2" Class="pa-8 rounded-lg" Style="width: 100%; max-width: 440px; background-color: #FFFFFF; border: 1px solid #F1F5F9;">
+        @* Error / Status Message *@
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="mb-4">
+                <StatusMessage Message="@errorMessage" />
+            </div>
+        }
 
-            @* Soft Navy Tinted Icon Badge *@
-            <MudPaper Elevation="0" Class="d-flex align-center justify-center rounded-lg mb-5"
-                      Style="width: 44px; height: 44px; background-color: rgba(22, 35, 104, 0.08);">
-                <MudIcon Icon="@Icons.Material.Outlined.LockOpen" Style="color: rgba(22, 35, 104, 1);" Size="Size.Medium" />
-            </MudPaper>
-
-            @* Title & Subtitle *@
-            <MudText Typo="Typo.h5" Class="font-weight-bold mb-1" Style="color: #111827;">
-                Welcome Back!
-            </MudText>
-            <MudText Typo="Typo.body2" Class="mb-5" Style="color: #6B7280;">
-                Please enter your login details to access your account.
-            </MudText>
-
-            @* Status Message *@
-            <StatusMessage Message="@errorMessage" />
-
-            @* Static SSR Login Form *@
+        @* Static SSR Login Form *@
+        <div class="nc-light-glass-form">
             <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator />
 
-                <MudGrid Spacing="3">
-                    <MudItem xs="12">
-                        <MudText Typo="Typo.caption" Class="font-weight-bold d-block mb-1" Style="color: #4B5563; letter-spacing: 0.5px;">
-                            EMAIL
+                <MudStack Spacing="4">
+                    @* Email *@
+                    <div>
+                        <MudText Typo="Typo.caption" Class="font-weight-bold d-block mb-1.5" Style="color: #334155; letter-spacing: 0.04em;">
+                            EMAIL ADDRESS
                         </MudText>
                         <MudStaticTextField For="@(() => Input.Email)"
                                             @bind-Value="Input.Email"
-                                            Placeholder="name@example.com"
+                                            Placeholder="name@novacare.com"
                                             Variant="Variant.Outlined"
-                                            Margin="Margin.Dense"
                                             Adornment="Adornment.Start"
                                             AdornmentIcon="@Icons.Material.Outlined.Email"
+                                            IconSize="Size.Small"
                                             UserAttributes="@(new() { { "autocomplete", "username webauthn" }, { "aria-required", "true" } })" />
-                    </MudItem>
+                    </div>
 
-                    <MudItem xs="12">
-                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-1">
-                            <MudText Typo="Typo.caption" Class="font-weight-bold" Style="color: #4B5563; letter-spacing: 0.5px;">
+                    @* Password *@
+                    <div>
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-1.5">
+                            <MudText Typo="Typo.caption" Class="font-weight-bold" Style="color: #334155; letter-spacing: 0.04em;">
                                 PASSWORD
                             </MudText>
-                            <MudLink Href="Account/ForgotPassword" Underline="Underline.None" Typo="Typo.caption" Style="color: rgba(22, 35, 104, 1); font-weight: 600;">
+                            <MudLink Href="Account/ForgotPassword" Underline="Underline.Hover" Typo="Typo.caption" Style="color: #162368; font-weight: 700;">
                                 Forgot password?
                             </MudLink>
                         </MudStack>
                         <MudStaticTextField For="@(() => Input.Password)"
                                             @bind-Value="Input.Password"
                                             InputType="InputType.Password"
-                                            Placeholder="••••••••"
+                                            Placeholder="••••••••••••"
                                             Variant="Variant.Outlined"
-                                            Margin="Margin.Dense"
                                             Adornment="Adornment.Start"
                                             AdornmentIcon="@Icons.Material.Outlined.Lock"
+                                            IconSize="Size.Small"
                                             UserAttributes="@(new() { { "autocomplete", "current-password" }, { "aria-required", "true" } })" />
-                    </MudItem>
+                    </div>
 
-                    <MudItem xs="12" Class="mt-2">
-                        <MudStaticButton Variant="Variant.Filled"
-                                         FullWidth="true"
-                                         FormAction="FormAction.Submit"
-                                         EndIcon="@Icons.Material.Rounded.ArrowForward"
-                                         Class="py-2.5 rounded-lg text-none font-weight-bold"
-                                         Style="background-color: rgba(22, 35, 104, 1); color: #FFFFFF; box-shadow: 0 4px 12px rgba(22, 35, 104, 0.25);">
-                            Log in
-                        </MudStaticButton>
-                    </MudItem>
-                </MudGrid>
+                    @* Remember Me *@
+              @*       <div class="mt-n1">
+                        <MudStaticCheckBox For="@(() => Input.RememberMe)"
+                                           @bind-Value="Input.RememberMe"
+                                           Color="Color.Primary"
+                                           Dense="true"
+                                           Size="Size.Small">
+                            <MudText Typo="Typo.body2" Style="color: #334155; font-size: 0.85rem;">
+                                Keep session active on this device
+                            </MudText>
+                        </MudStaticCheckBox>
+                    </div> *@
+
+                    @* Primary Submit Button *@
+                    <MudStaticButton Variant="Variant.Filled"
+                                     FullWidth="true"
+                                     FormAction="FormAction.Submit"
+                                     EndIcon="@Icons.Material.Rounded.ArrowForward"
+                                     Class="text-none nc-navy-glow-btn">
+                        Sign In
+                    </MudStaticButton>
+                </MudStack>
             </EditForm>
+        </div>
 
-        </MudPaper>
-
-        @* Footer Support Text *@
-        <MudStack Row="true" Justify="Justify.Center" AlignItems="AlignItems.Center" Spacing="1" Class="mt-6">
-            <MudText Typo="Typo.caption" Style="color: #6B7280;">Need help signing in?</MudText>
-            <MudLink Href="/support" Underline="Underline.None" Typo="Typo.caption" Style="color: rgba(22, 35, 104, 1); font-weight: 600;">
-                Contact support
-            </MudLink>
+        @* Divider + Passkey Option *@
+       @*  <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Class="my-5">
+            <MudDivider Style="border-color: #CBD5E1;" />
+            <MudText Typo="Typo.caption" Style="color: #64748B; font-weight: 700;">OR</MudText>
+            <MudDivider Style="border-color: #CBD5E1;" />
         </MudStack>
 
-    </MudItem>
+        <MudButton Variant="Variant.Outlined"
+                   FullWidth="true"
+                   StartIcon="@Icons.Material.Outlined.Fingerprint"
+                   Class="text-none font-weight-semibold nc-light-passkey-btn">
+            Sign in with Passkey
+        </MudButton> *@
 
-</MudGrid>
+    </MudPaper>
 
+    @* Bottom Frosted Footer Pill *@
+    <MudPaper Elevation="0" Class="px-4 py-1.5 rounded-pill mb-2 d-flex align-center"
+              Style="position: relative; z-index: 2; background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10); gap: 8px;">
+        <MudText Typo="Typo.caption" Style="color: #475569;">Having trouble logging in?</MudText>
+        <MudLink Href="/support" Underline="Underline.Hover" Typo="Typo.caption" Style="color: #162368; font-weight: 700;">
+            Contact IT Support
+        </MudLink>
+    </MudPaper>
+
+</div>
 
 @code {
     private string? errorMessage;
@@ -142,7 +330,6 @@
 
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         }
     }
@@ -158,26 +345,21 @@
         SignInResult result;
         if (!string.IsNullOrEmpty(Input.Passkey?.CredentialJson))
         {
-            // When performing passkey sign-in, don't perform form validation.
             result = await SignInManager.PasskeySignInAsync(Input.Passkey.CredentialJson);
         }
         else
         {
-            // If doing a password sign-in, validate the form.
             if (!editContext.Validate())
             {
                 return;
             }
 
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
             result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         }
 
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
-            // RedirectManager.RedirectTo(ReturnUrl);
             RedirectManager.RedirectTo("/");
         }
         else if (result.RequiresTwoFactor)

@@ -86,6 +86,8 @@ namespace NovaCare.Services
                             {
                                 Id = c.Id,
                                 DoctorId = c.DoctorId,
+                                StartDate = c.StartDate,
+                                FinishDate = c.FinishDate,
                                 IsReadyForService =
                                                 (c.BillItem != null && c.BillItem.Bill != null && c.BillItem.Bill.PaymentStatusId == 3)
                                                 ||
