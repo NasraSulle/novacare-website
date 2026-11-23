@@ -2959,7 +2959,7 @@ namespace NovaCare.Migrations
                         {
                             Id = 5,
                             RegisteredDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            StaffTitleName = "Help Desk",
+                            StaffTitleName = "Receptionist",
                             StaffTypeId = 1,
                             TitleGroupId = 5
                         },

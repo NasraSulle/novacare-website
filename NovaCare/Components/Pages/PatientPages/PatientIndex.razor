@@ -39,12 +39,9 @@
                 <MudTabPanel Text="Consultation Requests" Icon="@Icons.Material.Outlined.MedicalServices" Style="text-transform: none; font-weight: 500;" OnClick="@(() => SetGenre("Consultation Requests"))">
                     @RenderSubTabs("Consultation Requests")
                 </MudTabPanel>
-                <MudTabPanel Text="Vitals Requests" Icon="@Icons.Material.Outlined.MonitorHeart" Style="text-transform: none; font-weight: 500;" OnClick="@(() => SetGenre("Vitals Requests"))">
-                    @RenderSubTabs("Vitals Requests")
-                </MudTabPanel>
             }
 
-            @if (CurrentUser?.ClinicalTitleName?.Trim().ToLower() == "nurse" || CurrentUser?.AdministrativeTitleName?.Trim().ToLower() == "help desk")
+            @if (CurrentUser?.ClinicalTitleName?.Trim().ToLower() == "nurse" || CurrentUser?.AdministrativeTitleName?.Trim().ToLower() == "receptionist")
             {
                 <MudTabPanel Text="Vitals Requests" Icon="@Icons.Material.Outlined.MonitorHeart" Style="text-transform: none; font-weight: 500;" OnClick="@(() => SetGenre("Vitals Requests"))">
                     @RenderSubTabs("Vitals Requests")

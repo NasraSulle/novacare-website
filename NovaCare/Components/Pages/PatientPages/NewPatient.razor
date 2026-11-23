@@ -162,6 +162,12 @@
                                         </MudText>
                                     </MudItem>
                                     <MudItem md="12">
+                                        <MudPaper Class="pa-3" Outlined="true">
+                                            <MudText Typo="Typo.subtitle2">
+                                                Patient's Condition
+                                            </MudText>
+
+                                            <MudGrid Class="pa-3" Spacing="2">
                                         <MudItem md="6">
                                             <MudSelect For="@(() => CurrentVisit.PatientTypeId)"
                                                        @bind-Value="CurrentVisit.PatientTypeId"
@@ -188,6 +194,8 @@
                                                 }
                                             </MudSelect>
                                         </MudItem>
+                                            </MudGrid>
+                                        </MudPaper>
                                     </MudItem>
                                     <MudItem md="3">
                                         <MudPaper Class="pa-3" Outlined="true">
@@ -806,7 +814,7 @@
 
                         <MudItem md="12" Style="text-align:end" Class="pt-0">
                             <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit"
-                                             Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentVisit.PatientStatusId == 0 || CurrentVisit.PatientTypeId == 0)">Save  Patient Details</MudStaticButton>
+                                             Disabled="@(string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber))">Save  Patient Details</MudStaticButton>
                             <MudButton Disabled="!string.IsNullOrWhiteSpace(CurrentPatient.PatientCode)" Variant="Variant.Filled" Color="Color.Primary" OnClick="ResetPage" Class="">Reset Page</MudButton>
                             <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToPatientsPage" Class="">Back</MudButton>
                         </MudItem>
@@ -1006,7 +1014,7 @@
 
         isSaving = true;
 
-        if (string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber) || CurrentVisit.PatientStatusId == 0 || CurrentVisit.PatientTypeId == 0)
+        if (string.IsNullOrWhiteSpace(CurrentPatient.FisrtName) || string.IsNullOrWhiteSpace(CurrentPatient.PhoneNumber) || string.IsNullOrWhiteSpace(CurrentPatient.KinFullName) || string.IsNullOrWhiteSpace(CurrentPatient.KinPhoneNumber))
         {
             saveMessage = "Please fill patient details";
             isSaving = false;

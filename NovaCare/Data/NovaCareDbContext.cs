@@ -60,7 +60,7 @@ namespace NovaCare.Data
                 new StaffTitle { Id = 2, StaffTypeId = 2, StaffTitleName = "Nurse", TitleGroupId = 3 },
                 new StaffTitle { Id = 3, StaffTypeId = 1, StaffTitleName = "Director", TitleGroupId = 1 },
                 new StaffTitle { Id = 4, StaffTypeId = 1, StaffTitleName = "HOD", TitleGroupId = 1 },
-                new StaffTitle { Id = 5, StaffTypeId = 1, StaffTitleName = "Help Desk", TitleGroupId = 5 },
+                new StaffTitle { Id = 5, StaffTypeId = 1, StaffTitleName = "Receptionist", TitleGroupId = 5 },
                 new StaffTitle { Id = 6, StaffTypeId = 1, StaffTitleName = "Maintenance Office", TitleGroupId = 5 },
                 new StaffTitle { Id = 7, StaffTypeId = 2, StaffTitleName = "Pharmacist", TitleGroupId = 5 },
                 new StaffTitle { Id = 8, StaffTypeId = 1, StaffTitleName = "System Admin", TitleGroupId = 4 }

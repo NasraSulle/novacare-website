@@ -699,7 +699,17 @@ namespace NovaCare.Services
                         MNOOperator = p.MNOOperator,
                         InsurerSettlementReference = p.InsurerSettlementReference,
                         SettlementBatchNumber = p.SettlementBatchNumber
-                    }).ToList()
+                    }).ToList(),
+
+                    Visit = new VisitDto
+                    { 
+                        Patient = new PatientDto 
+                        { 
+                            PatientCode = b.Visit!.Patient!.PatientCode,
+                            HomeAddress = b.Visit!.Patient!.HomeAddress,
+                            PhoneNumber = b.Visit!.Patient!.PhoneNumber,
+                        }
+                    }
                 })
                 .FirstOrDefaultAsync();
 

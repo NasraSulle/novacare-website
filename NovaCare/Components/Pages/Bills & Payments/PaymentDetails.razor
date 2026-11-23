@@ -65,8 +65,8 @@
                     <MudText Typo="Typo.caption" Class="d-block"><strong>MRNo:</strong> @MrNo</MudText>
                     <MudText Typo="Typo.caption" Class="d-block"><strong>Address:</strong> @Address</MudText>
                     <MudText Typo="Typo.caption" Class="d-block"><strong>Phone:</strong> @Phone</MudText>
-                    <MudText Typo="Typo.caption" Class="d-block"><strong>Clinic:</strong> @Clinic</MudText>
-                    <MudText Typo="Typo.caption" Class="d-block"><strong>Doctor:</strong> @DoctorName</MudText>
+                    @* <MudText Typo="Typo.caption" Class="d-block"><strong>Clinic:</strong> @Clinic</MudText>
+                    <MudText Typo="Typo.caption" Class="d-block"><strong>Doctor:</strong> @DoctorName</MudText> *@
                     <MudText Typo="Typo.caption" Class="d-block"><strong>Paid Date:</strong> @VisitDate.ToString("yyyy-MM-dd HH:mm:ss")</MudText>
                 </div>
 
@@ -240,8 +240,8 @@
     [Parameter] public string MrNo { get; set; } = "—";
     [Parameter] public string Address { get; set; } = "—";
     [Parameter] public string Phone { get; set; } = "—";
-    [Parameter] public string Clinic { get; set; } = "GENERAL OPD";
-    [Parameter] public string DoctorName { get; set; } = "—";
+    //[Parameter] public string Clinic { get; set; } = "GENERAL OPD";
+    //[Parameter] public string DoctorName { get; set; } = "—";
     [Parameter] public List<ReceiptItem> Items { get; set; } = new();
 
     private HospitalInfoSettings Hospital => HospitalOptions.Value;
@@ -261,30 +261,28 @@
             _isLoading = true;
             try
             {
-                /*
-                 * Fetch full Bill & Patient details using CurrentPayment.BillId:
-                 *
-                 * var bill = await billService.GetBillByIdAsync(CurrentPayment.BillId);
-                 * if (bill != null)
-                 * {
-                 *     PatientName = bill.PatientName;
-                 *     MrNo = bill.MRNumber;
-                 *     Address = bill.PatientAddress;
-                 *     Phone = bill.PatientPhone;
-                 *     Clinic = bill.ClinicName ?? "GENERAL OPD";
-                 *     DoctorName = bill.DoctorName ?? "—";
-                 *
-                 *     if (bill.BillItems != null && bill.BillItems.Any())
-                 *     {
-                 *         Items = bill.BillItems.Select(bi => new ReceiptItem
-                 *         {
-                 *             Description = bi.ServiceName,
-                 *             Qty = bi.Quantity,
-                 *             SubTotal = bi.SubTotal
-                 *         }).ToList();
-                 *     }
-                 * }
-                 */
+                            
+                  var bill = await paymentService.GetBillByIdAsync(CurrentPayment.BillId);
+                  if (bill != null)
+                  {
+                      PatientName = bill.PatientFullName;
+                      MrNo = bill.Visit.Patient.PatientCode;
+                      Address = bill.Visit.Patient.HomeAddress;
+                      Phone = bill.Visit.Patient.PhoneNumber;
+                      //Clinic = bill.ClinicName ?? "GENERAL OPD";
+                      //DoctorName = bill.DoctorName ?? "—";
+                 
+                      if (bill.BillItems != null && bill.BillItems.Any())
+                      {
+                          Items = bill.BillItems.Select(bi => new ReceiptItem
+                          {
+                              Description = bi.ItemName,
+                              Qty = bi.Quantity,
+                              SubTotal = bi.SubTotal
+                          }).ToList();
+                      }
+                  }
+                
             }
             finally
             {
@@ -357,7 +355,7 @@
     public class ReceiptItem
     {
         public string Description { get; set; } = string.Empty;
-        public int Qty { get; set; } = 1;
+        public double Qty { get; set; } = 1;
         public decimal SubTotal { get; set; }
     }
 }
