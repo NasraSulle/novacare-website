@@ -1,4 +1,5 @@
-﻿using NovaCare.Shared.DTOs.DoctorDTOs;
+﻿using NovaCare.Modals.DoctorModals;
+using NovaCare.Shared.DTOs.DoctorDTOs;
 using NovaCare.Shared.DTOs.StaffDTOs;
 
 namespace NovaCare.Interfaces
@@ -10,7 +11,8 @@ namespace NovaCare.Interfaces
         Task<bool> AddDoctorAsync(DoctorDto doctorDto);
         Task<DoctorDto> GetDoctorByStaffId(string staffId);
         Task<bool> UpdateDoctorAsync(DoctorDto doctor, int doctorId);
-        Task<int> AddDoctorCodeAsync();
-        Task<bool> UpdateDoctorCodeAsync(int doctorId, int code);
+        Task<int> AddGenericCodeAsync();
+        Task<bool> UpdateGenericCodeAsync(int doctorId, int code, string codeFor);
+        Task<GenericCode> GetGenericCodeAsync(string codeFor);
     }
 }

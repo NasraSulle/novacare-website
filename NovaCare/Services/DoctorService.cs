@@ -46,18 +46,18 @@ namespace NovaCare.Services
             }
         }
 
-        public async Task<int> AddDoctorCodeAsync()
+        public async Task<int> AddGenericCodeAsync()
         {
             try
             {
                 using var context = _contextFactory.CreateDbContext();
 
-                var doctorCode = new DoctorCode();
+                var doctorCode = new GenericCode();
 
-                var result = context.DoctorCodes.Add(doctorCode);
+                var result = context.GenericCodes.Add(doctorCode);
                 await context.SaveChangesAsync();
 
-                return result.Entity.DocCode;
+                return result.Entity.CodeNumber;
             }
             catch
             {
@@ -147,6 +147,34 @@ namespace NovaCare.Services
             return docTypes;
         }
 
+        public async Task<GenericCode> GetGenericCodeAsync(string codeFor)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            GenericCode? result = new();
+
+            if (codeFor == "doctor")
+            {
+
+                result = await context.GenericCodes
+                    .AsNoTracking().AsSplitQuery().FirstOrDefaultAsync(gc => gc.DoctorId == null);
+            }
+
+            if (codeFor == "bed")
+            {
+
+                result = await context.GenericCodes
+                    .AsNoTracking().AsSplitQuery().FirstOrDefaultAsync(gc => gc.BedId == null);
+            }
+
+            if (codeFor == "room")
+            {
+
+                result = await context.GenericCodes
+                    .AsNoTracking().AsSplitQuery().FirstOrDefaultAsync(gc => gc.RoomId == null);
+            }
+            return result;
+        }
+
         public async Task<bool> UpdateDoctorAsync(DoctorDto doctor, int doctorId)
         {
             try
@@ -178,19 +206,26 @@ namespace NovaCare.Services
             }
         }
 
-        public async Task<bool> UpdateDoctorCodeAsync(int doctorId, int code)
+        public async Task<bool> UpdateGenericCodeAsync(int doctorId, int code, string codeFor)
         {
             try
             {
                 using var context = _contextFactory.CreateDbContext();
 
-                var existingDocCode = await context.DoctorCodes.FirstOrDefaultAsync(x => x.DocCode == code);
+                var existingDocCode = await context.GenericCodes.FirstOrDefaultAsync(x => x.CodeNumber == code);
 
                 if (existingDocCode != null)
                 {
-                    existingDocCode.DoctorId = doctorId;
+                    if(codeFor == "doctor")
+                        existingDocCode.DoctorId = doctorId;
 
-                    context.DoctorCodes.Update(existingDocCode);
+                    if(codeFor == "bed")
+                        existingDocCode.BedId = doctorId;
+
+                    if(codeFor == "room")
+                        existingDocCode.RoomId = doctorId;
+
+                    context.GenericCodes.Update(existingDocCode);
                     await context.SaveChangesAsync();
                 }
 

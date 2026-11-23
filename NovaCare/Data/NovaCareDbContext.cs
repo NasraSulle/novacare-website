@@ -76,7 +76,9 @@ namespace NovaCare.Data
                 new RoomType { Id = 2, RoomTypeCode = "002", RoomTypeName = "Consultation Room" },
                 new RoomType { Id = 3, RoomTypeCode = "003", RoomTypeName = "Lab" },
                 new RoomType { Id = 4, RoomTypeCode = "004", RoomTypeName = "Therapy Room" },
-                new RoomType { Id = 5, RoomTypeCode = "005", RoomTypeName = "Radiology" }
+                new RoomType { Id = 5, RoomTypeCode = "005", RoomTypeName = "Pharmacy" },
+                new RoomType { Id = 6, RoomTypeCode = "006", RoomTypeName = "Counter" },
+                new RoomType { Id = 7, RoomTypeCode = "007", RoomTypeName = "Radiology" }
                 );
 
             builder.Entity<RoomStatus>().HasData(
@@ -285,7 +287,7 @@ namespace NovaCare.Data
             #region [Fluent API Configurations]
 
             builder.HasSequence<int>("DoctorCodeSequence").StartsAt(1000).IncrementsBy(1);
-            builder.Entity<DoctorCode>().Property(d => d.DocCode).UseSequence("DoctorCodeSequence");
+            builder.Entity<GenericCode>().Property(d => d.CodeNumber).UseSequence("DoctorCodeSequence");
 
             builder.HasSequence<int>("EmployeeIdCodeSequence").StartsAt(1000).IncrementsBy(1);
             builder.Entity<EmployeeId>().Property(d => d.EmployeeIdCode).UseSequence("EmployeeIdCodeSequence");
@@ -476,7 +478,7 @@ namespace NovaCare.Data
         public DbSet<LabTest> LabTests { get; set; }
         public DbSet<MedicineGenre> MedicineGenres { get; set; }
 
-        public DbSet<DoctorCode> DoctorCodes { get; set; }
+        public DbSet<GenericCode> GenericCodes { get; set; }
         public DbSet<EmployeeId> EmployeeIds { get; set; }
         public DbSet<StaffTitleGroup> StaffTitleGroups { get; set; }
         public DbSet<LabTestResultComposition> LabTestResultCompositions { get; set; }

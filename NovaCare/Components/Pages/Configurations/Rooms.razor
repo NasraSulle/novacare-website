@@ -10,5 +10,7 @@
 </MudPaper>
 
 @code {
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
 
 }

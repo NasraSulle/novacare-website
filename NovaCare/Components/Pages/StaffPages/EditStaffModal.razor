@@ -515,7 +515,17 @@
 
     public async Task OnGenerateDoctorCode()
     {
-        docCode = await doctorService.AddDoctorCodeAsync();
+        var begotten = await doctorService.GetGenericCodeAsync("doctor");
+
+        if (begotten.CodeNumber == 0)
+        {
+            docCode = await doctorService.AddGenericCodeAsync();
+        }
+        else
+        {
+            docCode = begotten.CodeNumber;
+        }
+
         CurrentDoctor.DoctorCode = $"DOC{docCode}";
 
         if (string.IsNullOrWhiteSpace(CurrentDoctor.DoctorCode))

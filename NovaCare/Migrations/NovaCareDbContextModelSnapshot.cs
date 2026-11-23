@@ -365,34 +365,6 @@ namespace NovaCare.Migrations
                     b.ToTable("Doctors");
                 });
 
-            modelBuilder.Entity("NovaCare.Modals.DoctorModals.DoctorCode", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DocCode")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValueSql("NEXT VALUE FOR [DoctorCodeSequence]");
-
-                    SqlServerPropertyBuilderExtensions.UseSequence(b.Property<int>("DocCode"), "DoctorCodeSequence");
-
-                    b.Property<int?>("DoctorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DocCode")
-                        .IsUnique();
-
-                    b.HasIndex("DoctorId");
-
-                    b.ToTable("DoctorCodes");
-                });
-
             modelBuilder.Entity("NovaCare.Modals.DoctorModals.DoctorStatus", b =>
                 {
                     b.Property<int>("Id")
@@ -580,6 +552,44 @@ namespace NovaCare.Migrations
                             DoctorTypeName = "General Surgeon",
                             MedicalDeptId = 15
                         });
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.DoctorModals.GenericCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CodeNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValueSql("NEXT VALUE FOR [DoctorCodeSequence]");
+
+                    SqlServerPropertyBuilderExtensions.UseSequence(b.Property<int>("CodeNumber"), "DoctorCodeSequence");
+
+                    b.Property<int?>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RoomId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BedId");
+
+                    b.HasIndex("CodeNumber")
+                        .IsUnique();
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("DoctorCodes");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.DoctorModals.MedicalDepartment", b =>
@@ -2527,6 +2537,18 @@ namespace NovaCare.Migrations
                         {
                             Id = 5,
                             RoomTypeCode = "005",
+                            RoomTypeName = "Pharmacy"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            RoomTypeCode = "006",
+                            RoomTypeName = "Counter"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            RoomTypeCode = "007",
                             RoomTypeName = "Radiology"
                         });
                 });
@@ -3773,15 +3795,6 @@ namespace NovaCare.Migrations
                     b.Navigation("Staff");
                 });
 
-            modelBuilder.Entity("NovaCare.Modals.DoctorModals.DoctorCode", b =>
-                {
-                    b.HasOne("NovaCare.Modals.DoctorModals.Doctor", "Doctor")
-                        .WithMany()
-                        .HasForeignKey("DoctorId");
-
-                    b.Navigation("Doctor");
-                });
-
             modelBuilder.Entity("NovaCare.Modals.DoctorModals.DoctorType", b =>
                 {
                     b.HasOne("NovaCare.Modals.DoctorModals.MedicalDepartment", "MedicalDepartment")
@@ -3789,6 +3802,27 @@ namespace NovaCare.Migrations
                         .HasForeignKey("MedicalDepartmentId");
 
                     b.Navigation("MedicalDepartment");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.DoctorModals.GenericCode", b =>
+                {
+                    b.HasOne("NovaCare.Modals.RoomModals.Bed", "Bed")
+                        .WithMany()
+                        .HasForeignKey("BedId");
+
+                    b.HasOne("NovaCare.Modals.DoctorModals.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId");
+
+                    b.HasOne("NovaCare.Modals.RoomModals.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId");
+
+                    b.Navigation("Bed");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.InsuranceModals.InsuranceClaim", b =>

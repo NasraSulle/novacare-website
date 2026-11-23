@@ -391,7 +391,17 @@
 
     public async Task OnGenerateDoctorCode()
     {
-        docCode = await doctorService.AddDoctorCodeAsync();
+        var begotten = await doctorService.GetGenericCodeAsync("doctor");
+
+        if (begotten.CodeNumber == 0)
+        {
+            docCode = await doctorService.AddGenericCodeAsync();
+        }
+        else
+        {
+            docCode = begotten.CodeNumber;
+        }
+
         CurrentDoctor.DoctorCode = $"DOC{docCode}";
 
         if (string.IsNullOrWhiteSpace(CurrentDoctor.DoctorCode))
@@ -538,7 +548,7 @@
             if (!string.IsNullOrWhiteSpace(CurrentDoctor.DoctorCode))
             {
                 var code = Convert.ToInt32(CurrentDoctor.DoctorCode.Substring(3));
-                var codeUpdateResult = await doctorService.UpdateDoctorCodeAsync(CurrentDoctor.Id, code);
+                var codeUpdateResult = await doctorService.UpdateGenericCodeAsync(CurrentDoctor.Id, code, "doctor");
             }
 
             if (!string.IsNullOrWhiteSpace(Input.EmployeeId))

@@ -1,0 +1,56 @@
+﻿@page "/RoomsIndex"
+
+@using Microsoft.AspNetCore.Authorization
+@inject IDialogService Dialog
+
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+<PageTitle>Rooms - NovaCare</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0 px-sm-0">
+
+    @* Main Elevated Card Container *@
+    <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden" Style="background-color: rgba(246,246,246,1) !important;">
+                <MudTabs Elevation="0"
+                         Rounded="true"
+                         ApplyEffectsToContainer="true"
+                         TabHeaderClass="bg-primary-subtle  dense-tabs"
+                         SliderColor="Color.Secondary"
+                         TabPanelsClass="pa-3"
+                         Centered="false">
+                    <MudTabPanel Text="Consultation Rooms" Style="text-transform: none;">
+                        <Rooms CurrentUser="currentUser" FilterBy="Consultation" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="OR" Style="text-transform: none;">
+                        <Rooms CurrentUser="currentUser" FilterBy="OR" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Labs" Style="text-transform: none;">
+                        <Rooms CurrentUser="currentUser" FilterBy="Labs" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Counters" Style="text-transform: none;">
+                        <Rooms CurrentUser="currentUser" FilterBy="Counters" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Pharmacies" Style="text-transform: none;">
+                        <Rooms CurrentUser="currentUser" FilterBy="Pharmacies" />
+                    </MudTabPanel>
+                    <MudTabPanel Text="Radiology Rooms" Style="text-transform: none;">
+                        <Rooms CurrentUser="currentUser" FilterBy="Radiology" />
+                    </MudTabPanel>
+                </MudTabs>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    StaffDto currentUser = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+
+    public string icon = Icons.Material.Filled.MeetingRoom;
+    public string title = "Rooms";
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = await userService.GetLoggedInUserAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+}
