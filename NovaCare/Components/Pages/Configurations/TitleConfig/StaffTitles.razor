@@ -9,71 +9,73 @@
                 <GlobalLoader />
             </div>
         }
-        else if (!isLoading && (FilteredStaffType == null || !FilteredStaffType.Any()) && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredTitles == null || !FilteredTitles.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
             <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
                 <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
                     <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
-                        Add Department
+                        Add Title
                     </MudButton>
                 </div>
-                <NoDataNotice NoDataMessage="@messageDepartment" />
+                <NoDataNotice NoDataMessage="@messageTitle" />
             </MudPaper>
         }
-        else if (FilteredStaffType != null)
+        else if (FilteredTitles != null)
         {
-            @* Summary Strip *@
+            @* Summary Metric Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="6">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Departments</MudText>
-                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredStaffType.Count</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Staff Titles</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredTitles.Count</MudText>
                         </div>
                         <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
-                            <MudIcon Icon="@Icons.Material.Outlined.Domain" />
+                            <MudIcon Icon="@Icons.Material.Outlined.Badge" />
                         </MudAvatar>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="6">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-success);">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Assigned Titles</MudText>
-                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">@FilteredStaffType.Sum(x => x.StaffsTitleCount)</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Assigned Personnel</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                                @FilteredTitles.Sum(x => x.StaffsCount)
+                            </MudText>
                         </div>
                         <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
-                            <MudIcon Icon="@Icons.Material.Outlined.Badge" />
+                            <MudIcon Icon="@Icons.Material.Outlined.PeopleAlt" />
                         </MudAvatar>
                     </MudPaper>
                 </MudItem>
             </MudGrid>
 
-            @* Data Table *@
+            @* Staff Titles Data Table *@
             <MudDataGrid Loading="@isSearchLoading"
                          Hover="true"
                          Elevation="0"
                          Outlined="true"
-                         T="StaffTypeDto"
-                         Items="@FilteredStaffType"
+                         T="StaffTitleDto"
+                         Items="@FilteredTitles"
                          ReadOnly="@_readOnly"
+                         RowStyle="cursor: pointer;"
                          Class="bg-transparent"
                          Bordered="false"
                          Dense="true"
-                         RowStyle="cursor: pointer;"
-                         RowClick="@((args) => PreviewDepartmentProfile(args.Item))">
+                         RowClick="@((args) => PreviewTitleProfile(args.Item))">
                 <ToolBarContent>
                     <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
                         <div class="d-flex align-center gap-2">
                             <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart}s")</MudText>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredStaffType.Count} records")</MudChip>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredTitles.Count} titles")</MudChip>
                         </div>
 
                         <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
                             <MudTextField T="string"
                                           Value="@searchString"
                                           ValueChanged="@(s => OnSearch(s))"
-                                          Placeholder="Search department name or code..."
+                                          Placeholder="Search title, department, or group..."
                                           Adornment="Adornment.Start"
                                           Margin="Margin.Dense"
                                           Variant="Variant.Outlined"
@@ -89,48 +91,66 @@
                                        StartIcon="@Icons.Material.Filled.Add"
                                        OnClick="OpenRegisterModal"
                                        Style="text-transform:none; white-space:nowrap;">
-                                Add Department
+                                Add Title
                             </MudButton>
                         </div>
                     </div>
                 </ToolBarContent>
 
                 <Columns>
-                    <TemplateColumn Title="Department" SortBy="@(x => x.StaffTypeName)">
+                    <TemplateColumn Title="Title Name" SortBy="@(x => x.StaffTitleName)">
                         <CellTemplate>
                             <div class="d-flex align-center py-1">
-                                <MudAvatar Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="me-3">
-                                    <MudIcon Icon="@Icons.Material.Outlined.Business" Size="Size.Small" />
+                                <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Class="me-3">
+                                    <MudIcon Icon="@Icons.Material.Outlined.Badge" Size="Size.Small" />
                                 </MudAvatar>
                                 <div>
-                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600;">@context.Item.StaffTypeName</MudText>
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Code: @context.Item.StaffTypeCode</MudText>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@context.Item.StaffTitleName</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Role Designation</MudText>
                                 </div>
                             </div>
                         </CellTemplate>
                     </TemplateColumn>
 
-                    <TemplateColumn Title="Titles Count" SortBy="@(x => x.StaffsTitleCount)">
+                    <TemplateColumn Title="Department" SortBy="@(x => x.StaffTypeName)">
                         <CellTemplate>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">
-                                @($"{context.Item.StaffsTitleCount} titles")
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.Domain" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.StaffTypeName</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Group Name" SortBy="@(x => x.TitleGroupName)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">
+                                @(string.IsNullOrWhiteSpace(context.Item.TitleGroupName) ? "Unassigned" : context.Item.TitleGroupName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Total Staff" SortBy="@(x => x.StaffsCount)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">
+                                @($"{context.Item.StaffsCount} staff")
                             </MudChip>
                         </CellTemplate>
                     </TemplateColumn>
 
                     <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
                         <CellTemplate>
-                            <MudTooltip Text="Edit Department">
-                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                            <MudTooltip Text="Edit Title">
+                                <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
                                                Size="Size.Small"
-                                               OnClick="@(() => PreviewDepartmentProfile(context.Item))" />
+                                               Color="Color.Default"
+                                               OnClick="@(() => PreviewTitleProfile(context.Item))" />
                             </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
                 </Columns>
 
                 <PagerContent>
-                    <MudDataGridPager T="StaffTypeDto" />
+                    <MudDataGridPager T="StaffTitleDto" />
                 </PagerContent>
             </MudDataGrid>
         }
@@ -142,14 +162,14 @@
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
     private bool _readOnly = true;
 
-    List<StaffTypeDto>? AllStaffType;
-    List<StaffTypeDto>? FilteredStaffType;
+    List<StaffTitleDto>? AllTitles;
+    List<StaffTitleDto>? FilteredTitles;
     [Parameter] public string FilterBy { get; set; } = string.Empty;
     [Parameter] public string Genre { get; set; } = string.Empty;
 
-    StaffTypeDto? CurrentStaffType;
+    StaffTitleDto? CurrentTitle;
 
-    string messageDepartment = string.Empty;
+    string messageTitle = string.Empty;
     string firstPart = string.Empty;
     string? searchString;
 
@@ -162,7 +182,7 @@
         isLoading = true;
         await Task.Delay(300);
 
-        AllStaffType = await staffService.GetStaffTypesAsync();
+        AllTitles = await staffService.GetStaffTitlesAsync();
         ApplyFilterAndSearch();
 
         isLoading = false;
@@ -171,28 +191,29 @@
 
     private void ApplyFilterAndSearch()
     {
-        IEnumerable<StaffTypeDto> query = AllStaffType ?? Enumerable.Empty<StaffTypeDto>();
+        IEnumerable<StaffTitleDto> query = AllTitles ?? Enumerable.Empty<StaffTitleDto>();
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            firstPart = "Department";
-            messageDepartment = "No departments are currently configured.";
+            firstPart = "Title";
+            messageTitle = "No staff titles are currently configured.";
         }
         else
         {
             firstPart = FilterBy;
-            messageDepartment = $"No {firstPart.ToLower()} departments are currently configured.";
+            messageTitle = $"No {firstPart.ToLower()} titles are currently available.";
             query = query.Where(x => string.Equals(x.StaffTypeName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrWhiteSpace(searchString))
         {
             query = query.Where(x =>
+                (x.StaffTitleName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
                 (x.StaffTypeName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.StaffTypeCode?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+                (x.TitleGroupName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
         }
 
-        FilteredStaffType = query.ToList();
+        FilteredTitles = query.ToList();
     }
 
     private async Task OnSearch(string text)
@@ -204,13 +225,13 @@
         await Task.CompletedTask;
     }
 
-    private async Task PreviewDepartmentProfile(StaffTypeDto item)
+    private async Task PreviewTitleProfile(StaffTitleDto item)
     {
         var Parameters = new DialogParameters
         {
-            {"CurrentStaffType" , item}
+            {"CurrentTitle" , item}
         };
-        var dialog = await Dialog.ShowAsync<EditDepartment>("Department Details", Parameters, _maxWidth);
+        var dialog = await Dialog.ShowAsync<EditStaffTitle>("Title Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
         if (result != null && !result.Canceled)
@@ -221,14 +242,14 @@
 
     public async Task Back()
     {
-        CurrentStaffType = new();
+        CurrentTitle = new();
         isEdit = false;
         await InvokeAsync(StateHasChanged);
     }
 
     public async Task OpenRegisterModal()
     {
-        var dialog = await Dialog.ShowAsync<NewDepartment>("Register New Department", _maxWidth);
+        var dialog = await Dialog.ShowAsync<NewTitle>("Register New Title", _maxWidth);
         var result = await dialog.Result;
 
         if (result != null && !result.Canceled)

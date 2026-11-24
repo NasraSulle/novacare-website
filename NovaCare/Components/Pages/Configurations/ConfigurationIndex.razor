@@ -1,4 +1,12 @@
 ﻿@page "/ConfigurationIndex"
+@using NovaCare.Components.Pages.Configurations.BedConfig
+@using NovaCare.Components.Pages.Configurations.DeptConfig
+@using NovaCare.Components.Pages.Configurations.DiseaseConfig
+@using NovaCare.Components.Pages.Configurations.GroupConfig
+@using NovaCare.Components.Pages.Configurations.RoomConfig
+@using NovaCare.Components.Pages.Configurations.TariffConfig
+@using NovaCare.Components.Pages.Configurations.TitleConfig
+@using NovaCare.Components.Pages.Configurations.WardConfig
 
 @rendermode InteractiveServer
 <MudPopoverProvider />
@@ -24,9 +32,19 @@
                  TabHeaderClass="bg-secondary-subtle"
                  SliderColor="Color.Error"
                  TabPanelsClass="pa-0">
+            <MudTabPanel Text="Wards" Icon="@Icons.Material.Outlined.LocalHospital" Style="text-transform: none; font-weight: 500;">
+                <div class="pa-3 pa-sm-6">
+                    <Ward />
+                </div>
+            </MudTabPanel>
             <MudTabPanel Text="Rooms" Icon="@Icons.Material.Outlined.MeetingRoom" Style="text-transform: none; font-weight: 500;">
                 <div class="pa-0 pa-sm-0">
                     <RoomIndex />
+                </div>
+            </MudTabPanel>
+            <MudTabPanel Text="Beds" Icon="@Icons.Material.Outlined.Bed" Style="text-transform: none; font-weight: 500;">
+                <div class="pa-3 pa-sm-6">
+                    <Bed />
                 </div>
             </MudTabPanel>
             <MudTabPanel Text="Staff Titles" Icon="@Icons.Material.Outlined.Badge" Style="text-transform: none; font-weight: 500;">

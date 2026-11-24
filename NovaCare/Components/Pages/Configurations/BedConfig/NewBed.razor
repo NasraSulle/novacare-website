@@ -1,0 +1,251 @@
+﻿@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentBed" method="post" OnValidSubmit="SaveBedAsync" FormName="newbed">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="4" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;">Enter Bed Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudStaticTextField For="@(() => CurrentBed.BedCodeNumber)" @bind-Value="CurrentBed.BedCodeNumber" Margin="Margin.Dense"
+                                                        Label="Bed name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Bed name"
+                                                        UserAttributes="@(new() { { "autocomplete", "wardname" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+
+                                <MudItem md="12">
+                                    <MudSelect T="int?" For="@(() => CurrentBed.WardId)"
+                                               @bind-Value="CurrentBed.WardId"
+                                               Label="Ward" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                        <MudSelectItem Value="0" Disabled>Ward</MudSelectItem>
+
+                                        @foreach (var item in AllWards)
+                                        {
+                                            <MudSelectItem T="int?" Value="@item.Id">@item.WardName</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="string.IsNullOrWhiteSpace(CurrentBed.BedCodeNumber) || CurrentBed.WardId == 0" OnClick="@(() => AddBedToBatch(CurrentBed))" Class="mt-2" FullWidth="true">Add Bed To Batch</MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                    <MudItem md="8" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;">Wards Batch Summary</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    @if (!BedsBatch!.Any())
+                                    {
+                                        <NoDataNotice NoDataMessage="No Beds in Batch" />
+                                    }
+                                    else
+                                    {
+
+                                        <MudTable Dense="true" Height="500px" FixedHeader="true" Items="@BedsBatch" Hover="true" Breakpoint="Breakpoint.Sm" Context="medContext">
+                                            <HeaderContent>
+                                                <MudTh>Name</MudTh>
+                                                <MudTh>Ward</MudTh>
+                                                <MudTh></MudTh>
+                                            </HeaderContent>
+                                            <RowTemplate>
+                                                <MudTd DataLabel="Description">@($"{medContext.BedCodeNumber}")</MudTd>
+                                                <MudTd DataLabel="Department">@medContext.WardName</MudTd>
+                                                <MudTd DataLabel="">
+                                                    <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveBedFromBatch(medContext))" />
+                                                </MudTd>
+                                            </RowTemplate>
+                                        </MudTable>
+                                    }
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="text-align:end">
+                    <MudItem Style="display:flex; justify-content:center; ">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="width:19%; margin-right:20px;" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Wards Added Successfully!</MudAlert>
+                        }
+                        <MudAlert Style="@(isCreatedSuccessfully ? "width: 40%;" : "width: 50%;")" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">@addedSuccessfully</MudAlert>
+                        <MudAlert Style="@(isCreatedSuccessfully ? "width: 40%;" : "width: 50%;")" Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center">@notaddedSuccessfully</MudAlert>
+                    </MudItem>
+                    <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                            <MudText Class="ps-3"> Saving  Wards...</MudText>
+                        }
+                        else
+                        {
+                            <MudText> Save Wards</MudText>
+                        }
+                    </MudStaticButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ResetPage" Class="mt-3">Reset Page</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToStaffWardsPage" Class="mt-3">Back</MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<BedDto> AllBeds = new();
+    List<BedDto> BedsBatch = new();
+    List<WardDto> AllWards = new();
+
+    BedDto CurrentBed = new();
+
+    string saveMessage = string.Empty;
+    string? addedSuccessfully = "Added:";
+    string? notaddedSuccessfully = "Not Added:";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllBeds = await roomService.GetAllBedsAsync();
+        AllWards = await roomService.GetAllWardsAsync();
+    }
+
+    public async Task AddBedToBatch(BedDto bedDto)
+    {
+
+        var existingMed = await roomService.GetWardyNameAsync(bedDto.BedCodeNumber);
+        bool inBatch = false;
+        inBatch = BedsBatch?.Any(r => r.WardName == bedDto.WardName) ?? false;
+
+        if (existingMed.Id == 0 && !inBatch)
+        {
+            bedDto.WardName = AllWards.FirstOrDefault(rt => rt.Id == bedDto.WardId)?.WardName ?? string.Empty;
+            var newBed = new BedDto
+            {
+                BedCodeNumber = bedDto.BedCodeNumber,
+                WardId = bedDto.WardId,
+            };
+
+            if (newBed != null)
+                BedsBatch!.Add(newBed);
+        }
+        else if (existingMed.Id > 0 && !inBatch)
+        {
+            saveMessage = $"{existingMed.WardName} is already registered";
+            Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Error }
+                    });
+        }
+        else if (existingMed.Id == 0 && inBatch)
+        {
+            saveMessage = $"{existingMed.WardName} is already batch";
+            Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Error }
+                    });
+        }
+
+        await InvokeAsync(StateHasChanged);
+
+    }
+
+    public async Task RemoveBedFromBatch(BedDto bedDto)
+    {
+        if (BedsBatch != null)
+            BedsBatch.Remove(bedDto);
+    }
+
+    public async Task SaveBedAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        if (BedsBatch!.Count == 0)
+        {
+            isSaving = false;
+            return;
+        }
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            foreach (var bed in BedsBatch)
+            {
+                var existingMed = await roomService.GetBedByNameAsync(bed.WardName);
+
+                if (existingMed.Id == 0)
+                {
+                    var isSucess = await roomService.AddBedAsync(bed);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"{bed.WardName} added sucessfully";
+                        Console.WriteLine(saveMessage);
+                        addedSuccessfully = addedSuccessfully + $" {bed.WardName},";
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {bed.WardName} not added sucessfully! Please read ward to batch and save";
+                        Console.WriteLine(saveMessage);
+                        notaddedSuccessfully = notaddedSuccessfully + $" {bed.WardName},";
+                    }
+                }
+                else if (existingMed.Id > 0)
+                {
+                    var isSucess = await roomService.UpdateBedAsync(bed, existingMed.Id);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"{bed.WardName} updated sucessfully";
+                        Console.WriteLine(saveMessage);
+                        addedSuccessfully = addedSuccessfully + $" {bed.WardName},";
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {bed.WardName} not updated sucessfully! Please read ward to batch and save";
+                        Console.WriteLine(saveMessage);
+                        notaddedSuccessfully = notaddedSuccessfully + $" {bed.WardName},";
+                    }
+                }
+            }
+            if (notaddedSuccessfully == "Not Added:")
+                isCreatedSuccessfully = true;
+            CurrentBed = new();
+            BedsBatch.Clear();
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public async Task ResetPage()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isCreatedSuccessfully = false;
+        CurrentBed = new();
+    }
+
+    public void ReturnToStaffWardsPage()
+    {
+        MudDialog.Cancel();
+    }
+}

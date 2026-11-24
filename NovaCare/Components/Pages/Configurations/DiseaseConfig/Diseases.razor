@@ -1,0 +1,245 @@
+﻿@using NovaCare.Shared.DTOs.DiseaseDTOs
+@using NovaCare.Shared.DTOs.StaffDTOs
+@inject IDialogService Dialog
+
+<MudGrid Spacing="3">
+    <MudItem xs="12">
+        @if (isLoading)
+        {
+            <div class="d-flex justify-center align-center py-12">
+                <GlobalLoader />
+            </div>
+        }
+        else if (!isLoading && (FilteredDiseases == null || !FilteredDiseases.Any()) && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudPaper Elevation="0" Class="pa-6 border bg-transparent text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
+                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
+                        Add Disease
+                    </MudButton>
+                </div>
+                <NoDataNotice NoDataMessage="@messageDisease" />
+            </MudPaper>
+        }
+        else if (FilteredDiseases != null)
+        {
+            @* Summary Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Diagnostic Tests</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredDiseases.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Biotech" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-info);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Disease Categories</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info" Style="font-weight:700;">
+                                @FilteredDiseases.Select(x => x.DiseaseTypeName).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().Count()
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Category" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            @* Data Table *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="DiseaseDto"
+                         Items="@FilteredDiseases"
+                         ReadOnly="@_readOnly"
+                         Class="bg-transparent"
+                         Bordered="false"
+                         Dense="true"
+                         RowStyle="cursor: pointer;"
+                         RowClick="@((args) => PreviewDiseaseProfile(args.Item))">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart}s")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredDiseases.Count} records")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search disease name, code, or type..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 260px;" />
+
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       OnClick="OpenRegisterModal"
+                                       Style="text-transform:none; white-space:nowrap;">
+                                Add Disease
+                            </MudButton>
+                        </div>
+                    </div>
+                </ToolBarContent>
+
+                <Columns>
+                    <TemplateColumn Title="Disease / Lab Test" SortBy="@(x => x.DiseaseName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="me-3">
+                                    <MudIcon Icon="@Icons.Material.Outlined.Science" Size="Size.Small" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600;">@context.Item.DiseaseName</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Code: @context.Item.DiseaseCode</MudText>
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Category / Type" SortBy="@(x => x.DiseaseTypeName)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">
+                                @(string.IsNullOrWhiteSpace(context.Item.DiseaseTypeName) ? "General" : context.Item.DiseaseTypeName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <PropertyColumn Property="x => x.LabTestCost" Title="Lab Test Cost" Format="N2" />
+
+                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="Edit Disease Details">
+                                <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
+                                               Size="Size.Small"
+                                               OnClick="@(() => PreviewDiseaseProfile(context.Item))" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="DiseaseDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private bool _readOnly = true;
+
+    List<DiseaseDto>? AllDiseases;
+    List<DiseaseDto>? FilteredDiseases;
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+
+    DiseaseDto? CurrentDisease;
+
+    string messageDisease = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(300);
+
+        AllDiseases = await diseaseService.GetAllDiseasesAsync();
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<DiseaseDto> query = AllDiseases ?? Enumerable.Empty<DiseaseDto>();
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            firstPart = "Disease";
+            messageDisease = "No lab test diseases are currently configured.";
+        }
+        else
+        {
+            firstPart = FilterBy;
+            messageDisease = $"No {firstPart.ToLower()} diseases are currently configured.";
+            query = query.Where(x => string.Equals(x.DiseaseTypeName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.DiseaseName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.DiseaseCode?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.DiseaseTypeName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        FilteredDiseases = query.ToList();
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
+    }
+
+    private async Task PreviewDiseaseProfile(DiseaseDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentDisease" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditDisease>("Disease Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    public async Task Back()
+    {
+        CurrentDisease = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task OpenRegisterModal()
+    {
+        var dialog = await Dialog.ShowAsync<NewDisease>("Register New Disease", _maxWidth);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+}

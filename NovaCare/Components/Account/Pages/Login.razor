@@ -174,7 +174,8 @@
     }
 </style>
 
-<div class="nc-daylight-stage d-flex flex-column justify-space-between align-center pa-4 pa-sm-6">
+@* <div class="nc-daylight-stage d-flex flex-column justify-space-between align-center pa-4 pa-sm-6"> *@
+<div class="nc-daylight-stage d-flex justify-content-center align-center">
 
     @* Full-Screen Background Carousel *@
     <div class="nc-bg-carousel">
@@ -185,20 +186,20 @@
     <div class="nc-daylight-scrim"></div>
 
     @* Top Frosted Status Pill *@
-    <MudPaper Elevation="0" Class="px-4 py-1.5 rounded-pill mt-2 d-flex align-center"
+   @*  <MudPaper Elevation="0" Class="px-4 py-1.5 rounded-pill mt-2 d-flex align-center"
               Style="position: relative; z-index: 2; background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10); gap: 8px;">
         <span class="nc-live-dot"></span>
         <MudText Typo="Typo.caption" Style="color: red; letter-spacing: 0.08em; font-weight: 700;">
             NOVACARE MEDICAL HOSPITAL
         </MudText>
-    </MudPaper>
+    </MudPaper> *@
 
     @* Centered Bright Frosted-Glass Login Card *@
-    <MudPaper Elevation="0" Class="nc-light-glass-card pa-7 pa-sm-9 my-6">
+    <MudPaper Elevation="0" Class="nc-light-glass-card pa-7 pa-sm-9">
 
         @* Logo & Clean Header *@
         <MudStack AlignItems="AlignItems.Center" Class="mb-6">
-            <MudImage Src="Images/logo2.png" Height="48" ObjectFit="ObjectFit.Contain" Alt="NovaCare" Class="mb-4" />
+            <MudImage Src="Images/logo2.png" Height="48" ObjectFit="ObjectFit.Contain" Alt="NovaCare" Class="" />
 
             <MudText Typo="Typo.h5" Align="Align.Center" Class="font-weight-bold" Style="color: #0F172A; letter-spacing: -0.02em;">
                 Staff Portal Access
@@ -243,9 +244,9 @@
                             <MudText Typo="Typo.caption" Class="font-weight-bold" Style="color: #334155; letter-spacing: 0.04em;">
                                 PASSWORD
                             </MudText>
-                            <MudLink Href="Account/ForgotPassword" Underline="Underline.Hover" Typo="Typo.caption" Style="color: #162368; font-weight: 700;">
+                           @*  <MudLink Href="Account/ForgotPassword" Underline="Underline.Hover" Typo="Typo.caption" Style="color: #162368; font-weight: 700;">
                                 Forgot password?
-                            </MudLink>
+                            </MudLink> *@
                         </MudStack>
                         <MudStaticTextField For="@(() => Input.Password)"
                                             @bind-Value="Input.Password"
@@ -256,6 +257,13 @@
                                             AdornmentIcon="@Icons.Material.Outlined.Lock"
                                             IconSize="Size.Small"
                                             UserAttributes="@(new() { { "autocomplete", "current-password" }, { "aria-required", "true" } })" />
+
+                        <MudStack Row="true" Justify="Justify.FlexEnd" AlignItems="AlignItems.Center" Class="mb-1.5">
+                            
+                            <MudLink Href="Account/ForgotPassword" Underline="Underline.Hover" Typo="Typo.caption" Style="color: #162368; font-weight: 700;">
+                                Forgot password?
+                            </MudLink>
+                        </MudStack>
                     </div>
 
                     @* Remember Me *@
@@ -300,13 +308,13 @@
     </MudPaper>
 
     @* Bottom Frosted Footer Pill *@
-    <MudPaper Elevation="0" Class="px-4 py-1.5 rounded-pill mb-2 d-flex align-center"
+@*     <MudPaper Elevation="0" Class="px-4 py-1.5 rounded-pill mb-2 d-flex align-center"
               Style="position: relative; z-index: 2; background: rgba(255, 255, 255, 0.90); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.10); gap: 8px;">
         <MudText Typo="Typo.caption" Style="color: #475569;">Having trouble logging in?</MudText>
         <MudLink Href="/support" Underline="Underline.Hover" Typo="Typo.caption" Style="color: #162368; font-weight: 700;">
             Contact IT Support
         </MudLink>
-    </MudPaper>
+    </MudPaper> *@
 
 </div>
 

@@ -9,27 +9,27 @@
                 <GlobalLoader />
             </div>
         }
-        else if (!isLoading && (FilteredTitles == null || !FilteredTitles.Any()) && string.IsNullOrWhiteSpace(searchString))
+        else if (!isLoading && (FilteredRooms == null || !FilteredRooms.Any()) && string.IsNullOrWhiteSpace(searchString))
         {
             <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
                 <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
                     <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
-                        Add Title
+                        Add Room
                     </MudButton>
                 </div>
                 <NoDataNotice NoDataMessage="@messageTitle" />
             </MudPaper>
         }
-        else if (FilteredTitles != null)
+        else if (FilteredRooms != null)
         {
             @* Summary Metric Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="6">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Staff Titles</MudText>
-                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredTitles.Count</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Available Rooms</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredRooms.Where(x => x.RoomStatusId == 2).Count()</MudText>
                         </div>
                         <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
                             <MudIcon Icon="@Icons.Material.Outlined.Badge" />
@@ -39,9 +39,9 @@
                 <MudItem xs="12" sm="6">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-success);">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Assigned Personnel</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Rooms In Use</MudText>
                             <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
-                                @FilteredTitles.Sum(x => x.StaffsCount)
+                                @FilteredRooms.Where(x => x.RoomStatusId == 1).Count()
                             </MudText>
                         </div>
                         <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
@@ -56,8 +56,8 @@
                          Hover="true"
                          Elevation="0"
                          Outlined="true"
-                         T="StaffTitleDto"
-                         Items="@FilteredTitles"
+                         T="RoomDto"
+                         Items="@FilteredRooms"
                          ReadOnly="@_readOnly"
                          RowStyle="cursor: pointer;"
                          Class="bg-transparent"
@@ -68,7 +68,7 @@
                     <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
                         <div class="d-flex align-center gap-2">
                             <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart}s")</MudText>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredTitles.Count} titles")</MudChip>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredRooms.Count} rooms")</MudChip>
                         </div>
 
                         <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
@@ -91,48 +91,40 @@
                                        StartIcon="@Icons.Material.Filled.Add"
                                        OnClick="OpenRegisterModal"
                                        Style="text-transform:none; white-space:nowrap;">
-                                Add Title
+                                Add Room
                             </MudButton>
                         </div>
                     </div>
                 </ToolBarContent>
 
                 <Columns>
-                    <TemplateColumn Title="Title Name" SortBy="@(x => x.StaffTitleName)">
+                    <TemplateColumn Title="Title Name" SortBy="@(x => x.RoomName)">
                         <CellTemplate>
                             <div class="d-flex align-center py-1">
                                 <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Class="me-3">
                                     <MudIcon Icon="@Icons.Material.Outlined.Badge" Size="Size.Small" />
                                 </MudAvatar>
                                 <div>
-                                    <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@context.Item.StaffTitleName</MudText>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@context.Item.RoomName</MudText>
                                     <MudText Typo="Typo.caption" Color="Color.Secondary">Role Designation</MudText>
                                 </div>
                             </div>
                         </CellTemplate>
                     </TemplateColumn>
 
-                    <TemplateColumn Title="Department" SortBy="@(x => x.StaffTypeName)">
+                    <TemplateColumn Title="Department" SortBy="@(x => x.RoomTypeName)">
                         <CellTemplate>
                             <div class="d-flex align-center">
                                 <MudIcon Icon="@Icons.Material.Outlined.Domain" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
-                                <MudText Typo="Typo.body2">@context.Item.StaffTypeName</MudText>
+                                <MudText Typo="Typo.body2">@context.Item.RoomTypeName</MudText>
                             </div>
                         </CellTemplate>
                     </TemplateColumn>
 
-                    <TemplateColumn Title="Group Name" SortBy="@(x => x.TitleGroupName)">
+                    <TemplateColumn Title="Availability" SortBy="@(x => x.RoomStatusName)">
                         <CellTemplate>
                             <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">
-                                @(string.IsNullOrWhiteSpace(context.Item.TitleGroupName) ? "Unassigned" : context.Item.TitleGroupName)
-                            </MudChip>
-                        </CellTemplate>
-                    </TemplateColumn>
-
-                    <TemplateColumn Title="Total Staff" SortBy="@(x => x.StaffsCount)">
-                        <CellTemplate>
-                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Outlined">
-                                @($"{context.Item.StaffsCount} staff")
+                                @(string.IsNullOrWhiteSpace(context.Item.RoomStatusName) ? "Unassigned" : context.Item.RoomStatusName)
                             </MudChip>
                         </CellTemplate>
                     </TemplateColumn>
@@ -140,7 +132,7 @@
                     <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
                         <CellTemplate>
                             <MudTooltip Text="Edit Title">
-                                <MudIconButton Icon="@Icons.Material.Outlined.ChevronRight"
+                                <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
                                                Size="Size.Small"
                                                Color="Color.Default"
                                                OnClick="@(() => PreviewTitleProfile(context.Item))" />
@@ -150,7 +142,7 @@
                 </Columns>
 
                 <PagerContent>
-                    <MudDataGridPager T="StaffTitleDto" />
+                    <MudDataGridPager T="RoomDto" />
                 </PagerContent>
             </MudDataGrid>
         }
@@ -162,12 +154,12 @@
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
     private bool _readOnly = true;
 
-    List<StaffTitleDto>? AllTitles;
-    List<StaffTitleDto>? FilteredTitles;
+    List<RoomDto>? AllRooms;
+    List<RoomDto>? FilteredRooms;
     [Parameter] public string FilterBy { get; set; } = string.Empty;
     [Parameter] public string Genre { get; set; } = string.Empty;
 
-    StaffTitleDto? CurrentTitle;
+    RoomDto? CurrentRoom;
 
     string messageTitle = string.Empty;
     string firstPart = string.Empty;
@@ -182,7 +174,7 @@
         isLoading = true;
         await Task.Delay(300);
 
-        AllTitles = await staffService.GetStaffTitlesAsync();
+        AllRooms = await roomService.GetAllRoomsAsync();
         ApplyFilterAndSearch();
 
         isLoading = false;
@@ -191,29 +183,30 @@
 
     private void ApplyFilterAndSearch()
     {
-        IEnumerable<StaffTitleDto> query = AllTitles ?? Enumerable.Empty<StaffTitleDto>();
+        IEnumerable<RoomDto> query = AllRooms ?? Enumerable.Empty<RoomDto>();
 
         if (string.IsNullOrWhiteSpace(FilterBy))
         {
-            firstPart = "Title";
-            messageTitle = "No staff titles are currently configured.";
+            firstPart = "Room";
+            messageTitle = "No rooms are currently configured.";
         }
         else
         {
             firstPart = FilterBy;
-            messageTitle = $"No {firstPart.ToLower()} titles are currently available.";
-            query = query.Where(x => string.Equals(x.StaffTypeName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
+            messageTitle = $"No {firstPart.ToLower()} room are currently available.";
+            // query = query.Where(x => string.Equals(x.RoomName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
+            query = query.Where(x => x.RoomTypeName?.Contains(FilterBy, StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
         if (!string.IsNullOrWhiteSpace(searchString))
         {
             query = query.Where(x =>
-                (x.StaffTitleName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.StaffTypeName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                (x.TitleGroupName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+                (x.RoomName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.RoomTypeName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.RoomStatusName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
         }
 
-        FilteredTitles = query.ToList();
+        FilteredRooms = query.ToList();
     }
 
     private async Task OnSearch(string text)
@@ -225,36 +218,30 @@
         await Task.CompletedTask;
     }
 
-    private async Task PreviewTitleProfile(StaffTitleDto item)
+    private async Task PreviewTitleProfile(RoomDto item)
     {
         var Parameters = new DialogParameters
         {
-            {"CurrentTitle" , item}
+            {"CurrentRoom" , item}
         };
-        var dialog = await Dialog.ShowAsync<EditStaffTitle>("Title Details", Parameters, _maxWidth);
+        var dialog = await Dialog.ShowAsync<EditRoom>("Room Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
-        {
-            await OnInitializedAsync();
-        }
+        await OnInitializedAsync();
     }
 
     public async Task Back()
     {
-        CurrentTitle = new();
+        CurrentRoom = new();
         isEdit = false;
         await InvokeAsync(StateHasChanged);
     }
 
     public async Task OpenRegisterModal()
     {
-        var dialog = await Dialog.ShowAsync<NewTitle>("Register New Title", _maxWidth);
+        var dialog = await Dialog.ShowAsync<NewRoom>("Register New Room", _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
-        {
-            await OnInitializedAsync();
-        }
+        await OnInitializedAsync();
     }
 }

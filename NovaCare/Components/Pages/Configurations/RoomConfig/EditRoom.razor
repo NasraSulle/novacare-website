@@ -1,0 +1,126 @@
+﻿@using NovaCare.Shared.DTOs.RoomDTOs
+@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentRoom" method="post" OnValidSubmit="SaveRoomAsync" FormName="editstafftitle">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;"> Staff Title Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudStaticTextField For="@(() => CurrentRoom.RoomName)" @bind-Value="CurrentRoom.RoomName" Margin="Margin.Dense"
+                                                        Label="Room name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Room name"
+                                                        UserAttributes="@(new() { { "autocomplete", "roomname" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudSelect For="@(() => CurrentRoom.RoomTypeId)"
+                                               @bind-Value="CurrentRoom.RoomTypeId"
+                                               Label="Type" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                        <MudSelectItem Value="0" Disabled>Type</MudSelectItem>
+
+                                        @foreach (var item in AllRoomTypes)
+                                        {
+                                            <MudSelectItem Value="@item.Id">@item.RoomTypeName</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="display:flex; justify-content:end; align-items:center;">
+                    <MudItem Class="mt-3 me-3">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Medicine Updated Successfully!</MudAlert>
+                        }
+                    </MudItem>
+                    <MudItem Style="display:flex; justify-content:end; ">
+                        <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3 me-1">
+                            @if (isSaving)
+                            {
+                                <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                <MudText Class="ps-3"> Updating Room...</MudText>
+                            }
+                            else
+                            {
+                                <MudText> Update Room Details</MudText>
+                            }
+                        </MudStaticButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToRoomsPage" Class="mt-3">Back</MudButton>
+                    </MudItem>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<RoomDto> AllRooms = new();
+    List<RoomTypeDto> AllRoomTypes = new();
+    [Parameter, EditorRequired] public RoomDto CurrentRoom { get; set; } = new();
+
+    string saveMessage = string.Empty;
+    string? addedSuccessfully = "Added:";
+    string? notaddedSuccessfully = "Not Added:";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllRooms = await roomService.GetAllRoomsAsync();
+        AllRoomTypes = await roomService.GetAllRoomTypesAsync();
+    }
+
+    public async Task SaveRoomAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            var isSucess = await roomService.UpdateRoomAsync(CurrentRoom, CurrentRoom.Id);
+
+            if (isSucess)
+            {
+                saveMessage = $"{CurrentRoom.RoomTypeName} updated sucessfully";
+                Console.WriteLine(saveMessage);
+                addedSuccessfully = addedSuccessfully + $" {CurrentRoom.RoomTypeName},";
+            }
+            else
+            {
+                saveMessage = $"Error: {CurrentRoom.RoomTypeName} not updated sucessfully!";
+                Console.WriteLine(saveMessage);
+                notaddedSuccessfully = notaddedSuccessfully + $" {CurrentRoom.RoomTypeName},";
+            }
+
+            isCreatedSuccessfully = true;
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public void ReturnToRoomsPage()
+    {
+        MudDialog.Cancel();
+    }
+}

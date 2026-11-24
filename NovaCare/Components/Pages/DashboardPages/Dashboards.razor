@@ -196,7 +196,7 @@
 
                         <div class="d-flex flex-wrap gap-2">
                             <div class="status-chip chip-alert">
-                                <MudIcon Icon="@Icons.Material.Outlined.Warning" Size="Size.Small" /> ICU at 92%
+                                <MudIcon Icon="@Icons.Material.Outlined.Warning" Size="Size.Small" /> ICU at @ICUatBedsPercentage%
                             </div>
                             <div class="status-chip chip-neutral">
                                 <MudIcon Icon="@Icons.Material.Outlined.People" Size="Size.Small" /> @UnavailableStaffCount staff off-duty
@@ -728,6 +728,7 @@
     double AvailableBedsPercentage = 0;
     double AvailableERBedsPercentage = 0;
     double AvailableICUBedsPercentage = 0;
+    double ICUatBedsPercentage = 0;
 
     double DoctorAvailabilityPct = 0;
     double StaffReadinessPct = 0;
@@ -815,6 +816,8 @@
         var totalICUBeds = allBeds.Where(b => b.BedAvailability.ToLower().Trim() == "unused" && b.WardName.ToLower().Trim() == "medical icu").Count();
         if (totalICUBeds > 0)
             AvailableICUBedsPercentage = Math.Round(((double)unsuedICUBedsCount / totalICUBeds) * 100);
+
+            ICUatBedsPercentage = 100 - AvailableICUBedsPercentage;
     }
 
     private void CalculateLiveVitals()

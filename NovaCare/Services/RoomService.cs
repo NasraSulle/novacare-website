@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using NovaCare.Components.Pages.Configurations;
+using NovaCare.Components.Pages.Configurations.WardConfig;
 using NovaCare.Data;
 using NovaCare.Interfaces;
 using NovaCare.Modals.RoomModals;
@@ -57,7 +57,7 @@ namespace NovaCare.Services
                     RoomStatusId = type.RoomStatusId,
                     RoomTypeId = type.RoomTypeId,
                     RoomTypeName = type.RoomType != null ? type.RoomType.RoomTypeName : string.Empty,
-                    RoomStatusName = type.RoomStatus != null ? type.RoomStatus.RoomStatusName : string.Empty
+                    RoomStatusName = type.RoomStatus != null ? type.RoomStatus.RoomStatusName : string.Empty,
                 })
                 .ToListAsync();
 
@@ -76,6 +76,7 @@ namespace NovaCare.Services
                     WardCost = type.WardCost,
                     MedicalDepartmentId = type.MedicalDepartmentId,
                     MedicalDepartmentName = type.MedicalDepartment != null ? type.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    BedsCount = type.Beds != null ? type.Beds.Count : 0,
                     Beds = type.Beds.Select(b => new BedDto
                     {
                         Id = b.Id,
@@ -98,6 +99,7 @@ namespace NovaCare.Services
                     Id = type.Id,
                     WardName = type.WardName,
                     WardCost = type.WardCost,
+                    BedsCount = type.Beds != null ? type.Beds.Count : 0,
                     MedicalDepartmentId = type.MedicalDepartmentId,
                     MedicalDepartmentName = type.MedicalDepartment != null ? type.MedicalDepartment.MedicalDepartmentName : string.Empty,
                     Beds = type.Beds.Select(b => new BedDto
@@ -207,6 +209,195 @@ namespace NovaCare.Services
                 .FirstOrDefaultAsync();
 
             return bed ?? new();
+        }
+
+        public async Task<List<RoomTypeDto>> GetAllRoomTypesAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var types = await context.RoomTypes
+                .AsNoTracking()
+                .Select(type => new RoomTypeDto
+                {
+                    Id = type.Id,
+                    RoomTypeCode = type.RoomTypeCode,
+                    RoomTypeName = type.RoomTypeName
+                })
+                .ToListAsync();
+
+            return types ?? new();
+        }
+
+        public async Task<RoomDto> GetRoomByNameAsync(string roomName)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var existingType = await context.Rooms
+                .AsNoTracking()
+                .Select(type => new RoomDto
+                {
+                    Id = type.Id,
+                    RoomName = type.RoomName,
+                    RoomStatusId = type.RoomStatusId,
+                    RoomTypeId = type.RoomTypeId,
+                    RoomTypeName = type.RoomType != null ? type.RoomType.RoomTypeName : string.Empty,
+                    RoomStatusName = type.RoomStatus != null ? type.RoomStatus.RoomStatusName : string.Empty
+                })
+                .FirstOrDefaultAsync(x => x.RoomName == roomName);
+
+            return existingType ?? new();
+        }
+
+        public async Task<WardDto> GetWardyNameAsync(string wardName)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var ward = await context.Wards
+                .AsNoTracking().Where(x => x.WardName == wardName)
+                .Select(type => new WardDto
+                {
+                    Id = type.Id,
+                    WardName = type.WardName,
+                    WardCost = type.WardCost,
+                    BedsCount = type.Beds != null ? type.Beds.Count : 0,
+                    MedicalDepartmentId = type.MedicalDepartmentId,
+                    MedicalDepartmentName = type.MedicalDepartment != null ? type.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    Beds = type.Beds.Select(b => new BedDto
+                    {
+                        Id = b.Id,
+                        BedCodeNumber = b.BedCodeNumber,
+                        BedAvailability = b.BedAvailability,
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            return ward ?? new();
+        }
+
+        public async Task<bool> AddWardAsync(WardDto wardDto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                if (wardDto == null) return false;
+
+                var newWard = new Modals.RoomModals.Ward
+                {
+                    WardName = wardDto.WardName,
+                    WardCost = wardDto.WardCost,
+                    MedicalDepartmentId = wardDto.MedicalDepartmentId
+                };
+
+                var result = context.Wards.Add(newWard);
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateWardAsync(WardDto wardDto, int wardId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var existingWard = await context.Wards.FirstOrDefaultAsync(x => x.Id == wardId);
+
+                if (existingWard != null)
+                {
+                    existingWard.WardName = wardDto.WardName;
+                    existingWard.WardCost = wardDto.WardCost;
+                    existingWard.MedicalDepartmentId = wardDto.MedicalDepartmentId;
+
+                    context.Wards.Update(existingWard);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<BedDto> GetBedByNameAsync(string bedName)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var bed = await context.Beds
+                .AsNoTracking().Where(x => x.BedCodeNumber == bedName)
+                .Select(type => new BedDto
+                {
+                    Id = type.Id,
+                    BedCodeNumber = type.BedCodeNumber,
+                    BedAvailability = type.BedAvailability,
+                    WardId = type.WardId,
+                    WardName = type.Ward != null ? type.Ward.WardName : string.Empty,
+                    Ward = type.Ward == null ? null : new WardDto
+                    {
+                        Id = type.Ward.Id,
+                        WardName = type.Ward.WardName,
+                        MedicalDepartmentId = type.Ward.MedicalDepartmentId,
+                        MedicalDepartmentName = type.Ward.WardName,
+                        WardCost = type.Ward.WardCost
+                    }
+                })
+                .FirstOrDefaultAsync();
+
+            return bed ?? new();
+        }
+
+        public async Task<bool> AddBedAsync(BedDto bedDto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                if (bedDto == null) return false;
+
+                var newBed = new Bed
+                {
+                    BedCodeNumber = bedDto.BedCodeNumber,
+                    WardId = bedDto.WardId
+                };
+
+                var result = context.Beds.Add(newBed);
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateBedAsync(BedDto bedDto, int bedId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var existingBed = await context.Beds.FirstOrDefaultAsync(x => x.Id == bedId);
+
+                if (existingBed != null)
+                {
+                    existingBed.BedCodeNumber = bedDto.BedCodeNumber;
+                    existingBed.BedAvailability = bedDto.BedAvailability;
+                    existingBed.WardId = bedDto.WardId;
+
+                    context.Beds.Update(existingBed);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

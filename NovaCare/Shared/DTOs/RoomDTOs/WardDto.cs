@@ -16,5 +16,6 @@ namespace NovaCare.Shared.DTOs.RoomDTOs
         public MedicalDepartmentDto? MedicalDepartment { get; set; }
         public List<BedDto>? Beds { get; set; }
         public string MedicalDepartmentName { get; set; } = string.Empty;
+        public int BedsCount { get; set; }
     }
 }
