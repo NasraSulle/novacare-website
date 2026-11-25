@@ -1,0 +1,132 @@
+﻿@inject IDialogService DialogService
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentDoctorType" method="post" OnValidSubmit="SaveDoctorTypeAsync" FormName="editstafftitle">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;"> Staff Title Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudStaticTextField For="@(() => CurrentDoctorType.DoctorTypeName)" @bind-Value="CurrentDoctorType.DoctorTypeName" Margin="Margin.Dense"
+                                                        Label="DoctorType name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="DoctorType name"
+                                                        UserAttributes="@(new() { { "autocomplete", "diseasename" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudSelect For="@(() => CurrentDoctorType.MedicalDeptId)"
+                                               @bind-Value="CurrentDoctorType.MedicalDeptId"
+                                               Label="Staff Type" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                        <MudSelectItem Value="0" Disabled>DoctorType Type</MudSelectItem>
+
+                                        @foreach (var item in AllMedicalDepartments)
+                                        {
+                                            <MudSelectItem Value="@item.Id">@item.MedicalDepartmentName</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudNumericField For="@(() => CurrentDoctorType.DeptConsultationFee)" @bind-Value="CurrentDoctorType.DeptConsultationFee" Margin="Margin.Dense"
+                                                     Label="DoctorType Cost" Variant="Variant.Outlined" Placeholder="DoctorType Cost"
+                                                     UserAttributes="@(new() { { "autocomplete", "wardname" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="display:flex; justify-content:end; align-items:center;">
+                    <MudItem Class="mt-3 me-3">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Medicine Updated Successfully!</MudAlert>
+                        }
+                    </MudItem>
+                    <MudItem Style="display:flex; justify-content:end; ">
+                        <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3 me-1">
+                            @if (isSaving)
+                            {
+                                <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                <MudText Class="ps-3"> Updating DoctorType...</MudText>
+                            }
+                            else
+                            {
+                                <MudText> Update DoctorType Details</MudText>
+                            }
+                        </MudStaticButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToDoctorTypesPage" Class="mt-3">Back</MudButton>
+                    </MudItem>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<DoctorTypeDto>? AllDoctorTypes;
+    List<DoctorTypeDto>? DoctorTypesBatch = new();
+    List<MedicalDepartmentDto> AllMedicalDepartments = new();
+
+    [Parameter] public DoctorTypeDto CurrentDoctorType { get; set; } = new();
+
+    string saveMessage = string.Empty;
+    string? addedSuccessfully = "Added:";
+    string? notaddedSuccessfully = "Not Added:";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllDoctorTypes = await doctorService.GetDoctorTypesAsync();
+        AllMedicalDepartments = await medicineService.GetAllMedicalDeptsAsync();
+    }
+
+    public async Task SaveDoctorTypeAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            var isSucess = await doctorService.UpdateDoctorTypeAsync(CurrentDoctorType, CurrentDoctorType.Id);
+
+            if (isSucess)
+            {
+                saveMessage = $"{CurrentDoctorType.DoctorTypeName} updated sucessfully";
+                Console.WriteLine(saveMessage);
+                addedSuccessfully = addedSuccessfully + $" {CurrentDoctorType.DoctorTypeName},";
+            }
+            else
+            {
+                saveMessage = $"Error: {CurrentDoctorType.DoctorTypeName} not updated sucessfully! Please read ward to batch and save";
+                Console.WriteLine(saveMessage);
+                notaddedSuccessfully = notaddedSuccessfully + $" {CurrentDoctorType.DoctorTypeName},";
+            }
+
+            isCreatedSuccessfully = true;
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public void ReturnToDoctorTypesPage()
+    {
+        MudDialog.Cancel();
+    }
+}

@@ -1,0 +1,259 @@
+﻿@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentTherapy" method="post" OnValidSubmit="SaveTherapyAsync" FormName="newtherapy">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="4" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius: 5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius: 5px; background-color: rgba(63,81,181,0.9); color:white;">Enter Therapy Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudStaticTextField For="@(() => CurrentTherapy.TherapyName)" @bind-Value="CurrentTherapy.TherapyName" Margin="Margin.Dense"
+                                                        Label="Therapy name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Therapy name"
+                                                        UserAttributes="@(new() { { "autocomplete", "therapyname" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudNumericField For="@(() => CurrentTherapy.TherapyCost)" @bind-Value="CurrentTherapy.TherapyCost" Margin="Margin.Dense"
+                                                     Label="Therapy Cost" Variant="Variant.Outlined" Placeholder="Therapy Cost"
+                                                     UserAttributes="@(new() { { "autocomplete", "therapyname" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudSelect For="@(() => CurrentTherapy.MedicalDepartmentId)"
+                                               @bind-Value="CurrentTherapy.MedicalDepartmentId"
+                                               Label="Department" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                        <MudSelectItem Value="0" Disabled>Department</MudSelectItem>
+
+                                        @foreach (var item in AllMedicalDepartments)
+                                        {
+                                            <MudSelectItem Value="@item.Id">@item.MedicalDepartmentName</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="string.IsNullOrWhiteSpace(CurrentTherapy.TherapyName) || CurrentTherapy.TherapyCost == 0 || CurrentTherapy.MedicalDepartmentId == 0" OnClick="@(() => AddTherapyToBatch(CurrentTherapy))" Class="mt-2" FullWidth="true">Add Therapy To Batch</MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                    <MudItem md="8" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Therapys Batch Summary</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    @if (!TherapysBatch!.Any())
+                                    {
+                                        <NoDataNotice NoDataMessage="No Therapys in Batch" />
+                                    }
+                                    else
+                                    {
+
+                                        <MudTable Dense="true" Height="500px" FixedHeader="true" Items="@TherapysBatch" Hover="true" Breakpoint="Breakpoint.Sm" Context="medContext">
+                                            <HeaderContent>
+                                                <MudTh>Description</MudTh>
+                                                <MudTh>Department</MudTh>
+                                                <MudTh>Cost</MudTh>
+                                                <MudTh></MudTh>
+                                            </HeaderContent>
+                                            <RowTemplate>
+                                                <MudTd DataLabel="Description">@($"{medContext.TherapyName}")</MudTd>
+                                                <MudTd DataLabel="Department">@medContext.MedicalDepartmentName</MudTd>
+                                                <MudTd DataLabel="Cost">@medContext.TherapyCost</MudTd>
+                                                <MudTd DataLabel="">
+                                                    <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveTherapyFromBatch(medContext))" />
+                                                </MudTd>
+                                            </RowTemplate>
+                                        </MudTable>
+                                    }
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="text-align:end">
+                    <MudItem Style="display:flex; justify-content:center; ">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="width:19%; margin-right:20px;" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Therapys Added Successfully!</MudAlert>
+                        }
+                        <MudAlert Style="@(isCreatedSuccessfully ? "width: 40%;" : "width: 50%;")" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">@addedSuccessfully</MudAlert>
+                        <MudAlert Style="@(isCreatedSuccessfully ? "width: 40%;" : "width: 50%;")" Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center">@notaddedSuccessfully</MudAlert>
+                    </MudItem>
+                    <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                            <MudText Class="ps-3"> Saving  Therapys...</MudText>
+                        }
+                        else
+                        {
+                            <MudText> Save Therapys</MudText>
+                        }
+                    </MudStaticButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ResetPage" Class="mt-3">Reset Page</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToStaffTherapysPage" Class="mt-3">Back</MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<TherapyDto>? AllTherapys;
+    List<TherapyDto>? TherapysBatch = new();
+    List<MedicalDepartmentDto> AllMedicalDepartments = new();
+
+    TherapyDto CurrentTherapy = new();
+
+    string saveMessage = string.Empty;
+    string? addedSuccessfully = "Added:";
+    string? notaddedSuccessfully = "Not Added:";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllTherapys = await medicineService.GetAllTherapiesAsync();
+        AllMedicalDepartments = await medicineService.GetAllMedicalDeptsAsync();
+    }
+
+    public async Task AddTherapyToBatch(TherapyDto therapyDto)
+    {
+
+        var existingMed = await medicineService.GetTherapyByNameAsync(therapyDto.TherapyName);
+        bool inBatch = false;
+        inBatch = TherapysBatch?.Any(r => r.TherapyName == therapyDto.TherapyName) ?? false;
+
+        if (existingMed.Id == 0 && !inBatch)
+        {
+            therapyDto.MedicalDepartmentName = AllMedicalDepartments.FirstOrDefault(rt => rt.Id == therapyDto.MedicalDepartmentId)?.MedicalDepartmentName ?? string.Empty;
+            var newTherapy = new TherapyDto
+            {
+                TherapyName = therapyDto.TherapyName,
+                TherapyCost = therapyDto.TherapyCost,
+                MedicalDepartmentName = therapyDto.MedicalDepartmentName,
+                MedicalDepartmentId = therapyDto.MedicalDepartmentId,
+            };
+
+            if (newTherapy != null)
+                TherapysBatch!.Add(newTherapy);
+        }
+        else if (existingMed.Id > 0 && !inBatch)
+        {
+            saveMessage = $"{existingMed.TherapyName} is already registered";
+            Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Error }
+                    });
+        }
+        else if (existingMed.Id == 0 && inBatch)
+        {
+            saveMessage = $"{existingMed.TherapyName} is already batch";
+            Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Error }
+                    });
+        }
+
+        await InvokeAsync(StateHasChanged);
+
+    }
+
+    public async Task RemoveTherapyFromBatch(TherapyDto therapyDto)
+    {
+        if (TherapysBatch != null)
+            TherapysBatch.Remove(therapyDto);
+    }
+
+    public async Task SaveTherapyAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        if (TherapysBatch!.Count == 0)
+        {
+            isSaving = false;
+            return;
+        }
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            foreach (var therapy in TherapysBatch)
+            {
+                var existingMed = await medicineService.GetTherapyByNameAsync(therapy.TherapyName);
+
+                if (existingMed.Id == 0)
+                {
+                    var isSucess = await medicineService.AddTherapyAsync(therapy);
+
+                    if (isSucess > 0)
+                    {
+                        saveMessage = $"{therapy.TherapyName} added sucessfully";
+                        Console.WriteLine(saveMessage);
+                        addedSuccessfully = addedSuccessfully + $" {therapy.TherapyName},";
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {therapy.TherapyName} not added sucessfully! Please read therapy to batch and save";
+                        Console.WriteLine(saveMessage);
+                        notaddedSuccessfully = notaddedSuccessfully + $" {therapy.TherapyName},";
+                    }
+                }
+                else if (existingMed.Id > 0)
+                {
+                    var isSucess = await medicineService.UpdateTherapyAsync(therapy, existingMed.Id);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"{therapy.TherapyName} updated sucessfully";
+                        Console.WriteLine(saveMessage);
+                        addedSuccessfully = addedSuccessfully + $" {therapy.TherapyName},";
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {therapy.TherapyName} not updated sucessfully! Please read therapy to batch and save";
+                        Console.WriteLine(saveMessage);
+                        notaddedSuccessfully = notaddedSuccessfully + $" {therapy.TherapyName},";
+                    }
+                }
+            }
+            if (notaddedSuccessfully == "Not Added:")
+                isCreatedSuccessfully = true;
+            CurrentTherapy = new();
+            TherapysBatch.Clear();
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public async Task ResetPage()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isCreatedSuccessfully = false;
+        CurrentTherapy = new();
+    }
+
+    public void ReturnToStaffTherapysPage()
+    {
+        MudDialog.Cancel();
+    }
+}

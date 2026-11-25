@@ -2,6 +2,7 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using NovaCare.Components.Account.Pages
+@using NovaCare.Components.Pages.Configurations.BloodConfig
 
 @inject IDialogService Dialog
 
@@ -38,6 +39,11 @@
             <MudTabPanel Text="Medicines Catalog" Icon="@Icons.Material.Outlined.Inventory2" Style="text-transform: none; font-weight: 500;">
                 <div class="pt-1 pt-sm-6">
                     <MedicineIndex />
+                </div>
+            </MudTabPanel>
+            <MudTabPanel Text="Blood Bank" Icon="@Icons.Material.Outlined.Bloodtype" Style="text-transform: none; font-weight: 500;">
+                <div class="pa-4 pa-sm-6">
+                    <Blood />
                 </div>
             </MudTabPanel>
         </MudTabs>

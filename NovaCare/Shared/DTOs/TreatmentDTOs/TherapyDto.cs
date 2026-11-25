@@ -11,6 +11,6 @@ namespace NovaCare.Shared.DTOs.TreatmentDTOs
 
         public int MedicalDepartmentId { get; set; }
         public MedicalDepartment? MedicalDepartment { get; set; }
-        public string MedicalDepartmentumber { get; set; } = string.Empty;
+        public string MedicalDepartmentName { get; set; } = string.Empty;
     }
 }

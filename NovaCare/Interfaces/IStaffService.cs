@@ -20,7 +20,7 @@ namespace NovaCare.Interfaces
         Task<StaffTypeDto> GetStaffTypeByIdAsync(int typeId);
         Task<StaffTitleDto> GetStaffTitleByIdAsync(int titleId);
         Task<StaffTitleGroupDto> GetStaffTitleGroupByIdAsync(int groupId);
-
+        Task AssignTitleAsync(string staffId, int titleId);
 
         Task<bool> AwardStaffOfTheWeekAsync(string staffId);
 

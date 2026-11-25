@@ -63,7 +63,8 @@ namespace NovaCare.Data
                 new StaffTitle { Id = 5, StaffTypeId = 1, StaffTitleName = "Receptionist", TitleGroupId = 5 },
                 new StaffTitle { Id = 6, StaffTypeId = 1, StaffTitleName = "Maintenance Office", TitleGroupId = 5 },
                 new StaffTitle { Id = 7, StaffTypeId = 2, StaffTitleName = "Pharmacist", TitleGroupId = 5 },
-                new StaffTitle { Id = 8, StaffTypeId = 1, StaffTitleName = "System Admin", TitleGroupId = 4 }
+                new StaffTitle { Id = 8, StaffTypeId = 1, StaffTitleName = "System Admin", TitleGroupId = 4 },
+                new StaffTitle { Id = 9, StaffTypeId = 1, StaffTitleName = "Cashier", TitleGroupId = 4 }
                 );
 
             builder.Entity<StaffStatus>().HasData(
@@ -178,8 +179,8 @@ namespace NovaCare.Data
 
             builder.Entity<DoctorStatus>().HasData(
                 new DoctorStatus { Id = 1, DoctorStatusName = "Free" },
-                new DoctorStatus { Id = 2, DoctorStatusName = "Busy" },
-                new DoctorStatus { Id = 3, DoctorStatusName = "WithPatients" }
+                new DoctorStatus { Id = 2, DoctorStatusName = "Busy" }
+                //new DoctorStatus { Id = 3, DoctorStatusName = "WithPatients" }
                 );
 
             builder.Entity<DiseaseType>().HasData(
@@ -280,6 +281,17 @@ namespace NovaCare.Data
                 new VisitStatus { Id = 1, VisitStatusName = "Active" },    // Patient is currently in the hospital/clinic
                 new VisitStatus { Id = 2, VisitStatusName = "Completed" }, // Discharged & bills finalized (corresponds to "Old")
                 new VisitStatus { Id = 3, VisitStatusName = "Cancelled" }  // Visit created by mistake or patient left before triage
+            );
+
+            builder.Entity<Blood>().HasData(
+                new Blood { Id = 1, BloodGroup = "A+" },
+                new Blood { Id = 2, BloodGroup = "A-" },
+                new Blood { Id = 3, BloodGroup = "B+" },
+                new Blood { Id = 4, BloodGroup = "B-" },
+                new Blood { Id = 5, BloodGroup = "AB+" },
+                new Blood { Id = 6, BloodGroup = "AB-" },
+                new Blood { Id = 7, BloodGroup = "O+" },
+                new Blood { Id = 8, BloodGroup = "O-" }
             );
 
             #endregion
@@ -497,6 +509,7 @@ namespace NovaCare.Data
         public DbSet<Prescription> Prescriptions { get; set; }
         public DbSet<Allergy> Allergies { get; set; }
         public DbSet<Referral> Referrals { get; set; }
+        public DbSet<Blood> Bloods { get; set; }
 
         #endregion
 

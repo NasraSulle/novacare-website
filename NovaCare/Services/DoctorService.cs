@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using NovaCare.Components.Pages.Configurations.DoctorTypeConfig;
 using NovaCare.Components.Pages.StaffPages;
 using NovaCare.Data;
 using NovaCare.Interfaces;
@@ -7,6 +8,8 @@ using NovaCare.Modals.DoctorModals;
 using NovaCare.Modals.StaffModals;
 using NovaCare.Shared.DTOs.DoctorDTOs;
 using NovaCare.Shared.DTOs.StaffDTOs;
+using System.Numerics;
+using DoctorType = NovaCare.Modals.DoctorModals.DoctorType;
 
 namespace NovaCare.Services
 {
@@ -36,6 +39,31 @@ namespace NovaCare.Services
                 };
 
                 context.Doctors.Add(doctor);
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> AddDoctorTypeAsync(DoctorTypeDto doctorTypeDto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var doctorType = new DoctorType
+                {
+                    DoctorTypeCode = doctorTypeDto.DoctorTypeCode,
+                    DoctorTypeName = doctorTypeDto.DoctorTypeName,
+                    DeptConsultationFee = doctorTypeDto.DeptConsultationFee,
+                    MedicalDeptId = doctorTypeDto.MedicalDeptId
+                };
+
+                context.DoctorTypes.Add(doctorType);
                 await context.SaveChangesAsync();
 
                 return true;
@@ -129,6 +157,48 @@ namespace NovaCare.Services
             return doctor ?? new();
         }
 
+        public async Task<DoctorTypeDto> GetDoctorTypeByIdAsync(int docTypeId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var docTypes = await context.DoctorTypes
+                .AsNoTracking()
+                .Select(title => new DoctorTypeDto
+                {
+                    Id = title.Id,
+                    DoctorTypeName = title.DoctorTypeName,
+                    DoctorTypeCode = title.DoctorTypeCode,
+                    DeptConsultationFee = title.DeptConsultationFee,
+                    MedicalDeptId = title.MedicalDeptId,
+                    MedicalDepartmentName = title.MedicalDepartment != null ? title.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    DoctorsCount = title.Doctors != null ? title.Doctors.Count : 0,
+
+                })
+                .FirstOrDefaultAsync(x => x.Id == docTypeId);
+
+            return docTypes;
+        }
+
+        public async Task<DoctorTypeDto> GetDoctorTypeByNameAsync(string docTypeName)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var docTypes = await context.DoctorTypes
+                .AsNoTracking()
+                .Select(title => new DoctorTypeDto
+                {
+                    Id = title.Id,
+                    DoctorTypeName = title.DoctorTypeName,
+                    DoctorTypeCode = title.DoctorTypeCode,
+                    DeptConsultationFee = title.DeptConsultationFee,
+                    MedicalDeptId = title.MedicalDeptId,
+                    MedicalDepartmentName = title.MedicalDepartment != null ? title.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    DoctorsCount = title.Doctors != null ? title.Doctors.Count : 0,
+
+                })
+                .FirstOrDefaultAsync(x => x.DoctorTypeName == docTypeName);
+
+            return docTypes ?? new();
+        }
+
         public async Task<List<DoctorTypeDto>> GetDoctorTypesAsync()
         {
             using var context = _contextFactory.CreateDbContext();
@@ -138,8 +208,11 @@ namespace NovaCare.Services
                 {
                     Id = title.Id,
                     DoctorTypeName = title.DoctorTypeName,
+                    DoctorTypeCode = title.DoctorTypeCode,
                     DeptConsultationFee = title.DeptConsultationFee,
                     MedicalDeptId = title.MedicalDeptId,
+                    MedicalDepartmentName = title.MedicalDepartment != null ? title.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    DoctorsCount = title.Doctors != null ? title.Doctors.Count : 0,
 
                 })
                 .ToListAsync();
@@ -172,7 +245,7 @@ namespace NovaCare.Services
                 result = await context.GenericCodes
                     .AsNoTracking().AsSplitQuery().FirstOrDefaultAsync(gc => gc.RoomId == null);
             }
-            return result;
+            return result ?? new();
         }
 
         public async Task<bool> UpdateDoctorAsync(DoctorDto doctor, int doctorId)
@@ -195,6 +268,33 @@ namespace NovaCare.Services
                     existingDoctor.DoctorConsultationFee = doctor.DoctorConsultationFee;
 
                     context.Doctors.Update(existingDoctor);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateDoctorTypeAsync(DoctorTypeDto doctorType, int doctorTypeId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var existingDoctorType = await context.DoctorTypes.FirstOrDefaultAsync(x => x.Id == doctorTypeId);
+
+                if (existingDoctorType != null)
+                {
+                    existingDoctorType.DoctorTypeCode = doctorType.DoctorTypeCode;
+                    existingDoctorType.DoctorTypeName = doctorType.DoctorTypeName;
+                    existingDoctorType.DeptConsultationFee = doctorType.DeptConsultationFee;
+                    existingDoctorType.MedicalDeptId = doctorType.MedicalDeptId;
+
+                    context.DoctorTypes.Update(existingDoctorType);
                     await context.SaveChangesAsync();
                 }
 

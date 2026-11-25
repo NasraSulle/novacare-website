@@ -450,31 +450,31 @@
             Input.Password = password.Trim();
             Input.RegisteredDate = DateTime.Now;
 
-            if (Input.AdministrativeTitleId > 0)
-            {
-                var title = new StaffTitle
-                {
-                    //Id = Input.AdministrativeTitleId,
-                    StaffTitleName = Input.AdministrativeTitleName,
-                    TitleGroupId = StaffTitles.FirstOrDefault(x => x.StaffTitleName == Input.AdministrativeTitleName)?.TitleGroupId ?? 0,
-                    StaffTypeId = 1
-                };
+            // if (Input.AdministrativeTitleId > 0)
+            // {
+            //     var title = new StaffTitle
+            //     {
+            //         //Id = Input.AdministrativeTitleId,
+            //         StaffTitleName = Input.AdministrativeTitleName,
+            //         TitleGroupId = StaffTitles.FirstOrDefault(x => x.StaffTitleName == Input.AdministrativeTitleName)?.TitleGroupId ?? 0,
+            //         StaffTypeId = 1
+            //     };
 
-                staffTitlesToAdd.Add(title);
-            }
+            //     staffTitlesToAdd.Add(title);
+            // }
 
-            if (Input.ClinicalTitleId > 0)
-            {
-                var title = new StaffTitle
-                {
-                    //Id = Input.ClinicalTitleId,
-                    StaffTitleName = Input.ClinicalTitleName,
-                    TitleGroupId = StaffTitles.FirstOrDefault(x => x.StaffTitleName == Input.ClinicalTitleName)?.TitleGroupId ?? 0,
-                    StaffTypeId = 2
-                };
+            // if (Input.ClinicalTitleId > 0)
+            // {
+            //     var title = new StaffTitle
+            //     {
+            //         //Id = Input.ClinicalTitleId,
+            //         StaffTitleName = Input.ClinicalTitleName,
+            //         TitleGroupId = StaffTitles.FirstOrDefault(x => x.StaffTitleName == Input.ClinicalTitleName)?.TitleGroupId ?? 0,
+            //         StaffTypeId = 2
+            //     };
 
-                staffTitlesToAdd.Add(title);
-            }
+            //     staffTitlesToAdd.Add(title);
+            // }
 
 
             #region(userDataTransfer)
@@ -538,6 +538,10 @@
             outMessage = "Staff created Successfully!";
 
             var userId = await UserManager.GetUserIdAsync(user);
+
+            if (Input.AdministrativeTitleId > 0) await staffService.AssignTitleAsync(userId, Input.AdministrativeTitleId);
+            if (Input.ClinicalTitleId > 0) await staffService.AssignTitleAsync(userId, Input.ClinicalTitleId);
+
 
             if (!string.IsNullOrWhiteSpace(CurrentDoctor.MedicalLicenseNumber))
             {

@@ -303,6 +303,15 @@ namespace NovaCare.Services
             return staffStatus;
         }
 
+        public async Task AssignTitleAsync(string staffId, int titleId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var staff = await context.Users.Include(s => s.StaffTitles).FirstOrDefaultAsync(s => s.Id == staffId);
+            var title = await context.StaffTitles.FindAsync(titleId);
+            if (staff != null && title != null) { staff.StaffTitles?.Add(title); await context.SaveChangesAsync(); }
+        }
+
+
         public async Task<StaffTitleDto> GetStaffTitleByIdAsync(int titleId)
         {
             using var context = _contextFactory.CreateDbContext();
@@ -441,6 +450,7 @@ namespace NovaCare.Services
                 {
                     Id = title.Id,
                     StaffTypeName = title.StaffTypeName,
+                    StaffsTitleCount = title.StaffTitles != null ? title.StaffTitles.Count : 0,
 
                 })
                 .ToListAsync();

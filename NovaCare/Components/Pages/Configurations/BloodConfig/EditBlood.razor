@@ -1,0 +1,146 @@
+﻿@using NovaCare.Shared.DTOs.DiseaseDTOs
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentBloodGroup" method="post" OnValidSubmit="SaveBloodAsync" FormName="editstafftitle">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="12" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9);; border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9);; color:white;"> Staff Title Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="6">
+                                    <MudText Align="Align.Left"><b>Blood Group: </b> @CurrentBloodGroup.BloodGroup</MudText>
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudText Align="Align.Left"><b>Pack Qty: </b> @CurrentBloodGroup.PackQty</MudText>
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudNumericField For="@(() => addPackQty)" @bind-Value="addPackQty" Margin="Margin.Dense"
+                                                     Label="Packs to Add" Variant="Variant.Outlined" Placeholder="Disease name"
+                                                     UserAttributes="@(new() { { "autocomplete", "diseasename" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="6">
+                                    <MudNumericField For="@(() => dispensePackQty)" @bind-Value="dispensePackQty" Margin="Margin.Dense"
+                                              Label="Packs to Dispense" Variant="Variant.Outlined" Placeholder="Disease name"
+                                              UserAttributes="@(new() { { "autocomplete", "diseasename" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="display:flex; justify-content:end; align-items:center;">
+                    <MudItem Class="mt-3 me-3">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Blood group Updated Successfully!</MudAlert>
+                        }
+                    </MudItem>
+                    <MudItem Style="display:flex; justify-content:end; ">
+                        <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3 me-1">
+                            @if (isSaving)
+                            {
+                                <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                                <MudText Class="ps-3"> Updating Disease...</MudText>
+                            }
+                            else
+                            {
+                                <MudText> Update Disease Details</MudText>
+                            }
+                        </MudStaticButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToDiseasesPage" Class="mt-3">Back</MudButton>
+                    </MudItem>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<BloodDto> AllBloodGroups = new();
+    [Parameter, EditorRequired] public BloodDto CurrentBloodGroup { get; set; } = new();
+
+    int addPackQty = 0;
+    int dispensePackQty = 0;
+    int newPackQty = 0;
+
+    string saveMessage = string.Empty;
+    string? addedSuccessfully = "Added:";
+    string? notaddedSuccessfully = "Not Added:";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllBloodGroups = await medicineService.GetAllBloodsAsync();
+    }
+
+    public async Task SaveBloodAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        saveMessage = string.Empty;
+
+        newPackQty = CurrentBloodGroup.PackQty;
+        newPackQty = CurrentBloodGroup.PackQty + addPackQty - dispensePackQty;
+
+        if (newPackQty < 0)
+        {
+            saveMessage = $"Blood packs can not be below zero";
+            Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Error }
+                    });
+
+            isSaving = false;
+
+        }
+        else
+        {
+            try
+            {
+                CurrentBloodGroup.PackQty = newPackQty;
+
+                var isSucess = await medicineService.UpdateBloodAsync(CurrentBloodGroup, CurrentBloodGroup.Id);
+
+                if (isSucess)
+                {
+                    saveMessage = $"{CurrentBloodGroup.BloodGroup} updated sucessfully";
+                    Console.WriteLine(saveMessage);
+                    addedSuccessfully = addedSuccessfully + $" {CurrentBloodGroup.BloodGroup},";
+                }
+                else
+                {
+                    saveMessage = $"Error: {CurrentBloodGroup.BloodGroup} not updated sucessfully!";
+                    Console.WriteLine(saveMessage);
+                    notaddedSuccessfully = notaddedSuccessfully + $" {CurrentBloodGroup.BloodGroup},";
+                }
+
+                isCreatedSuccessfully = true;
+
+            }
+            catch (Exception ex)
+            {
+                saveMessage = "Save failed: " + ex.Message;
+            }
+            finally
+            {
+                isSaving = false;
+            }
+        }
+    }
+
+    public void ReturnToDiseasesPage()
+    {
+        MudDialog.Cancel();
+    }
+}

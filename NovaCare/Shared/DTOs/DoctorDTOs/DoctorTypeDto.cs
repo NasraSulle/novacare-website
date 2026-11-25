@@ -19,5 +19,9 @@ namespace NovaCare.Shared.DTOs.DoctorDTOs
         //navigation properties
         public MedicalDepartmentDto? MedicalDepartment { get; set; }
         public List<DoctorDto>? Doctors { get; set; }
+
+        //UI
+        public string MedicalDepartmentName { get; set; } = string.Empty;
+        public int DoctorsCount { get; set; }
     }
 }

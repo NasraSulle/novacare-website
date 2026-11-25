@@ -391,11 +391,6 @@ namespace NovaCare.Migrations
                         {
                             Id = 2,
                             DoctorStatusName = "Busy"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            DoctorStatusName = "WithPatients"
                         });
                 });
 
@@ -419,15 +414,12 @@ namespace NovaCare.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("MedicalDepartmentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("MedicalDeptId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MedicalDepartmentId");
+                    b.HasIndex("MedicalDeptId");
 
                     b.ToTable("DoctorTypes");
 
@@ -589,7 +581,7 @@ namespace NovaCare.Migrations
 
                     b.HasIndex("RoomId");
 
-                    b.ToTable("DoctorCodes");
+                    b.ToTable("GenericCodes");
                 });
 
             modelBuilder.Entity("NovaCare.Modals.DoctorModals.MedicalDepartment", b =>
@@ -1293,6 +1285,76 @@ namespace NovaCare.Migrations
                     b.HasIndex("LabTestId");
 
                     b.ToTable("LabTestResultCompositions");
+                });
+
+            modelBuilder.Entity("NovaCare.Modals.MedicineModals.Blood", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BloodGroup")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PackQty")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Bloods");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            BloodGroup = "A+",
+                            PackQty = 0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            BloodGroup = "A-",
+                            PackQty = 0
+                        },
+                        new
+                        {
+                            Id = 3,
+                            BloodGroup = "B+",
+                            PackQty = 0
+                        },
+                        new
+                        {
+                            Id = 4,
+                            BloodGroup = "B-",
+                            PackQty = 0
+                        },
+                        new
+                        {
+                            Id = 5,
+                            BloodGroup = "AB+",
+                            PackQty = 0
+                        },
+                        new
+                        {
+                            Id = 6,
+                            BloodGroup = "AB-",
+                            PackQty = 0
+                        },
+                        new
+                        {
+                            Id = 7,
+                            BloodGroup = "O+",
+                            PackQty = 0
+                        },
+                        new
+                        {
+                            Id = 8,
+                            BloodGroup = "O-",
+                            PackQty = 0
+                        });
                 });
 
             modelBuilder.Entity("NovaCare.Modals.MedicineModals.Medicine", b =>
@@ -3008,6 +3070,14 @@ namespace NovaCare.Migrations
                             StaffTitleName = "System Admin",
                             StaffTypeId = 1,
                             TitleGroupId = 4
+                        },
+                        new
+                        {
+                            Id = 9,
+                            RegisteredDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            StaffTitleName = "Cashier",
+                            StaffTypeId = 1,
+                            TitleGroupId = 4
                         });
                 });
 
@@ -3799,7 +3869,9 @@ namespace NovaCare.Migrations
                 {
                     b.HasOne("NovaCare.Modals.DoctorModals.MedicalDepartment", "MedicalDepartment")
                         .WithMany("DoctorTypes")
-                        .HasForeignKey("MedicalDepartmentId");
+                        .HasForeignKey("MedicalDeptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("MedicalDepartment");
                 });

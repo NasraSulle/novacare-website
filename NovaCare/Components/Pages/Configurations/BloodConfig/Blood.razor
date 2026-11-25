@@ -1,0 +1,219 @@
+﻿@using NovaCare.Shared.DTOs.StaffDTOs
+@inject IDialogService Dialog
+
+<MudGrid Spacing="3">
+    <MudItem xs="12">
+            @* Summary Metric Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" lg="12">
+                    <MudPaper Elevation="0" Class="surface-card is-interactive col-span-12 lg:col-span-6 p-3 lg:p-4 animate-rise-in infect-card" Style="animation-delay: 0s; background-color: rgba(255,0,0,0.05)">
+                        <div class="d-flex align-center justify-space-between gap-3">
+                            <div class="d-flex align-center gap-2">
+                                <MudIcon Icon="@Icons.Material.Outlined.Bloodtype" Size="Size.Small" />
+                                <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Blood Bank Status</MudText>
+                            </div>
+                            <MudChip T="string" Color="Color.Warning" Size="Size.Small" Variant="Variant.Text" Class="font-weight-bold badge-warning-soft">
+                                @* 87.4% full *@
+                                Every drop saves life
+                            </MudChip>
+                        </div>
+                        <MudGrid class="">
+                            <MudItem md="12" Class="">
+                                <MudGrid>
+                                    <MudItem md="12" Class="d-flex justify-content-center">
+                                    @if (AllBloods != null && AllBloods.Any())
+                                    {
+                                        var totalPacks = AllBloods.Sum(b => b.PackQty);
+
+                                        foreach (var blood in AllBloods)
+                                        {
+                                            var percentage = totalPacks > 0
+                                                ? Math.Round((double)blood.PackQty / totalPacks * 100, 1)
+                                                : 0;
+
+                                            <MudProgressCircular Style="height: 80px; width: 80px" class="me-3" Color="Color.Info" Value="@percentage">
+                                                <ChildContent>
+                                                    <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                                                        <MudText Typo="Typo.subtitle2" Color="Color.Dark">@blood.BloodGroup</MudText>
+                                                        <MudText Typo="Typo.subtitle2" Color="Color.Error">@($"{percentage}%")</MudText>
+                                                    </MudStack>
+                                                </ChildContent>
+                                            </MudProgressCircular>
+                                        }
+                                    }
+
+                                    </MudItem>
+                                </MudGrid>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            @* Staff Bloods Data Table *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="BloodDto"
+                         Items="@FilteredBloods"
+                         ReadOnly="@_readOnly"
+                         RowStyle="cursor: pointer;"
+                         Class="bg-transparent"
+                         Bordered="false"
+                         Dense="true"
+                         RowClick="@((args) => PreviewBloodProfile(args.Item))">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart}s")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredBloods.Count} blood groups")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search title, department, or group..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 260px;" />
+                        </div>
+                    </div>
+                </ToolBarContent>
+
+                <Columns>
+                    <TemplateColumn Title="Blood Group" SortBy="@(x => x.BloodGroup)">
+                        <CellTemplate>
+                            <div class="d-flex align-center py-1">
+                            <MudIcon Color="Color.Error" Icon="@Icons.Material.Outlined.WaterDrop" Size="Size.Small" />
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@context.Item.BloodGroup</MudText>
+                                    @* <MudText Typo="Typo.caption" Color="Color.Secondary">Blood Group</MudText> *@
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Available Packs" SortBy="@(x => x.PackQty)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudText Typo="Typo.body2">@context.Item.PackQty</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="Edit Blood">
+                                <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => PreviewBloodProfile(context.Item))" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="BloodDto" />
+                </PagerContent>
+            </MudDataGrid>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private bool _readOnly = true;
+
+    List<BloodDto>? AllBloods;
+    List<BloodDto>? FilteredBloods;
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+
+    BloodDto? CurrentBloodGroup;
+
+    string messageBlood = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(300);
+
+        AllBloods = await medicineService.GetAllBloodsAsync();
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<BloodDto> query = AllBloods ?? Enumerable.Empty<BloodDto>();
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            firstPart = "Blood";
+            messageBlood = "No blood groups are currently configured.";
+        }
+        else
+        {
+            firstPart = FilterBy;
+            messageBlood = $"No {firstPart.ToLower()} blood groups are currently available.";
+            query = query.Where(x => string.Equals(x.BloodGroup?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.BloodGroup?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.PackQty.ToString()?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        FilteredBloods = query.ToList();
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
+    }
+
+    private async Task PreviewBloodProfile(BloodDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentBloodGroup" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditBlood>("Blood Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    public async Task Back()
+    {
+        CurrentBloodGroup = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+}

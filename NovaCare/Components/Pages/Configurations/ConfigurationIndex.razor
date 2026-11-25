@@ -2,9 +2,12 @@
 @using NovaCare.Components.Pages.Configurations.BedConfig
 @using NovaCare.Components.Pages.Configurations.DeptConfig
 @using NovaCare.Components.Pages.Configurations.DiseaseConfig
+@using NovaCare.Components.Pages.Configurations.DoctorTypeConfig
 @using NovaCare.Components.Pages.Configurations.GroupConfig
 @using NovaCare.Components.Pages.Configurations.RoomConfig
+@using NovaCare.Components.Pages.Configurations.SurgeryConfig
 @using NovaCare.Components.Pages.Configurations.TariffConfig
+@using NovaCare.Components.Pages.Configurations.TherapyConfig
 @using NovaCare.Components.Pages.Configurations.TitleConfig
 @using NovaCare.Components.Pages.Configurations.WardConfig
 
@@ -32,6 +35,21 @@
                  TabHeaderClass="bg-secondary-subtle"
                  SliderColor="Color.Error"
                  TabPanelsClass="pa-0">
+            <MudTabPanel Text="Therapies" Icon="@Icons.Material.Outlined.Accessible" Style="text-transform: none; font-weight: 500;">
+                <div class="pa-3 pa-sm-6">
+                    <Therapy />
+                </div>
+            </MudTabPanel>
+            <MudTabPanel Text="Surgeries" Icon="@Icons.Material.Outlined.BabyChangingStation" Style="text-transform: none; font-weight: 500;">
+                <div class="pa-3 pa-sm-6">
+                    <Surgery />
+                </div>
+            </MudTabPanel>
+            <MudTabPanel Text="Doctor Types" Icon="@Icons.Material.Outlined.Person2" Style="text-transform: none; font-weight: 500;">
+                <div class="pa-3 pa-sm-6">
+                    <DoctorType />
+                </div>
+            </MudTabPanel>
             <MudTabPanel Text="Wards" Icon="@Icons.Material.Outlined.LocalHospital" Style="text-transform: none; font-weight: 500;">
                 <div class="pa-3 pa-sm-6">
                     <Ward />

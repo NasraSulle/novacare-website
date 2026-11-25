@@ -278,16 +278,12 @@
 
             <!-- Patient Flow Monitor — stepped funnel (7 columns on desktop) -->
             <MudItem xs="12" lg="7">
-                <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100">
+                <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100" Style="height: 261.734px;">
                     <div class="d-flex align-start justify-space-between gap-3">
                         <div>
                             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Patient Flow Monitor</MudText>
                             <MudText Typo="Typo.caption" Class="text-muted">Admission &rarr; triage &rarr; treatment &rarr; discharge &middot; today</MudText>
                         </div>
-@*                         <MudIconButton Icon="@(_isFlowExpanded ? Icons.Material.Filled.KeyboardArrowUp : Icons.Material.Filled.KeyboardArrowDown)"
-                                       Size="Size.Small"
-                                       OnClick="@(() => _isFlowExpanded = !_isFlowExpanded)"
-                                       aria-label="Collapse panel" /> *@
                     </div>
 
                     <MudCollapse Expanded="@_isFlowExpanded">
@@ -341,54 +337,84 @@
 
             <!-- Live Bed Occupancy (5 columns on desktop) -->
             <MudItem xs="12" lg="5">
+                @{
+                    var wardsList = allWards ?? new List<WardDto>();
+
+                    var wardStats = wardsList.Select(w =>
+                    {
+                        var bedsInWard = (w.Beds != null && w.Beds.Any())
+                            ? w.Beds
+                            : (allBeds ?? new List<BedDto>()).Where(b => b.WardId == w.Id).ToList();
+
+                        var total = bedsInWard.Count > 0 ? bedsInWard.Count : w.BedsCount;
+                        var occupied = bedsInWard.Count(b => !string.Equals(b.BedAvailability, "UnUsed", StringComparison.OrdinalIgnoreCase));
+                        var pct = total > 0 ? Math.Round((double)occupied / total * 100, 1) : 0;
+
+                        var deptName = !string.IsNullOrWhiteSpace(w.MedicalDepartmentName)
+                            ? w.MedicalDepartmentName
+                            : w.MedicalDepartment?.MedicalDepartmentName;
+
+                        return new
+                        {
+                            w.WardName,
+                            DepartmentName = deptName,
+                            Occupied = occupied,
+                            Total = total,
+                            Percentage = pct
+                        };
+                    }).ToList();
+
+                    var totalHospitalBeds = wardStats.Sum(w => w.Total);
+                    var totalHospitalOccupied = wardStats.Sum(w => w.Occupied);
+                    var overallOccupancy = totalHospitalBeds > 0
+                        ? Math.Round((double)totalHospitalOccupied / totalHospitalBeds * 100, 1)
+                        : 0;
+
+                    var overallChipColor = overallOccupancy >= 90 ? Color.Error
+                                         : overallOccupancy >= 75 ? Color.Warning
+                                         : Color.Success;
+                }
                 <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100" Style="animation-delay: 0.08s;">
-                    <div class="d-flex align-center justify-space-between gap-3">
+                    <div class="d-flex align-center justify-space-between gap-3 mb-4">
                         <div class="d-flex align-center gap-2">
                             <MudIcon Icon="@Icons.Material.Outlined.Bed" Size="Size.Small" />
                             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Live Bed Occupancy</MudText>
                         </div>
-                        <MudChip T="string" Color="Color.Warning" Size="Size.Small" Variant="Variant.Text" Class="font-weight-bold badge-warning-soft">
-                            87.4% full
+                        <MudChip T="string" Color="@overallChipColor" Size="Size.Small" Variant="Variant.Text" Class="font-weight-bold badge-warning-soft">
+                            @($"{overallOccupancy}% full")
                         </MudChip>
                     </div>
 
-                    <div class="d-flex flex-column gap-3">
-                        <!-- General Ward -->
-                        <div>
-                            <div class="d-flex align-center justify-space-between mb-1">
-                                <MudText Typo="Typo.caption" Class="font-weight-bold">General Ward &middot; GW-1</MudText>
-                                <MudText Typo="Typo.caption" Class="text-muted">142 / 160</MudText>
-                            </div>
-                            <MudProgressLinear Value="88.7" Color="Color.Warning" Size="Size.Medium" Rounded="true" />
-                        </div>
+                    @if (wardStats.Any())
+                    {
+                        <div class="d-flex flex-column gap-3 pe-1" style="height: 200px; overflow-y: auto;">
+                            @foreach (var ward in wardStats)
+                            {
+                                var barColor = ward.Percentage >= 90 ? Color.Error
+                                             : ward.Percentage >= 75 ? Color.Warning
+                                             : ward.Percentage >= 60 ? Color.Info
+                                             : Color.Success;
 
-                        <!-- ICU-B -->
-                        <div>
-                            <div class="d-flex align-center justify-space-between mb-1">
-                                <MudText Typo="Typo.caption" Class="font-weight-bold">ICU-B</MudText>
-                                <MudText Typo="Typo.caption" Class="text-muted">33 / 36</MudText>
-                            </div>
-                            <MudProgressLinear Value="91.6" Color="Color.Error" Size="Size.Medium" Rounded="true" />
+                                <div>
+                                    <div class="d-flex align-center justify-space-between mb-1">
+                                        <MudText Typo="Typo.caption" Class="font-weight-bold">
+                                            @ward.WardName
+                                            @if (!string.IsNullOrWhiteSpace(ward.DepartmentName))
+                                            {
+                                                <span class="text-muted font-weight-regular"> &middot; @ward.DepartmentName</span>
+                                            }
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Class="text-muted">@($"{ward.Occupied} / {ward.Total}")</MudText>
+                                    </div>
+                                    <MudProgressLinear Value="@ward.Percentage" Color="@barColor" Size="Size.Medium" Rounded="true" />
+                                </div>
+                            }
                         </div>
-
-                        <!-- Pediatrics -->
-                        <div>
-                            <div class="d-flex align-center justify-space-between mb-1">
-                                <MudText Typo="Typo.caption" Class="font-weight-bold">Pediatrics &middot; PW-2</MudText>
-                                <MudText Typo="Typo.caption" Class="text-muted">38 / 60</MudText>
-                            </div>
-                            <MudProgressLinear Value="63.3" Color="Color.Info" Size="Size.Medium" Rounded="true" />
-                        </div>
-
-                        <!-- Maternity -->
-                        <div>
-                            <div class="d-flex align-center justify-space-between mb-1">
-                                <MudText Typo="Typo.caption" Class="font-weight-bold">Maternity &middot; MW-1</MudText>
-                                <MudText Typo="Typo.caption" Class="text-muted">21 / 40</MudText>
-                            </div>
-                            <MudProgressLinear Value="52.5" Color="Color.Success" Size="Size.Medium" Rounded="true" />
-                        </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">No wards configured.</MudText>
+                    }
                 </MudPaper>
             </MudItem>
 
@@ -402,7 +428,7 @@
 
             <!-- Ph.1 -->
             <MudItem xs="12" lg="4">
-                <MudPaper Elevation="0" Class="surface-card is-interactive col-span-12 lg:col-span-4 p-3 lg:p-4 animate-rise-in" Style="animation-delay: 0s;">
+                <MudPaper Elevation="0" Class="surface-card is-interactive col-span-12 lg:col-span-4 p-3 lg:p-4 animate-rise-in" Style="animation-delay: 0s; height: 258px;">
                     <div class="d-flex align-center justify-space-between gap-3">
                         <div class="d-flex align-center gap-2">
                             <MudIcon Icon="@Icons.Material.Outlined.LocalPharmacy" Size="Size.Small" />
@@ -413,41 +439,23 @@
                         </MudChip>
                     </div>
                     <ul class="space-y-2.5 amb-rail__list scroll-thin">
-                        <li class="flex items-center justify-between p-2.5 rounded-xl u-background-color-mix-in-oklab-color-danger-500-6-surface-sun">
-                            <span class="text-[12px] font-medium">Epinephrine 1mg/mL</span>
-                            <span class="text-[11px] font-semibold u-color-color-danger-500">8 units left</span>
-                        </li>
-                        <li class="flex items-center justify-between p-2.5 rounded-xl u-background-color-mix-in-oklab-color-danger-500-6-surface-sun">
-                            <span class="text-[12px] font-medium">Insulin Glargine</span>
-                            <span class="text-[11px] font-semibold u-color-color-danger-500">14 units left</span>
-                        </li>
-                        <li class="flex items-center justify-between p-2.5 rounded-xl u-background-color-mix-in-oklab-color-warning-500-6-surface-su">
-                            <span class="text-[12px] font-medium">Amoxicillin 500mg</span>
-                            <span class="text-[11px] font-semibold u-color-color-warning-500">62 units left</span>
-                        </li>
-                        <li class="flex items-center justify-between p-2.5 rounded-xl u-background-color-mix-in-oklab-color-danger-500-6-surface-sun">
-                            <span class="text-[12px] font-medium">Epinephrine 1mg/mL</span>
-                            <span class="text-[11px] font-semibold u-color-color-danger-500">8 units left</span>
-                        </li>
-                        <li class="flex items-center justify-between p-2.5 rounded-xl u-background-color-mix-in-oklab-color-danger-500-6-surface-sun">
-                            <span class="text-[12px] font-medium">Insulin Glargine</span>
-                            <span class="text-[11px] font-semibold u-color-color-danger-500">14 units left</span>
-                        </li>
-                        <li class="flex items-center justify-between p-2.5 rounded-xl u-background-color-mix-in-oklab-color-warning-500-6-surface-su">
-                            <span class="text-[12px] font-medium">Amoxicillin 500mg</span>
-                            <span class="text-[11px] font-semibold u-color-color-warning-500">62 units left</span>
-                        </li>
-                        <li class="flex items-center justify-between p-2.5 rounded-xl u-background-color-mix-in-oklab-color-warning-500-6-surface-su">
-                            <span class="text-[12px] font-medium">Amoxicillin 500mg</span>
-                            <span class="text-[11px] font-semibold u-color-color-warning-500">62 units left</span>
-                        </li>
+                        @if(allMedicines != null && allMedicines.Any())
+                        {
+                            foreach (var med in allMedicines)
+                            {
+                                <li class="flex items-center justify-between p-2.5 rounded-xl u-background-color-mix-in-oklab-color-danger-500-6-surface-sun">
+                                    <span class="text-[12px] font-medium">@med.MedicineName</span>
+                                    <span class="text-[11px] font-semibold u-color-color-danger-500">@med.MedicineQty units left</span>
+                                </li>
+                            }
+                        }
                     </ul>
                 </MudPaper>
             </MudItem>
 
             <!-- Ph.2 -->
             <MudItem xs="12" lg="4">
-                <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100" Style="animation-delay: 0.08s;">
+                <MudPaper Elevation="0" Class="pa-5 surface-card animate-rise-in h-100" Style="animation-delay: 0.08s; height: 258px;">
                     <div class="d-flex align-center justify-space-between gap-3">
                         <div class="d-flex align-center gap-2">
                             <MudIcon Icon="@Icons.Material.Outlined.Medication" Size="Size.Small" />
@@ -500,91 +508,45 @@
 
             <!-- Ph.3 -->
             <MudItem xs="12" lg="4">
-                <MudPaper Elevation="0" Class="surface-card is-interactive col-span-12 lg:col-span-6 p-3 lg:p-4 animate-rise-in infect-card" style="animation-delay: 0s;">
-                    <div class="d-flex align-center justify-space-between gap-3">
+                <MudPaper Elevation="0" Class="surface-card is-interactive col-span-12 lg:col-span-6 p-3 lg:p-4 animate-rise-in infect-card" Style="animation-delay: 0s; height: 258px;">
+                    <div class="d-flex align-center justify-space-between gap-3 mb-3">
                         <div class="d-flex align-center gap-2">
                             <MudIcon Icon="@Icons.Material.Outlined.Bloodtype" Size="Size.Small" />
                             <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Blood Bank Status</MudText>
                         </div>
                         <MudChip T="string" Color="Color.Warning" Size="Size.Small" Variant="Variant.Text" Class="font-weight-bold badge-warning-soft">
-                            87.4% full
+                            Every drop saves life
                         </MudChip>
                     </div>
-                    <MudGrid class="">
-                        <MudItem md="12" Class="">
-                            <MudGrid>
-                                <MudItem md="12" Class="d-flex justify-content-center">
-                                    <MudProgressCircular Style="height: 80px; width: 80px" Color="Color.Info" Value="67">
-                                        <ChildContent>
-                                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Dark">A+</MudText>
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Error">67%</MudText>
-                                            </MudStack>
-                                        </ChildContent>
-                                    </MudProgressCircular>
-                                    <MudProgressCircular Style="height: 80px; width: 80px" Color="Color.Info" Value="67">
-                                        <ChildContent>
-                                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Dark">B+</MudText>
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Error">67%</MudText>
-                                            </MudStack>
-                                        </ChildContent>
-                                    </MudProgressCircular>
-                                    <MudProgressCircular Style="height: 80px; width: 80px" Color="Color.Info" Value="67">
-                                        <ChildContent>
-                                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Dark">AB+</MudText>
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Error">67%</MudText>
-                                            </MudStack>
-                                        </ChildContent>
-                                    </MudProgressCircular>
-                                    <MudProgressCircular Style="height: 80px; width: 80px" Color="Color.Info" Value="67">
-                                        <ChildContent>
-                                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Dark">O+</MudText>
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Error">67%</MudText>
-                                            </MudStack>
-                                        </ChildContent>
-                                    </MudProgressCircular>
-                                </MudItem>
-                                <MudItem md="12" Class="d-flex justify-content-center">
-                                    <MudProgressCircular Style="height: 80px; width: 80px" Color="Color.Info" Value="67">
-                                        <ChildContent>
-                                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Dark">A-</MudText>
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Error">67%</MudText>
-                                            </MudStack>
-                                        </ChildContent>
-                                    </MudProgressCircular>
-                                    <MudProgressCircular Style="height: 80px; width: 80px" Color="Color.Info" Value="67">
-                                        <ChildContent>
-                                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Dark">B-</MudText>
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Error">67%</MudText>
-                                            </MudStack>
-                                        </ChildContent>
-                                    </MudProgressCircular>
-                                    <MudProgressCircular Style="height: 80px; width: 80px" Color="Color.Info" Value="67">
-                                        <ChildContent>
-                                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Dark">AB-</MudText>
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Error">67%</MudText>
-                                            </MudStack>
-                                        </ChildContent>
-                                    </MudProgressCircular>
-                                    <MudProgressCircular Style="height: 80px; width: 80px" Color="Color.Info" Value="67">
-                                        <ChildContent>
-                                            <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Dark">O-</MudText>
-                                                <MudText Typo="Typo.subtitle2" Color="Color.Error">67%</MudText>
-                                            </MudStack>
-                                        </ChildContent>
-                                    </MudProgressCircular>
-                                </MudItem>
-                            </MudGrid>
-                        </MudItem>
-                    </MudGrid>
+
+                    <div class="d-flex flex-wrap justify-center align-center gap-3">
+                        @if (AllBloods != null && AllBloods.Any())
+                        {
+                            var totalPacks = AllBloods.Sum(b => b.PackQty);
+
+                            foreach (var blood in AllBloods)
+                            {
+                                var percentage = totalPacks > 0
+                                    ? Math.Round((double)blood.PackQty / totalPacks * 100, 1)
+                                    : 0;
+
+                                <MudProgressCircular Style="height: 80px; width: 80px;" Color="Color.Info" Value="@percentage">
+                                    <ChildContent>
+                                        <MudStack Spacing="0" AlignItems="AlignItems.Center" Justify="Justify.Center">
+                                            <MudText Typo="Typo.subtitle2" Color="Color.Dark">@blood.BloodGroup</MudText>
+                                            <MudText Typo="Typo.subtitle2" Color="Color.Error">@($"{percentage}%")</MudText>
+                                        </MudStack>
+                                    </ChildContent>
+                                </MudProgressCircular>
+                            }
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">No blood stock data available.</MudText>
+                        }
+                    </div>
                 </MudPaper>
+
             </MudItem>
         </MudGrid>
 
@@ -702,6 +664,7 @@
     List<MedicineDto> allMedicines = new();
     List<BedDto> allBeds = new();
     List<WardDto> allWards = new();
+    List<BloodDto>? AllBloods;
 
     List<ChartSeries<double>> _weeklyPatients = new();
     List<ChartSeries<double>> _weeklyPatientsByType = new();
@@ -752,6 +715,7 @@
         allBeds = await roomService.GetAllBedsAsync() ?? new();
         allWards = await roomService.GetAllWardsAsync() ?? new();
         allVisits = await patientService.GetAllVisitsAsync() ?? new();
+        AllBloods = await medicineService.GetAllBloodsAsync();
 
         StaffOfTheWeek = allStaffs.FirstOrDefault(x => x.IsStaffOfTTheWeek) ?? new();
 

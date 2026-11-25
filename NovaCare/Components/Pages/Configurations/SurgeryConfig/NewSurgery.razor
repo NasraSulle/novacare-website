@@ -1,0 +1,259 @@
+﻿@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="CurrentSurgery" method="post" OnValidSubmit="SaveSurgeryAsync" FormName="newward">
+            <MudGrid Spacing="3" Class="pa-3">
+                <MudGrid Spacing="5" Justify="Justify.Center" Class="ps-3 pt-6 pe-0" Style="border:none;">
+                    <MudItem md="4" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Enter Surgery Details</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    <MudStaticTextField For="@(() => CurrentSurgery.SurgeryName)" @bind-Value="CurrentSurgery.SurgeryName" Margin="Margin.Dense"
+                                                        Label="Surgery name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="Surgery name"
+                                                        UserAttributes="@(new() { { "autocomplete", "wardname" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudNumericField For="@(() => CurrentSurgery.SurgeryCost)" @bind-Value="CurrentSurgery.SurgeryCost" Margin="Margin.Dense"
+                                                     Label="Surgery Cost" Variant="Variant.Outlined" Placeholder="Surgery Cost"
+                                                     UserAttributes="@(new() { { "autocomplete", "wardname" }, { "aria-required", "true" } } )" />
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudSelect For="@(() => CurrentSurgery.MedicalDepartmentId)"
+                                               @bind-Value="CurrentSurgery.MedicalDepartmentId"
+                                               Label="Department" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                        <MudSelectItem Value="0" Disabled>Department</MudSelectItem>
+
+                                        @foreach (var item in AllMedicalDepartments)
+                                        {
+                                            <MudSelectItem Value="@item.Id">@item.MedicalDepartmentName</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem md="12">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="string.IsNullOrWhiteSpace(CurrentSurgery.SurgeryName) || CurrentSurgery.SurgeryCost == 0 || CurrentSurgery.MedicalDepartmentId == 0" OnClick="@(() => AddSurgeryToBatch(CurrentSurgery))" Class="mt-2" FullWidth="true">Add Surgery To Batch</MudButton>
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                    <MudItem md="8" Class="ps-6 pe-0 pt-0">
+                        <MudItem Style="height:100%;border:1px solid rgba(63,81,181,0.9); border-radius:5px; border-top:none;" Class="pa-0">
+                            <MudText Typo="Typo.h6" Class="text-center ps-3" Style="border-radius:5px; background-color: rgba(63,81,181,0.9); color:white;">Surgerys Batch Summary</MudText>
+                            <MudGrid Class="pa-3">
+                                <MudItem md="12">
+                                    @if (!SurgerysBatch!.Any())
+                                    {
+                                        <NoDataNotice NoDataMessage="No Surgerys in Batch" />
+                                    }
+                                    else
+                                    {
+
+                                        <MudTable Dense="true" Height="500px" FixedHeader="true" Items="@SurgerysBatch" Hover="true" Breakpoint="Breakpoint.Sm" Context="medContext">
+                                            <HeaderContent>
+                                                <MudTh>Description</MudTh>
+                                                <MudTh>Department</MudTh>
+                                                <MudTh>Cost</MudTh>
+                                                <MudTh></MudTh>
+                                            </HeaderContent>
+                                            <RowTemplate>
+                                                <MudTd DataLabel="Description">@($"{medContext.SurgeryName}")</MudTd>
+                                                <MudTd DataLabel="Department">@medContext.MedicalDepartmentName</MudTd>
+                                                <MudTd DataLabel="Cost">@medContext.SurgeryCost</MudTd>
+                                                <MudTd DataLabel="">
+                                                    <MudIconButton Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Outlined.Delete" OnClick="@(() => RemoveSurgeryFromBatch(medContext))" />
+                                                </MudTd>
+                                            </RowTemplate>
+                                        </MudTable>
+                                    }
+                                </MudItem>
+                            </MudGrid>
+                        </MudItem>
+                    </MudItem>
+                </MudGrid>
+
+                <MudItem md="12" Style="text-align:end">
+                    <MudItem Style="display:flex; justify-content:center; ">
+                        @if (isCreatedSuccessfully)
+                        {
+                            <MudAlert Style="width:19%; margin-right:20px;" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">Surgerys Added Successfully!</MudAlert>
+                        }
+                        <MudAlert Style="@(isCreatedSuccessfully ? "width: 40%;" : "width: 50%;")" Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center">@addedSuccessfully</MudAlert>
+                        <MudAlert Style="@(isCreatedSuccessfully ? "width: 40%;" : "width: 50%;")" Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center">@notaddedSuccessfully</MudAlert>
+                    </MudItem>
+                    <MudStaticButton Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="isSaving" Class="mt-3">
+                        @if (isSaving)
+                        {
+                            <MudProgressCircular Color="Color.Default" Indeterminate="true" Size="Size.Small" />
+                            <MudText Class="ps-3"> Saving  Surgerys...</MudText>
+                        }
+                        else
+                        {
+                            <MudText> Save Surgerys</MudText>
+                        }
+                    </MudStaticButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ResetPage" Class="mt-3">Reset Page</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="ReturnToStaffSurgerysPage" Class="mt-3">Back</MudButton>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<bool> OnBack { get; set; }
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
+    List<SurgeryDto>? AllSurgerys;
+    List<SurgeryDto>? SurgerysBatch = new();
+    List<MedicalDepartmentDto> AllMedicalDepartments = new();
+
+    SurgeryDto CurrentSurgery = new();
+
+    string saveMessage = string.Empty;
+    string? addedSuccessfully = "Added:";
+    string? notaddedSuccessfully = "Not Added:";
+
+    bool isCreatedSuccessfully;
+    bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllSurgerys = await medicineService.GetAllSurgeriesAsync();
+        AllMedicalDepartments = await medicineService.GetAllMedicalDeptsAsync();
+    }
+
+    public async Task AddSurgeryToBatch(SurgeryDto wardDto)
+    {
+
+        var existingMed = await medicineService.GetSurgeryByNameAsync(wardDto.SurgeryName);
+        bool inBatch = false;
+        inBatch = SurgerysBatch?.Any(r => r.SurgeryName == wardDto.SurgeryName) ?? false;
+
+        if (existingMed.Id == 0 && !inBatch)
+        {
+            wardDto.MedicalDepartmentName = AllMedicalDepartments.FirstOrDefault(rt => rt.Id == wardDto.MedicalDepartmentId)?.MedicalDepartmentName ?? string.Empty;
+            var newSurgery = new SurgeryDto
+            {
+                SurgeryName = wardDto.SurgeryName,
+                SurgeryCost = wardDto.SurgeryCost,
+                MedicalDepartmentName = wardDto.MedicalDepartmentName,
+                MedicalDepartmentId = wardDto.MedicalDepartmentId,
+            };
+
+            if (newSurgery != null)
+                SurgerysBatch!.Add(newSurgery);
+        }
+        else if (existingMed.Id > 0 && !inBatch)
+        {
+            saveMessage = $"{existingMed.SurgeryName} is already registered";
+            Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Error }
+                    });
+        }
+        else if (existingMed.Id == 0 && inBatch)
+        {
+            saveMessage = $"{existingMed.SurgeryName} is already batch";
+            Snackbar.Add<MudChip<string>>(new Dictionary<string, object>() {
+                        { "Text", $"{saveMessage}" },
+                        { "Color", Color.Error }
+                    });
+        }
+
+        await InvokeAsync(StateHasChanged);
+
+    }
+
+    public async Task RemoveSurgeryFromBatch(SurgeryDto wardDto)
+    {
+        if (SurgerysBatch != null)
+            SurgerysBatch.Remove(wardDto);
+    }
+
+    public async Task SaveSurgeryAsync()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isSaving = true;
+
+        if (SurgerysBatch!.Count == 0)
+        {
+            isSaving = false;
+            return;
+        }
+
+        saveMessage = string.Empty;
+
+        try
+        {
+            foreach (var ward in SurgerysBatch)
+            {
+                var existingMed = await medicineService.GetSurgeryByNameAsync(ward.SurgeryName);
+
+                if (existingMed.Id == 0)
+                {
+                    var isSucess = await medicineService.AddSurgeryAsync(ward);
+
+                    if (isSucess > 0)
+                    {
+                        saveMessage = $"{ward.SurgeryName} added sucessfully";
+                        Console.WriteLine(saveMessage);
+                        addedSuccessfully = addedSuccessfully + $" {ward.SurgeryName},";
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {ward.SurgeryName} not added sucessfully! Please read ward to batch and save";
+                        Console.WriteLine(saveMessage);
+                        notaddedSuccessfully = notaddedSuccessfully + $" {ward.SurgeryName},";
+                    }
+                }
+                else if (existingMed.Id > 0)
+                {
+                    var isSucess = await medicineService.UpdateSurgeryAsync(ward, existingMed.Id);
+
+                    if (isSucess)
+                    {
+                        saveMessage = $"{ward.SurgeryName} updated sucessfully";
+                        Console.WriteLine(saveMessage);
+                        addedSuccessfully = addedSuccessfully + $" {ward.SurgeryName},";
+                    }
+                    else
+                    {
+                        saveMessage = $"Error: {ward.SurgeryName} not updated sucessfully! Please read ward to batch and save";
+                        Console.WriteLine(saveMessage);
+                        notaddedSuccessfully = notaddedSuccessfully + $" {ward.SurgeryName},";
+                    }
+                }
+            }
+            if (notaddedSuccessfully == "Not Added:")
+                isCreatedSuccessfully = true;
+            CurrentSurgery = new();
+            SurgerysBatch.Clear();
+
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Save failed: " + ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public async Task ResetPage()
+    {
+        addedSuccessfully = "Added:";
+        notaddedSuccessfully = "Not Added:";
+        isCreatedSuccessfully = false;
+        CurrentSurgery = new();
+    }
+
+    public void ReturnToStaffSurgerysPage()
+    {
+        MudDialog.Cancel();
+    }
+}

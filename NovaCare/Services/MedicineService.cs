@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NovaCare.Components.Pages.Configurations.TherapyConfig;
 using NovaCare.Components.Pages.Medicine___Pharmacy_Pages;
 using NovaCare.Data;
 using NovaCare.Interfaces;
@@ -11,6 +12,7 @@ using NovaCare.Shared.DTOs.MedicineDTOs;
 using NovaCare.Shared.DTOs.PatientDTOs;
 using NovaCare.Shared.DTOs.ReportDTOs;
 using NovaCare.Shared.DTOs.TreatmentDTOs;
+using Therapy = NovaCare.Modals.TreatmentModals.Therapy;
 
 namespace NovaCare.Services
 {
@@ -361,7 +363,7 @@ namespace NovaCare.Services
                     TherapyName = therapy.TherapyName,
                     TherapyCodeNumber = therapy.TherapyCodeNumber,
                     TherapyCost = therapy.TherapyCost,
-                    MedicalDepartmentumber = therapy.MedicalDepartment != null ? therapy.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    MedicalDepartmentName = therapy.MedicalDepartment != null ? therapy.MedicalDepartment.MedicalDepartmentName : string.Empty,
                     MedicalDepartmentId = therapy.MedicalDepartmentId
                 })
                 .ToListAsync();
@@ -636,6 +638,242 @@ namespace NovaCare.Services
                         }).FirstOrDefaultAsync();
 
             return medicine ?? new();
+        }
+
+        public async Task<int> AddSurgeryAsync(SurgeryDto surgDto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var surgery = new Surgery
+                {
+                    SurgeryName = surgDto.SurgeryName,
+                    //SurgeryCodeNumber = surgDto.SurgeryCodeNumber,
+                    SurgeryCost = surgDto.SurgeryCost,
+                    MedicalDepartmentId = surgDto.MedicalDepartmentId
+                };
+
+                var result = context.Surgeries.Add(surgery);
+                await context.SaveChangesAsync();
+
+                return result.Entity.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return 0;
+            }
+        }
+
+        public async Task<bool> UpdateSurgeryAsync(SurgeryDto surgDto, int surgId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var existingSurgery = await context.Surgeries.FirstOrDefaultAsync(x => x.Id == surgId);
+
+                if (existingSurgery != null)
+                {
+
+                    existingSurgery.SurgeryName = surgDto.SurgeryName;
+                    //existingSurgery.SurgeryCodeNumber = surgDto.SurgeryCodeNumber ?? existingSurgery.SurgeryCodeNumber;
+                    existingSurgery.SurgeryCost = surgDto.SurgeryCost;
+                    existingSurgery.MedicalDepartmentId = surgDto.MedicalDepartmentId;
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return false;
+            }
+        }
+
+        public async Task<SurgeryDto> GetSurgeryByNameAsync(string surgName)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var surgeries = await context.Surgeries
+                .AsNoTracking()
+                .Select(surgery => new SurgeryDto
+                {
+                    Id = surgery.Id,
+                    SurgeryName = surgery.SurgeryName,
+                    SurgeryCost = surgery.SurgeryCost,
+                    MedicalDepartmentId = surgery.MedicalDepartmentId,
+                    MedicalDepartmentName = surgery.MedicalDepartment != null ? surgery.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    SurgeryCodeNumber = surgery.SurgeryCodeNumber
+                })
+                .FirstOrDefaultAsync(s => s.SurgeryName == surgName);
+
+            return surgeries ?? new();
+        }
+
+        public async Task<SurgeryDto> GetSurgeryByIdAsync(int surgId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var surgeries = await context.Surgeries
+                .AsNoTracking()
+                .Select(surgery => new SurgeryDto
+                {
+                    Id = surgery.Id,
+                    SurgeryName = surgery.SurgeryName,
+                    SurgeryCost = surgery.SurgeryCost,
+                    MedicalDepartmentId = surgery.MedicalDepartmentId,
+                    MedicalDepartmentName = surgery.MedicalDepartment != null ? surgery.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    SurgeryCodeNumber = surgery.SurgeryCodeNumber
+                })
+                .FirstOrDefaultAsync(s => s.Id == surgId);
+
+            return surgeries ?? new();
+        }
+
+        public async Task<int> AddTherapyAsync(TherapyDto therapyDto)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+
+                var therapy = new Therapy
+                {
+                    TherapyName = therapyDto.TherapyName,
+                    //TherapyCodeNumber = surgDto.TherapyCodeNumber,
+                    TherapyCost = therapyDto.TherapyCost,
+                    MedicalDepartmentId = therapyDto.MedicalDepartmentId
+                };
+
+                var result = context.Therapies.Add(therapy);
+                await context.SaveChangesAsync();
+
+                return result.Entity.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return 0;
+            }
+        }
+
+        public async Task<bool> UpdateTherapyAsync(TherapyDto therapyDto, int therapyId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var existingTherapy = await context.Therapies.FirstOrDefaultAsync(x => x.Id == therapyId);
+
+                if (existingTherapy != null)
+                {
+
+                    existingTherapy.TherapyName = therapyDto.TherapyName;
+                    //existingSurgery.TherapyCodeNumber = therapyDto.TherapyCodeNumber ?? existingSurgery.TherapyCodeNumber;
+                    existingTherapy.TherapyCost = therapyDto.TherapyCost;
+                    existingTherapy.MedicalDepartmentId = therapyDto.MedicalDepartmentId;
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return false;
+            }
+        }
+
+        public async Task<TherapyDto> GetTherapyByNameAsync(string therapyName)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var therapies = await context.Therapies
+                .AsNoTracking()
+                .Select(therapy => new TherapyDto
+                {
+                    Id = therapy.Id,
+                    TherapyName = therapy.TherapyName,
+                    TherapyCodeNumber = therapy.TherapyCodeNumber,
+                    TherapyCost = therapy.TherapyCost,
+                    MedicalDepartmentName = therapy.MedicalDepartment != null ? therapy.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    MedicalDepartmentId = therapy.MedicalDepartmentId
+                })
+                .FirstOrDefaultAsync(t => t.TherapyName == therapyName);
+
+            return therapies ?? new();
+        }
+
+        public async Task<TherapyDto> GetTherapyByIdAsync(int therapyId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var therapies = await context.Therapies
+                .AsNoTracking()
+                .Select(therapy => new TherapyDto
+                {
+                    Id = therapy.Id,
+                    TherapyName = therapy.TherapyName,
+                    TherapyCodeNumber = therapy.TherapyCodeNumber,
+                    TherapyCost = therapy.TherapyCost,
+                    MedicalDepartmentName = therapy.MedicalDepartment != null ? therapy.MedicalDepartment.MedicalDepartmentName : string.Empty,
+                    MedicalDepartmentId = therapy.MedicalDepartmentId
+                })
+                .FirstOrDefaultAsync(t => t.Id == therapyId);
+
+            return therapies ?? new();
+        }
+
+        public async Task<bool> UpdateBloodAsync(BloodDto dto, int bloodId)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var existingBlood = await context.Bloods.FirstOrDefaultAsync(x => x.Id == bloodId);
+
+                if (existingBlood != null)
+                {
+
+                    existingBlood.PackQty = dto.PackQty;
+
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex}");
+                return false;
+            }
+        }
+
+        public async Task<List<BloodDto>> GetAllBloodsAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var bloods = await context.Bloods
+                .AsNoTracking()
+                .Select(bld => new BloodDto
+                {
+                    Id = bld.Id,
+                    BloodGroup = bld.BloodGroup,
+                    PackQty = bld.PackQty
+                })
+                .ToListAsync();
+
+            return bloods;
+        }
+
+        public async Task<BloodDto> GetBloodByIdAsync(int bId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var bloods = await context.Bloods
+                .AsNoTracking()
+                .Select(bld => new BloodDto
+                {
+                    Id = bld.Id,
+                    BloodGroup = bld.BloodGroup,
+                    PackQty = bld.PackQty
+                })
+                .FirstOrDefaultAsync(x => x.Id == bId);
+
+            return bloods ?? new();
         }
     }
 }

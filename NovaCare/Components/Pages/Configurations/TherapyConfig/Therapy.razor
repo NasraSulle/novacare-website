@@ -1,0 +1,254 @@
+﻿@using NovaCare.Shared.DTOs.StaffDTOs
+@inject IDialogService Dialog
+
+<MudGrid Spacing="3">
+    <MudItem xs="12">
+        @if (isLoading)
+        {
+            <div class="d-flex justify-center align-center py-12">
+                <GlobalLoader />
+            </div>
+        }
+        else if (!isLoading && (FilteredTherapies == null || !FilteredTherapies.Any()) && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
+                    <MudText Typo="Typo.h6">@($"All {firstPart}s")</MudText>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
+                        Add Therapy
+                    </MudButton>
+                </div>
+                <NoDataNotice NoDataMessage="@messageTherapy" />
+            </MudPaper>
+        }
+        else if (FilteredTherapies != null)
+        {
+            @* Summary Metric Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total Therapies</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredTherapies.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.Accessibility" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-error);">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">On going Therapies</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Default" Style="font-weight:700;">
+                                @TherapiesShortOnBeds
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Error" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.AccessibilityNew" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            @* Staff Titles Data Table *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         T="TherapyDto"
+                         Items="@FilteredTherapies"
+                         ReadOnly="@_readOnly"
+                         RowStyle="cursor: pointer;"
+                         Class="bg-transparent"
+                         Bordered="false"
+                         Dense="true"
+                         RowClick="@((args) => PreviewTherapyProfile(args.Item))">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart}s")</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredTherapies.Count} titles")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search title, department, or group..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 260px;" />
+
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       OnClick="OpenRegisterModal"
+                                       Style="text-transform:none; white-space:nowrap;">
+                                Add Therapy
+                            </MudButton>
+                        </div>
+                    </div>
+                </ToolBarContent>
+
+                <Columns>
+                    <TemplateColumn Title="Therapy Name" SortBy="@(x => x.TherapyName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small" Class="me-3">
+                                    <MudIcon Icon="@Icons.Material.Outlined.Badge" Size="Size.Small" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight:600;">@context.Item.TherapyName</MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Role Designation</MudText>
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Department" SortBy="@(x => x.MedicalDepartmentName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.Domain" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.MedicalDepartmentName</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Cost" SortBy="@(x => x.TherapyCost)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.MonetizationOn" Size="Size.Small" Color="Color.Warning" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.TherapyCost</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                        <CellTemplate>
+                            <MudTooltip Text="Edit Title">
+                                <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
+                                               Size="Size.Small"
+                                               Color="Color.Default"
+                                               OnClick="@(() => PreviewTherapyProfile(context.Item))" />
+                            </MudTooltip>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="TherapyDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+    private bool _readOnly = true;
+
+    List<TherapyDto>? AllTherapies;
+    List<TherapyDto>? FilteredTherapies;
+    [Parameter] public string FilterBy { get; set; } = string.Empty;
+    [Parameter] public string Genre { get; set; } = string.Empty;
+
+    TherapyDto? CurrentTherapy;
+
+    int TherapiesShortOnBeds = 0;
+
+    string messageTherapy = string.Empty;
+    string firstPart = string.Empty;
+    string? searchString;
+
+    bool isSearchLoading;
+    bool isLoading;
+    bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        await Task.Delay(300);
+
+        AllTherapies = await medicineService.GetAllTherapiesAsync();
+
+        // TherapiesShortOnBeds = AllTherapies
+        //     .Where(w => w.Beds.Count(b => b.BedAvailability.Equals("inuse", StringComparison.OrdinalIgnoreCase))
+        //               > w.Beds.Count(b => b.BedAvailability.Equals("available", StringComparison.OrdinalIgnoreCase)))
+        //     .Count();
+
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<TherapyDto> query = AllTherapies ?? Enumerable.Empty<TherapyDto>();
+
+        if (string.IsNullOrWhiteSpace(FilterBy))
+        {
+            firstPart = "Therapy";
+            messageTherapy = "No wards are currently configured.";
+        }
+        else
+        {
+            firstPart = FilterBy;
+            messageTherapy = $"No {firstPart.ToLower()} wards are currently available.";
+            query = query.Where(x => string.Equals(x.TherapyName?.Trim(), FilterBy.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.TherapyName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.MedicalDepartmentName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        FilteredTherapies = query.ToList();
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
+    }
+
+    private async Task PreviewTherapyProfile(TherapyDto item)
+    {
+        var Parameters = new DialogParameters
+        {
+            {"CurrentTherapy" , item}
+        };
+        var dialog = await Dialog.ShowAsync<EditTherapy>("Therapy Details", Parameters, _maxWidth);
+        var result = await dialog.Result;
+
+        await OnInitializedAsync();
+    }
+
+    public async Task Back()
+    {
+        CurrentTherapy = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public async Task OpenRegisterModal()
+    {
+        var dialog = await Dialog.ShowAsync<NewTherapy>("Register New Therapy", _maxWidth);
+        var result = await dialog.Result;
+
+        await OnInitializedAsync();
+    }
+}

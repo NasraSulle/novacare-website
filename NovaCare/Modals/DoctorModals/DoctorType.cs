@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace NovaCare.Modals.DoctorModals
@@ -14,6 +15,7 @@ namespace NovaCare.Modals.DoctorModals
         public string DoctorTypeName { get; set; } = string.Empty;
         public decimal DeptConsultationFee { get; set; } = 0m;
 
+        [ForeignKey(nameof(MedicalDepartment))]
         public int MedicalDeptId { get; set; }
 
         //navigation properties
