@@ -135,7 +135,7 @@
 
                                                             @foreach (var item in PatientTypes)
                                                             {
-                                                                <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
+                                                                <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
                                                             }
                                                         </MudSelect>
                                                     </MudItem>
@@ -148,7 +148,7 @@
 
                                                             @foreach (var item in PatientStatus)
                                                             {
-                                                                <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
+                                                                <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
                                                             }
                                                         </MudSelect>
                                                     </MudItem>
@@ -855,8 +855,8 @@
     List<TherapyDto> AllTherapies = new();
     List<WardDto> AllWards = new();
     List<RoomDto> AllRooms = new();
-    List<PatientStatusDto> PatientTypes = new();
-    List<PatientTypeDto> PatientStatus = new();
+    List<PatientTypeDto> PatientTypes = new();
+    List<PatientStatusDto> PatientStatus = new();
 
     List<PrescriptionDto> PreviousPrescription = new();
     List<LabTestDto> PreviousLabTests = new();

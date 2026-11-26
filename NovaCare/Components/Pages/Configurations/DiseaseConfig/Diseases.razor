@@ -219,7 +219,7 @@
         var dialog = await Dialog.ShowAsync<EditDisease>("Disease Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }
@@ -237,7 +237,7 @@
         var dialog = await Dialog.ShowAsync<NewDisease>("Register New Disease", _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }

@@ -148,15 +148,20 @@
     </DialogContent>
 
     <DialogActions>
-        <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="Cancel">
-            Close
-        </MudButton>
-        <MudButton Variant="Variant.Filled"
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Close</MudButton>
+
+        <MudButton OnClick="@(() => PrintReceiptAsync("thermal"))"
+                   Variant="Variant.Outlined"
                    Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Print"
-                   Disabled="@_isLoading"
-                   OnClick="PrintReceiptAsync">
-            Print Receipt
+                   StartIcon="@Icons.Material.Filled.ReceiptLong">
+            Print 80mm
+        </MudButton>
+
+        <MudButton OnClick="@(() => PrintReceiptAsync("a4"))"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Print">
+            Print A4
         </MudButton>
     </DialogActions>
 </MudDialog>
@@ -164,7 +169,8 @@
 <style>
     /* Standard 80mm thermal receipt paper look */
     .thermal-receipt {
-        width: 350px;
+        /* width: 350px; */
+        width: 500px;
         background-color: #ffffff;
         color: #1a1a1a;
         border-radius: 2px;
@@ -345,12 +351,17 @@
 
     private void Cancel() => MudDialog.Cancel();
 
-    public async Task PrintReceiptAsync()
+    public async Task PrintReceiptAsync(string mode = "thermal")
     {
         await Task.Delay(100);
-        await JS.InvokeVoidAsync("printReferralElement", "printable-receipt");
+        await JS.InvokeVoidAsync("printLabResultElement", "printable-receipt", new
+        {
+            title = "Payment Receipt",
+            mode = mode // "thermal" (80mm) or "a4"
+        });
         MudDialog.Close(DialogResult.Ok(true));
     }
+
 
     public class ReceiptItem
     {

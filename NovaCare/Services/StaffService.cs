@@ -152,6 +152,7 @@ namespace NovaCare.Services
                     LastName = staff.LastName,
                     StaffPhoto = staff.StaffPhoto,
                     Email = staff.Email ?? string.Empty,
+                    EmployeeId = staff.EmployeeId ?? string.Empty,
                     ClinicalTitleName = staff.StaffTitles!.Where(x => x.StaffTypeId == 2).Select(x => x.StaffTitleName).FirstOrDefault() ?? string.Empty,
                     AdministrativeTitleName = staff.StaffTitles!.Where(x => x.StaffTypeId == 1).Select(x => x.StaffTitleName).FirstOrDefault() ?? string.Empty,
                     StaffStatusName = staff.StaffStatus!.StaffStatusName,
@@ -175,17 +176,22 @@ namespace NovaCare.Services
                 .AsNoTracking()
                 .Select(staff => new StaffDto
                 {
+                    Id = staff.Id,
                     FisrtName = staff.FisrtName,
                     MiddleName = staff.MiddleName,
                     LastName = staff.LastName,
                     StaffPhoto = staff.StaffPhoto,
                     Email = staff.Email ?? string.Empty,
+                    EmployeeId = staff.EmployeeId ?? string.Empty,
                     ClinicalTitleName = staff.StaffTitles!.Where(x => x.StaffTypeId == 2).Select(x => x.StaffTitleName).FirstOrDefault() ?? string.Empty,
                     AdministrativeTitleName = staff.StaffTitles!.Where(x => x.StaffTypeId == 1).Select(x => x.StaffTitleName).FirstOrDefault() ?? string.Empty,
-                    AdministrativeGroupId = staff.StaffTitles!.Where(x => x.StaffTypeId == 1).Select(x => x.TitleGroupId).FirstOrDefault(),
-                    ClinicalGroupId = staff.StaffTitles!.Where(x => x.StaffTypeId == 2).Select(x => x.TitleGroupId).FirstOrDefault(),
                     StaffStatusName = staff.StaffStatus!.StaffStatusName,
+                    AdministrativeGroupId = staff.StaffTitles!.Where(x => x.StaffTypeId == 1).Select(x => x.TitleGroupId).FirstOrDefault(),
+                    AdministrativeTitleGroupName = staff.StaffTitles!.Where(x => x.StaffTypeId == 1).Select(x => x.StaffTitleGroup!.GroupName).FirstOrDefault() ?? string.Empty,
+                    ClinicalGroupId = staff.StaffTitles!.Where(x => x.StaffTypeId == 2).Select(x => x.TitleGroupId).FirstOrDefault(),
+                    ClinicalTitleGroupName = staff.StaffTitles!.Where(x => x.StaffTypeId == 2).Select(x => x.StaffTitleGroup!.GroupName).FirstOrDefault() ?? string.Empty,
                     RegisteredDate = staff.RegisteredDate,
+                    IsStaffOfTTheWeek = staff.IsStaffOfTTheWeek,
                 })
                 .ToListAsync();
 

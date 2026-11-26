@@ -242,7 +242,10 @@
         var dialog = await Dialog.ShowAsync<EditWard>("Ward Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        await OnInitializedAsync();
+        if (result != null)
+        {
+            await OnInitializedAsync();
+        }
     }
 
     public async Task Back()
@@ -257,6 +260,9 @@
         var dialog = await Dialog.ShowAsync<NewWard>("Register New Ward", _maxWidth);
         var result = await dialog.Result;
 
-        await OnInitializedAsync();
+        if (result != null)
+        {
+            await OnInitializedAsync();
+        }
     }
 }

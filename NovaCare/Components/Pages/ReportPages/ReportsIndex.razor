@@ -73,6 +73,10 @@
             {
                 <Medicines allMedicines="allMedicines.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
             }
+            else if (allVisits.Data != null && allVisits.Data.Any())
+            {
+                <VisitReports AllVisits="allVisits.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
+            }
         </MudItem>
 
         @if (!string.IsNullOrWhiteSpace(pdfBase64))
@@ -84,13 +88,14 @@
 
     @code {
 
-    List<string> ReportTypes = new() { "Staff Report", "Patient Report", "Medicine Report", "LabTests Report" };
+    List<string> ReportTypes = new() { "Staff Report", "Patient Report", "Medicine Report", "LabTests Report", "Visits Report" };
     private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
 
     ReportPreviewDto<StaffDto> allStaffs = new();
     ReportPreviewDto<PatientDto> allPatients = new();
     ReportPreviewDto<LabTestDto> allLabTests = new();
     ReportPreviewDto<MedicineDto> allMedicines = new();
+    ReportPreviewDto<VisitDto> allVisits = new();
 
 
     StaffDto? currentUser;
@@ -170,12 +175,25 @@
                 IsEmpty = true;
             }
         }
+        else if (reportType == "Visits Report")
+        {
+            allVisits = await patientService.GetAllVisitsAsync(fromDate, toDate);
+            if (allVisits.Data != null)
+            {
+                IsEmpty = false;
+            }
+            else
+            {
+                IsEmpty = true;
+            }
+        }
         else
         {
             allStaffs = new();
             allPatients = new();
             allLabTests = new();
             allMedicines = new();
+            allVisits = new();
             IsEmpty = true;
         }
     }

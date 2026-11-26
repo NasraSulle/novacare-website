@@ -5,29 +5,29 @@
 <MudGrid Spacing="3">
     <MudItem xs="12">
         @if (isLoading)
-        {
+                {
             <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
             </div>
-        }
-        else if (!isLoading && (FilteredPatients == null || !FilteredPatients.Any()) && string.IsNullOrWhiteSpace(searchString))
-        {
+                }
+                else if (!isLoading && (FilteredPatients == null || !FilteredPatients.Any()) && string.IsNullOrWhiteSpace(searchString))
+                {
             <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
                 <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
                     <MudText Typo="Typo.h6">@($"All {firstPart} Patients")</MudText>
-                    @if (CurrentUser != null && CurrentUser.IsCreateNewPatient && !isReport && (PatientGenre != "Consultation Requests" && PatientGenre != "Vitals Requests"))
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToNewPatientPage" StartIcon="@Icons.Material.Filled.PersonAdd" Style="text-transform:none;">
-                            Register Patient
-                        </MudButton>
-                    }
+@if (CurrentUser != null && CurrentUser.IsCreateNewPatient && !isReport && (PatientGenre != "Consultation Requests" && PatientGenre != "Vitals Requests"))
+                        {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GoToNewPatientPage" StartIcon="@Icons.Material.Filled.PersonAdd" Style="text-transform:none;">
+                    Register Patient
+                </MudButton>
+                        }
                 </div>
                 <NoDataNotice NoDataMessage="@messagePatient" />
             </MudPaper>
-        }
-        else if (FilteredPatients != null)
-        {
-            @* Quick Summary Metric Strip *@
+                }
+                else if (FilteredPatients != null)
+                {
+@* Quick Summary Metric Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="4">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);background-color: rgba(246,246,246,0.01) !important;">
@@ -68,12 +68,12 @@
                 </MudItem>
             </MudGrid>
 
-            @* Main Data Table *@
+@* Main Data Table *@
             <MudDataGrid Loading="@isSearchLoading"
                          Hover="true"
                          Elevation="0"
                          Outlined="true"
-                         RowClick="@((args) => PreviewPatientProfile(args.Item.Id, args.Item.PatientCode))"
+                         RowClick="@((args) => {if(!isReport)PreviewPatientProfile(args.Item.Id, args.Item.PatientCode);})"
                          RowStyle="cursor: pointer;"
                          T="PatientDto"
                          Items="@FilteredPatients"
@@ -187,6 +187,8 @@
                     <PropertyColumn Property="x => x.RegisteredDate.ToShortDateString()" Title="Registered Date" />
 
                     @* Action Chevron *@
+                    @if (!isReport)
+                    {
                     <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
                         <CellTemplate>
                             <MudTooltip Text="Open Patient Record">
@@ -197,6 +199,7 @@
                             </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
+                    }
                 </Columns>
 
                 <PagerContent>

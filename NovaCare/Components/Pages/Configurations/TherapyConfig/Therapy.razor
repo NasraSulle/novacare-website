@@ -234,7 +234,10 @@
         var dialog = await Dialog.ShowAsync<EditTherapy>("Therapy Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        await OnInitializedAsync();
+        if (result != null)
+        {
+            await OnInitializedAsync();
+        }
     }
 
     public async Task Back()
@@ -249,6 +252,9 @@
         var dialog = await Dialog.ShowAsync<NewTherapy>("Register New Therapy", _maxWidth);
         var result = await dialog.Result;
 
-        await OnInitializedAsync();
+        if (result != null)
+        {
+            await OnInitializedAsync();
+        }
     }
 }

@@ -214,7 +214,7 @@
         var dialog = await Dialog.ShowAsync<EditTitleGroup>("Title Group Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }
@@ -232,7 +232,7 @@
         var dialog = await Dialog.ShowAsync<NewGroup>("Register New Staff Title Group", _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }

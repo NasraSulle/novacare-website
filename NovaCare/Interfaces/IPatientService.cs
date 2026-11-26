@@ -13,8 +13,8 @@ namespace NovaCare.Interfaces
     {
         Task<ReportPreviewDto<PatientDto>> GetAllPatientsAsync(DateTime? fromDate, DateTime? toDate);
         Task<List<PatientDto>> GetAllPatientsAsync();
-        Task<List<PatientStatusDto>> GetAllPatientTypesAsync();
-        Task<List<PatientTypeDto>> GetAllPatientStatusesAsync();
+        Task<List<PatientTypeDto>> GetAllPatientTypesAsync();
+        Task<List<PatientStatusDto>> GetAllPatientStatusesAsync();
         Task<string> AddPatientAsync(PatientDto dto);
         Task<PatientDto> GetPatientByIdAsync(int patientId);
         Task<PatientDto> GetPatientByCodeAsync(string patientCode);
@@ -26,6 +26,7 @@ namespace NovaCare.Interfaces
         Task<List<PatientInsuaranceDto>> GetPatientInsurancesAsync(int patientId);
 
         // Visits & Visit Insurance Authorization
+        Task<ReportPreviewDto<VisitDto>> GetAllVisitsAsync(DateTime? fromDate, DateTime? toDate);
         Task<List<VisitDto>> GetAllVisitsAsync();
         Task<int> AddVisitAsync(VisitDto dto);
         Task<bool> UpdateVisitAsync(VisitDto dto, int visitId);
@@ -44,6 +45,7 @@ namespace NovaCare.Interfaces
 
         Task<VisitDto> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName);
         Task<int> GetVisitIdByPatientIdAsync(int pId);
+        Task<VisitDto> GetLastVisit(int pId);
 
         Task<List<ConsultationDto>> GetAllConsultationsAsync();
         Task<ConsultationDto> GetConsultationByIdAsync(int conId);

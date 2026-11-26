@@ -1,0 +1,325 @@
+﻿@using NovaCare.Shared.DTOs.PatientDTOs
+@inject IDialogService Dialog
+@inject ISnackbar Snackbar
+
+<MudGrid Spacing="3">
+    <MudItem xs="12">
+        @if (isLoading)
+        {
+            <div class="d-flex justify-center align-center py-12">
+                <GlobalLoader />
+            </div>
+        }
+        else if (!isLoading && (FilteredVisits == null || !FilteredVisits.Any()) && string.IsNullOrWhiteSpace(searchString))
+        {
+            <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
+                <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
+                    <MudText Typo="Typo.h6">@($"All {firstPart} Visits")</MudText>
+                </div>
+                <NoDataNotice NoDataMessage="@messagePatient" />
+            </MudPaper>
+        }
+        else if (FilteredVisits != null)
+        {
+            @* Quick Summary Metric Strip *@
+            <MudGrid Spacing="2" Class="mb-4">
+                <MudItem xs="12" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-primary);background-color: rgba(246,246,246,0.01) !important;">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total @(string.IsNullOrWhiteSpace(firstPart) ? "Visits" : $"{firstPart} Visits")</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredVisits.Count</MudText>
+                        </div>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.PeopleAlt" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="4" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-error);background-color: rgba(246,246,246,0.01) !important;">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Emergency</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Error" Style="font-weight:700;">
+                                @FilteredVisits.Count(x => string.Equals(x.PatientStatusName, "emergency", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Error" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.WarningAmber" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="4" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-warning);background-color: rgba(246,246,246,0.01) !important;">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Warning" Style="text-transform:uppercase; letter-spacing:0.5px;">Not Emergency</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight:700;">
+                                @FilteredVisits.Count(x => string.Equals(x.PatientStatusName, "not emergency", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Warning" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.WarningAmber" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="4" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-error);background-color: rgba(246,246,246,0.01) !important;">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Outside</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Error" Style="font-weight:700;">
+                                @FilteredVisits.Count(x => string.Equals(x.PatientTypeName, "outside", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Error" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.WarningAmber" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="4" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);background-color: rgba(246,246,246,0.01) !important;">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Hospitalized</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                                @FilteredVisits.Count(x => string.Equals(x.PatientTypeName, "hospitalized", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.CheckCircle" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="4" sm="4">
+                    <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between" Style="border-left: 4px solid var(--mud-palette-success);background-color: rgba(246,246,246,0.01) !important;">
+                        <div>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Clinical</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                                @FilteredVisits.Count(x => string.Equals(x.PatientTypeName, "clinic", StringComparison.OrdinalIgnoreCase))
+                            </MudText>
+                        </div>
+                        <MudAvatar Color="Color.Success" Variant="Variant.Outlined" Size="Size.Medium">
+                            <MudIcon Icon="@Icons.Material.Outlined.CheckCircle" />
+                        </MudAvatar>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            @* Main Data Table *@
+            <MudDataGrid Loading="@isSearchLoading"
+                         Hover="true"
+                         Elevation="0"
+                         Outlined="true"
+                         RowStyle="cursor: pointer;"
+                         T="VisitDto"
+                         Items="@FilteredVisits"
+                         ReadOnly="@_readOnly"
+                         Class="bg-transparent"
+                         Bordered="false"
+                         Dense="true">
+                <ToolBarContent>
+                    <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
+                        <div class="d-flex align-center gap-2">
+                            <MudText Typo="Typo.h6" Style="font-weight:600;">@($"All {firstPart} Visits".Replace("  ", " "))</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@($"{FilteredVisits.Count} records")</MudChip>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-2">
+                            <MudTextField T="string"
+                                          Value="@searchString"
+                                          ValueChanged="@(s => OnSearch(s))"
+                                          Placeholder="Search name, MRN, phone, or type..."
+                                          Adornment="Adornment.Start"
+                                          Margin="Margin.Dense"
+                                          Variant="Variant.Outlined"
+                                          Clearable="true"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          IconSize="Size.Small"
+                                          Style="min-width: 270px;" />
+
+                            @if (isReport)
+                            {
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Error"
+                                           OnClick="GeneratePdf"
+                                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                                           Style="text-transform:none; white-space:nowrap;">
+                                    Generate Pdf
+                                </MudButton>
+                            }
+                        </div>
+                    </div>
+                </ToolBarContent>
+
+                <Columns>
+                    @* Patient Avatar, Full Name & MRN *@
+                    <TemplateColumn Title="Patient" SortBy="@(x => x.PatientFullName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center py-1">
+                                <MudAvatar Size="Size.Medium" Class="me-3 border">
+                                    <MudImage Src="Images/dp.png" Alt="Patient Avatar" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600; line-height: 1.2;">
+                                        @context.Item.PatientFullName
+                                    </MudText>
+                                    <MudText Typo="Typo.caption" Color="Color.Primary" Style="font-weight: 500;">
+                                        MRN: @context.Item.Patient.PatientCode
+                                    </MudText>
+                                </div>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Patient Type Pill *@
+                                    <TemplateColumn Title="Patient Type" SortBy="@(x => x.PatientTypeName)">
+                        <CellTemplate>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Info" Variant="Variant.Outlined">
+                                @(string.IsNullOrWhiteSpace(context.Item.PatientTypeName) ? "General" : context.Item.PatientTypeName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Visit Type *@
+                    <TemplateColumn Title="Visit Type" SortBy="@(x => x.VisitTypeName)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.NordicWalking" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.VisitTypeName</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Status Indicator *@
+                        <TemplateColumn Title="Patient Status" SortBy="@(x => x.PatientStatusName)">
+                        <CellTemplate>
+                            @{
+                                bool isEmergency = string.Equals(context.Item.PatientStatusName, "Emergency", StringComparison.OrdinalIgnoreCase);
+                            }
+                            <MudChip T="string"
+                                     Variant="Variant.Outlined"
+                                     Icon="@(isEmergency ? Icons.Material.Outlined.Warning : Icons.Material.Outlined.CheckCircleOutline)"
+                                     Color="@(isEmergency ? Color.Error : Color.Success)"
+                                     Size="Size.Small"
+                                     Style="font-weight: 500;">
+                                @(string.IsNullOrWhiteSpace(context.Item.PatientStatusName) ? "Active" : context.Item.PatientStatusName)
+                            </MudChip>
+                        </CellTemplate>
+                    </TemplateColumn>
+
+                    @* Registered Date *@
+                    <PropertyColumn Property="x => x.VisitDate.ToShortDateString()" Title="Registered Date" />
+
+                </Columns>
+
+                <PagerContent>
+                    <MudDataGridPager T="VisitDto" />
+                </PagerContent>
+            </MudDataGrid>
+        }
+    </MudItem>
+</MudGrid>
+
+
+@code {
+    string? searchString;
+    string messageStaff = string.Empty;
+    string? pdfBase64;
+
+    bool isSearchLoading;
+    private bool _readOnly = true;
+    private bool _isCellEditMode;
+
+    [Parameter] public List<VisitDto>? AllVisits { get; set; } = new();
+    List<VisitDto> FilteredVisits = new();
+    [Parameter] public bool isReport { get; set; }
+    [Parameter] public DateTime? fromDate { get; set; } = DateTime.Now.AddMonths(-3);
+    [Parameter] public DateTime? toDate { get; set; } = DateTime.Now;
+    [Parameter] public StaffDto CurrentUser { get; set; } = new();
+    // [Parameter] public string PatientGenre { get; set; } = string.Empty;
+    private readonly DialogOptions _maxWidth = new() { MaxWidth = MaxWidth.Large, FullWidth = true, BackdropClick = false };
+
+    VisitDto? CurrentPatient;
+    PreliminaryTestDto CurrentPreliminaryTest = new();
+    dynamic? currentDoc;
+
+    string messagePatient = string.Empty;
+    string firstPart = string.Empty;
+    string? searchWord;
+
+    bool isLoading;
+    bool isEdit;
+    bool showVitalDialog;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = await userService.GetLoggedInUserAsync();
+        if (CurrentUser != null)
+        {
+            currentDoc = await doctorService.GetDoctorByStaffId(CurrentUser.Id);
+        }
+
+        isLoading = true;
+        StateHasChanged();
+
+        if (!isReport)
+            AllVisits = await patientService.GetAllVisitsAsync();
+
+        ApplyFilterAndSearch();
+
+        isLoading = false;
+        StateHasChanged();
+    }
+
+    private void ApplyFilterAndSearch()
+    {
+        IEnumerable<VisitDto> query = AllVisits ?? Enumerable.Empty<VisitDto>();
+
+        if (!string.IsNullOrWhiteSpace(searchString))
+        {
+            query = query.Where(x =>
+                (x.PatientTypeName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.PatientStatusName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.VisitDate.ToString()?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.PatientFullName?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.Patient!.PatientCode.ToString()?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                (x.DischargedDate.ToString()?.Contains(searchString, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        FilteredVisits = query.ToList();
+    }
+
+    public async Task Back()
+    {
+        CurrentPatient = new();
+        isEdit = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearch(string text)
+    {
+        searchString = text;
+        isSearchLoading = true;
+        ApplyFilterAndSearch();
+        isSearchLoading = false;
+        await Task.CompletedTask;
+    }
+
+    public async Task GeneratePdf()
+    {
+        var reportDto = new ReportPreviewDto<VisitDto>
+        {
+            ReportType = "Visits",
+            FromDate = fromDate,
+            ToDate = toDate,
+            Data = FilteredVisits
+        };
+
+        pdfBase64 = pdfExportService.GenerateStaffPreview<VisitDto>(reportDto, CurrentUser);
+
+        var Parameters = new DialogParameters
+        {
+            {"pdfBase64" , pdfBase64}
+        };
+
+        var dialog = await Dialog.ShowAsync<PdfPreview>($"Visits Report Pdf", Parameters, _maxWidth);
+    }
+}

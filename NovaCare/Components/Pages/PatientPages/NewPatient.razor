@@ -177,7 +177,7 @@
 
                                                 @foreach (var item in PatientTypes)
                                                 {
-                                                    <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
+                                                    <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
                                                 }
                                             </MudSelect>
                                         </MudItem>
@@ -190,7 +190,7 @@
 
                                                 @foreach (var item in PatientStatus)
                                                 {
-                                                    <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
+                                                    <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
                                                 }
                                             </MudSelect>
                                         </MudItem>
@@ -831,8 +831,8 @@
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public string? TitleIcon { get; set; }
 
-    List<PatientStatusDto> PatientTypes = new();
-    List<PatientTypeDto> PatientStatus = new();
+    List<PatientTypeDto> PatientTypes = new();
+    List<PatientStatusDto> PatientStatus = new();
     List<PaymentModeDto> PaymentModes = new();
     List<InsuaranceDto> InsuaranceCompanies = new();
     List<VisitTypeDto> allVisitTypes = new();

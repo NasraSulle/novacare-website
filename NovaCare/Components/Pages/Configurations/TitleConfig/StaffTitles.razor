@@ -234,7 +234,7 @@
         var dialog = await Dialog.ShowAsync<EditStaffTitle>("Title Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }
@@ -252,7 +252,7 @@
         var dialog = await Dialog.ShowAsync<NewTitle>("Register New Title", _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }

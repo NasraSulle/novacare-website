@@ -280,7 +280,7 @@
         var dialog = await Dialog.ShowAsync<BillDetails>("Register New Bill", _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }
@@ -296,7 +296,7 @@
         var dialog = await Dialog.ShowAsync<BillDetails>("Bill Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }

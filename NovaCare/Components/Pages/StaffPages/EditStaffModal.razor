@@ -145,7 +145,7 @@
                                                        Immediate="true"
                                                        ReadOnly="!isEditStaff" Label="Administrative Title" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                        UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                <MudSelectItem Value="0" Disabled>Administrative Title</MudSelectItem>
+                                                <MudSelectItem Value="0" >Administrative Title</MudSelectItem>
                                                 @foreach (var item in StaffTitles.Where(st => st.StaffTypeId == 1))
                                                 {
                                                     <MudSelectItem Value="@item.Id">@item.StaffTitleName</MudSelectItem>
@@ -158,7 +158,7 @@
                                                        @bind-Value:after="OnTitleChange"
                                                        ReadOnly="!isEditStaff" Label="Clinical Title" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                        UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                <MudSelectItem Value="0" Disabled>Clinical Title</MudSelectItem>
+                                                <MudSelectItem Value="0" >Clinical Title</MudSelectItem>
 
                                                 @foreach (var item in StaffTitles.Where(st => st.StaffTypeId == 2))
                                                 {

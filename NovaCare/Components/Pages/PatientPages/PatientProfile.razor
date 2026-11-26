@@ -35,7 +35,10 @@
                                     </MudText>
                                 </MudItem>
                                 <MudItem md="1" Class="text-end">
-                                    <MudIconButton OnClick="@(() => isPersonalDetails = true)" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                                    @if(CurrentUser.IsUpdateOrEditPatient)
+                                    {
+                                        <MudIconButton OnClick="@(() => isPersonalDetails = true)" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                                    }
                                 </MudItem>
                            </MudGrid>
                         </MudItem>
@@ -43,18 +46,22 @@
                 </MudPaper>
             </MudItem>
             <MudItem md="12" Class="d-flex ps-0 pt-0">
-                    <MudText Typo="Typo.subtitle2" Align="Align.Center"><MudIcon Icon="@Icons.Material.Outlined.AssistWalker" /> Current Condition -
-                    <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@CurrentVisit.PatientTypeName | @CurrentVisit.PatientStatusName</MudChip>
+                <MudText Typo="Typo.subtitle2" Align="Align.Center">
+                    <MudIcon Icon="@Icons.Material.Outlined.AssistWalker" /> Most Recent Condition -
+                    <MudChip T="string" Variant="Variant.Text" Color="Color.Error">@LastVisit.PatientTypeName | @LastVisit.PatientStatusName</MudChip>
                     </MudText>
                     <MudSpacer />
                 <MudPaper Elevation="0" Class="d-flex align-content-center bg-transparent">
                     <MudText Typo="Typo.subtitle2" Align="Align.Center">
-                        <MudIcon Icon="@Icons.Material.Outlined.MonitorHeart" /> Current Vitals -
-                        <MudChip T="string" Variant="Variant.Text" Color="Color.Info">Weight: @(CurrentVisit.PreliminaryTest?.PreliminaryWeight ?? 0) | Height: @(CurrentVisit.PreliminaryTest?.PreliminaryHeight ?? 0) | Pressure: @(CurrentVisit.PreliminaryTest?.PreliminaryPressure ?? 0)</MudChip>
+                        <MudIcon Icon="@Icons.Material.Outlined.MonitorHeart" /> Most Recent Vitals -
+                        <MudChip T="string" Variant="Variant.Text" Color="Color.Info">Weight: @(LastVisit.PreliminaryTest?.PreliminaryWeight ?? 0) | Height: @(LastVisit.PreliminaryTest?.PreliminaryHeight ?? 0) | Pressure: @(LastVisit.PreliminaryTest?.PreliminaryPressure ?? 0)</MudChip>
                     </MudText>
-                    <MudText Typo="Typo.subtitle2" Align="Align.Center" Class="align-content-center">
-                        <MudButton OnClick="@(() => isVisitModal = true)" Variant="Variant.Outlined" EndIcon=@Icons.Material.Filled.Edit Size="Size.Small">Active Visit</MudButton>
-                    </MudText>
+                    @if(CurrentUser.IsUpdateOrEditPatient)
+                    {
+                        <MudText Typo="Typo.subtitle2" Align="Align.Center" Class="align-content-center">
+                            <MudButton OnClick="@(() => isVisitModal = true)" Variant="Variant.Outlined" EndIcon=@Icons.Material.Filled.Edit Size="Size.Small">Active Visit</MudButton>
+                        </MudText>
+                    }
                 </MudPaper>
             </MudItem>
             <MudItem md="12" Class="ps-0 pt-0">
@@ -441,7 +448,7 @@
 
                                                                 @foreach (var item in PatientTypes)
                                                                 {
-                                                                    <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
+                                                                    <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
                                                                 }
                                                             </MudSelect>
                                                         </MudItem>
@@ -454,7 +461,7 @@
 
                                                                 @foreach (var item in PatientStatus)
                                                                 {
-                                                                    <MudSelectItem Value="@item.Id">@item.PatientTypeName</MudSelectItem>
+                                                                    <MudSelectItem Value="@item.Id">@item.PatientStatusName</MudSelectItem>
                                                                 }
                                                             </MudSelect>
                                                         </MudItem>
@@ -1105,8 +1112,8 @@
     [Parameter] public int PatientId { get; set; }
     [Parameter] public string? TitleIcon { get; set; }
 
-    List<PatientStatusDto> PatientTypes = new();
-    List<PatientTypeDto> PatientStatus = new();
+    List<PatientTypeDto> PatientTypes = new();
+    List<PatientStatusDto> PatientStatus = new();
     List<PaymentModeDto> PaymentModes = new();
     List<InsuaranceDto> InsuaranceCompanies = new();
     List<VisitTypeDto> allVisitTypes = new();
@@ -1129,7 +1136,7 @@
     List<MedicineDto> FilteredMedicines = new();
     List<WardDto> AllWards = new();
     List<RoomDto> AllRooms = new();
-    
+
 
     List<PrescriptionDto> PreviousPrescription = new();
     List<LabTestDto> PreviousLabTests = new();
@@ -1140,6 +1147,7 @@
     PaymentModeDto CurrentPaymentMode = new();
     [Parameter] public PatientDto CurrentPatient { get; set; } = new();
     VisitDto CurrentVisit = new();
+    VisitDto LastVisit = new();
     TreatmentDto CurrentTreatment = new();
     PrescriptionDto CurrentPrescription = new();
     PreliminaryTestDto CurrentPreliminaryTest = new();
@@ -1195,6 +1203,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        LastVisit = await patientService.GetLastVisit(CurrentPatient.Id);
         PatientTypes = await patientService.GetAllPatientTypesAsync();
         PatientStatus = await patientService.GetAllPatientStatusesAsync();
         PaymentModes = await paymentService.GetAllPaymentModesAsync();

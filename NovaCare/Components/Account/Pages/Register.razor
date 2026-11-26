@@ -112,7 +112,7 @@
                                                                Immediate="true"
                                                                Label="Administrative Title" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                        <MudSelectItem Value="0" Disabled>Select Administrative Title</MudSelectItem>
+                                                        <MudSelectItem Value="0">Select Administrative Title</MudSelectItem>
                                                         @foreach (var item in StaffTitles.Where(st => st.StaffTypeId == 1))
                                                         {
                                                             <MudSelectItem Value="@item.Id">@item.StaffTitleName</MudSelectItem>
@@ -125,7 +125,7 @@
                                                                @bind-Value:after="OnTitleChange"
                                                                Label="Clinical Title" Variant="Variant.Outlined" Margin="Margin.Dense"
                                                                UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                        <MudSelectItem Value="0" Disabled>Select Clinical Title</MudSelectItem>
+                                                        <MudSelectItem Value="0">Select Clinical Title</MudSelectItem>
 
                                                         @foreach (var item in StaffTitles.Where(st => st.StaffTypeId == 2))
                                                         {
@@ -539,8 +539,8 @@
 
             var userId = await UserManager.GetUserIdAsync(user);
 
-            if (Input.AdministrativeTitleId > 0) await staffService.AssignTitleAsync(userId, Input.AdministrativeTitleId);
-            if (Input.ClinicalTitleId > 0) await staffService.AssignTitleAsync(userId, Input.ClinicalTitleId);
+           if (Input.AdministrativeTitleId > 0) await staffService.AssignTitleAsync(userId, Input.AdministrativeTitleId);
+           if (Input.ClinicalTitleId > 0) await staffService.AssignTitleAsync(userId, Input.ClinicalTitleId);
 
 
             if (!string.IsNullOrWhiteSpace(CurrentDoctor.MedicalLicenseNumber))

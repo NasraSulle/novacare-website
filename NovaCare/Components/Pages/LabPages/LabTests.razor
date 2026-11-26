@@ -68,7 +68,7 @@
                          Striped="false"
                          Elevation="0" 
                          Outlined="true"
-                         RowClick="@((args) => PreviewLabTestProfile(args.Item.Id))"
+                         RowClick="@((args) => {if(!isReport)PreviewLabTestProfile(args.Item.Id);})"
                          RowStyle="cursor: pointer;"
                          T="LabTestDto"
                          Items="@FilteredLabTests"
@@ -177,16 +177,19 @@
                     </TemplateColumn>
 
                     @* Row Action Indicator *@
+                    @if (!isReport)
+                    {
                     <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
                         <CellTemplate>
                             <MudTooltip Text="View / Update Results">
                                 <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
                                                Size="Size.Small"
                                                Color="Color.Default"
-                                               OnClick="@(() => PreviewLabTestProfile(context.Item.Id))" />
+                                                   OnClick="@(() => PreviewLabTestProfile(context.Item.Id))" />
                             </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
+                    }
                 </Columns>
 
                 <PagerContent>

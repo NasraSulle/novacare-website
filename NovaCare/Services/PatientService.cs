@@ -128,9 +128,7 @@ namespace NovaCare.Services
             return patients;
         }
 
-
-
-        public async Task<List<PatientTypeDto>> GetAllPatientStatusesAsync()
+        public async Task<List<PatientTypeDto>> GetAllPatientTypesAsync()
         {
             using var context = _contextFactory.CreateDbContext();
             var patientTypes = await context.PatientTypes
@@ -147,7 +145,7 @@ namespace NovaCare.Services
             return patientTypes;
         }
 
-        public async Task<List<PatientStatusDto>> GetAllPatientTypesAsync()
+        public async Task<List<PatientStatusDto>> GetAllPatientStatusesAsync()
         {
             using var context = _contextFactory.CreateDbContext();
             var patientStatus = await context.PatientStatuses
@@ -259,7 +257,6 @@ namespace NovaCare.Services
                 return string.Empty;
             }
         }
-
 
         public async Task<ReportPreviewDto<PatientDto>> GetAllPatientsAsync(DateTime? fromDate, DateTime? toDate)
         {
@@ -577,8 +574,6 @@ namespace NovaCare.Services
             return patient;
         }
 
-
-
         public async Task<VisitDto?> GetVisitByPCodeOrFullNameAsync(string pCodeOrFullName)
         {
             if (string.IsNullOrWhiteSpace(pCodeOrFullName))
@@ -849,7 +844,6 @@ namespace NovaCare.Services
             return visit;
         }
 
-
         public async Task<bool> UpdatePatientAsync(PatientDto dto, int patientId)
         {
             try
@@ -967,7 +961,6 @@ namespace NovaCare.Services
             }
         }
 
-
         public async Task<List<VisitDto>> GetAllVisitsAsync()
         {
             using var context = _contextFactory.CreateDbContext();
@@ -1064,7 +1057,6 @@ namespace NovaCare.Services
             }
         }
 
-
         public async Task<bool> UpdateVisitAsync(VisitDto dto, int visitId)
         {
             try
@@ -1102,7 +1094,6 @@ namespace NovaCare.Services
                 return false;
             }
         }
-
 
         public async Task<List<VisitTypeDto>> GetAllVisitTypesAsync()
         {
@@ -1777,6 +1768,140 @@ namespace NovaCare.Services
                 .FirstOrDefaultAsync();
 
             return referral ?? new();
+        }
+
+        public async Task<VisitDto> GetLastVisit(int pId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var visit = await context.Visits
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(v => v.PatientId == pId)
+                .OrderByDescending(visit => visit.Id)
+                .Select(visit => new VisitDto
+                {
+                    Id = visit.Id,
+                    VisitDate = visit.VisitDate,
+                    VisitTypeId = visit.VisitTypeId,
+                    VisitTypeName = visit.VisitType != null ? visit.VisitType.TypeName : string.Empty,
+                    PatientId = visit.PatientId,
+                    PatientFullName = visit.Patient != null ? visit.Patient.PatientFullName : string.Empty,
+                    VisitStatusId = visit.VisitStatusId,
+                    VisitStatusName = visit.VisitStatus != null ? visit.VisitStatus.VisitStatusName : string.Empty,
+                    DischargedDate = visit.DischargedDate,
+                    PatientStatusId = visit.PatientStatusId,
+                    PatientTypeId = visit.PatientTypeId,
+                    PatientStatusName = visit.PatientStatus != null ? visit.PatientStatus.PatientStatusName : string.Empty,
+                    PatientTypeName = visit.PatientType != null ? visit.PatientType.PatientTypeName : string.Empty,
+
+                    // Payment Mode & Insurance Details
+                    PaymentModeId = visit.PaymentModeId,
+                    PatientInsuaranceId = visit.PatientInsuaranceId,
+                    RegisteredPaymentMode = visit.PaymentMode != null ? visit.PaymentMode.PaymentModeName : "Cash",
+                    InsuranceProviderName = (visit.PatientInsuarance != null && visit.PatientInsuarance.Insuarance != null)
+                        ? visit.PatientInsuarance.Insuarance.InsuaranceName
+                        : string.Empty,
+                    InsuranceSchemeName = (visit.PatientInsuarance != null && visit.PatientInsuarance.InsuranceScheme != null)
+                        ? visit.PatientInsuarance.InsuranceScheme.SchemeName
+                        : string.Empty,
+                    MemberCardNumber = visit.PatientInsuarance != null ? visit.PatientInsuarance.MemberCardNumber : string.Empty,
+                    AuthorizationNumber = visit.VisitInsuranceAuth != null ? visit.VisitInsuranceAuth.AuthorizationNumber : string.Empty,
+
+                    Bills = visit.Bills.Select(bill => new BillDto
+                    {
+                        Id = bill.Id,
+                        BillDate = bill.BillDate,
+                        BillNumber = bill.BillNumber,
+                        BillDescription = bill.BillDescription,
+                        VisitId = bill.VisitId,
+                        TotalAmount = bill.TotalAmount,
+                        TotalPatientAmount = bill.TotalPatientAmount,
+                        TotalInsuranceAmount = bill.TotalInsuranceAmount,
+                        PaymentModeId = bill.PaymentModeId,
+                        PaymentModeName = bill.PaymentMode != null ? bill.PaymentMode.PaymentModeName : "Cash",
+                        PaymentStatusId = bill.PaymentStatusId,
+                        PaymentStatusName = bill.PaymentStatus != null ? bill.PaymentStatus.PaymentStatusName : "Unpaid"
+                    }).ToList(),
+
+                    Patient = visit.Patient == null ? null : new PatientDto
+                    {
+                        Id = visit.Patient.Id,
+                        PatientCode = visit.Patient.PatientCode,
+                        PatientFullName = visit.Patient.PatientFullName,
+                    }
+                }).FirstOrDefaultAsync(); 
+
+            return visit ?? new();
+        }
+
+        public async Task<ReportPreviewDto<VisitDto>> GetAllVisitsAsync(DateTime? fromDate, DateTime? toDate)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var visits = await context.Visits
+                .AsNoTracking()
+                .AsSplitQuery()
+                //.OrderByDescending(v => v.VisitDate)
+                .Select(visit => new VisitDto
+                {
+                    Id = visit.Id,
+                    VisitDate = visit.VisitDate,
+                    VisitTypeId = visit.VisitTypeId,
+                    VisitTypeName = visit.VisitType != null ? visit.VisitType.TypeName : string.Empty,
+                    PatientId = visit.PatientId,
+                    PatientFullName = visit.Patient != null ? visit.Patient.PatientFullName : string.Empty,
+                    VisitStatusId = visit.VisitStatusId,
+                    VisitStatusName = visit.VisitStatus != null ? visit.VisitStatus.VisitStatusName : string.Empty,
+                    DischargedDate = visit.DischargedDate,
+                    PatientStatusId = visit.PatientStatusId,
+                    PatientTypeId = visit.PatientTypeId,
+                    PatientStatusName = visit.PatientStatus != null ? visit.PatientStatus.PatientStatusName : string.Empty,
+                    PatientTypeName = visit.PatientType != null ? visit.PatientType.PatientTypeName : string.Empty,
+
+                    // Payment Mode & Insurance Details
+                    PaymentModeId = visit.PaymentModeId,
+                    PatientInsuaranceId = visit.PatientInsuaranceId,
+                    RegisteredPaymentMode = visit.PaymentMode != null ? visit.PaymentMode.PaymentModeName : "Cash",
+                    InsuranceProviderName = (visit.PatientInsuarance != null && visit.PatientInsuarance.Insuarance != null)
+                        ? visit.PatientInsuarance.Insuarance.InsuaranceName
+                        : string.Empty,
+                    InsuranceSchemeName = (visit.PatientInsuarance != null && visit.PatientInsuarance.InsuranceScheme != null)
+                        ? visit.PatientInsuarance.InsuranceScheme.SchemeName
+                        : string.Empty,
+                    MemberCardNumber = visit.PatientInsuarance != null ? visit.PatientInsuarance.MemberCardNumber : string.Empty,
+                    AuthorizationNumber = visit.VisitInsuranceAuth != null ? visit.VisitInsuranceAuth.AuthorizationNumber : string.Empty,
+
+                    Bills = visit.Bills.Select(bill => new BillDto
+                    {
+                        Id = bill.Id,
+                        BillDate = bill.BillDate,
+                        BillNumber = bill.BillNumber,
+                        BillDescription = bill.BillDescription,
+                        VisitId = bill.VisitId,
+                        TotalAmount = bill.TotalAmount,
+                        TotalPatientAmount = bill.TotalPatientAmount,
+                        TotalInsuranceAmount = bill.TotalInsuranceAmount,
+                        PaymentModeId = bill.PaymentModeId,
+                        PaymentModeName = bill.PaymentMode != null ? bill.PaymentMode.PaymentModeName : "Cash",
+                        PaymentStatusId = bill.PaymentStatusId,
+                        PaymentStatusName = bill.PaymentStatus != null ? bill.PaymentStatus.PaymentStatusName : "Unpaid"
+                    }).ToList(),
+
+                    Patient = visit.Patient == null ? null : new PatientDto
+                    {
+                        Id = visit.Patient.Id,
+                        PatientCode = visit.Patient.PatientCode,
+                        PatientFullName = visit.Patient.PatientFullName,
+                    }
+                }).ToListAsync();
+
+            var result = new ReportPreviewDto<VisitDto>
+            {
+                FromDate = fromDate,
+                ToDate = toDate,
+                ReportType = "Visit",
+                Data = visits
+            };
+            return result;
         }
     }
 }

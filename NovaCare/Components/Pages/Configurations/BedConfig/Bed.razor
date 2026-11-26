@@ -242,7 +242,7 @@
         var dialog = await Dialog.ShowAsync<EditBed>("Bed Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }
@@ -260,7 +260,7 @@
         var dialog = await Dialog.ShowAsync<NewBed>("Register New Bed", _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }

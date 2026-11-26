@@ -74,7 +74,7 @@
                          Striped="false"
                          Elevation="0"
                          Outlined="true"
-                         RowClick="@((args) => OpenEditStaffModal(args.Item.Id))"
+                         RowClick="@((args) => {if(!isReport) OpenEditStaffModal(args.Item.Id);})"
                          RowStyle="cursor: pointer;"
                          T="StaffDto"
                          Items="@FilteredStaffs"
@@ -157,6 +157,16 @@
                         </CellTemplate>
                     </TemplateColumn>
 
+                    @* Emp Id *@
+                    <TemplateColumn Title="Employee Id" SortBy="@(x => x.Email)">
+                        <CellTemplate>
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Outlined.PermIdentity" Size="Size.Small" Color="Color.Secondary" Class="me-2" />
+                                <MudText Typo="Typo.body2">@context.Item.EmployeeId</MudText>
+                            </div>
+                        </CellTemplate>
+                    </TemplateColumn>
+
                     @* Contact Email *@
                     <TemplateColumn Title="Contact Email" SortBy="@(x => x.Email)">
                         <CellTemplate>
@@ -194,16 +204,19 @@
                     </TemplateColumn>
 
                     @* Row Action Indicator *@
-                    <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
-                        <CellTemplate>
-                            <MudTooltip Text="View / Edit Profile">
-                                <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
-                                               Size="Size.Small"
-                                               Color="Color.Default"
-                                               OnClick="@(() => OpenEditStaffModal(context.Item.Id))" />
-                            </MudTooltip>
-                        </CellTemplate>
-                    </TemplateColumn>
+                    @if (!isReport)
+                    {
+                        <TemplateColumn Title="" CellStyle="width: 60px; text-align: right;">
+                            <CellTemplate>
+                                <MudTooltip Text="View / Edit Profile">
+                                    <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
+                                                   Size="Size.Small"
+                                                   Color="Color.Default"
+                                                   OnClick="@(() => OpenEditStaffModal(context.Item.Id))" />
+                                </MudTooltip>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    }
                 </Columns>
 
                 <PagerContent>

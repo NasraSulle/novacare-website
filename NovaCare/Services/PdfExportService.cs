@@ -436,6 +436,10 @@ namespace NovaCare.Services
                 {
                     html.Append("<th class='sn-col'>Sn.</th><th>Medicine Name</th><th>Quantity</th><th>Price</th>");
                 }
+                else if (dto.Data is IEnumerable<VisitDto>)
+                {
+                    html.Append("<th class='sn-col'>Sn.</th><th>Patient</th><th>Patient Type</th><th>Visit Type</th><th>Patient Status</th><th>Registered Date</th>");
+                }
                 else if (dto.Data is IEnumerable<BillItemDto>)
                 {
                     html.Append("<th class='sn-col'>Sn.</th><th>Insurer Code</th><th>Service / Item Description</th><th>Qty</th><th>Unit Price</th><th>Covered %</th><th>Claim Amount</th>");
@@ -454,21 +458,21 @@ namespace NovaCare.Services
                 {
                     foreach (StaffDto staff in staffList)
                     {
-                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td><strong>{staff.FisrtName} {staff.MiddleName} {staff.LastName}</strong></td><td>{staff.EmployeeId}</td><td>{staff.AdministrativeTitleName} / {staff.ClinicalTitleName}</td><td>{staff.StaffStatusName}</td></tr>");
+                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td>{staff.FisrtName} {staff.MiddleName} {staff.LastName}</td><td>{staff.EmployeeId}</td><td>{staff.AdministrativeTitleName} / {staff.ClinicalTitleName}</td><td>{staff.StaffStatusName}</td></tr>");
                     }
                 }
                 else if (dto.Data is IEnumerable<PatientDto> patientList)
                 {
                     foreach (PatientDto patient in patientList)
                     {
-                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td><strong>{patient.FisrtName} {patient.MiddleName} {patient.LastName}</strong></td><td>{patient.PhoneNumber}</td></tr>");
+                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td>{patient.FisrtName} {patient.MiddleName} {patient.LastName}</td><td>{patient.PhoneNumber}</td></tr>");
                     }
                 }
                 else if (dto.Data is IEnumerable<LabTestDto> labList)
                 {
                     foreach (LabTestDto lab in labList)
                     {
-                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td>{lab.DiseaseName}</td><td><strong>{lab.PatientFullName}</strong></td><td>{lab.CreatedDate:yyyy-MM-dd}</td></tr>");
+                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td>{lab.DiseaseName}</td><td>{lab.PatientFullName}</td><td>{lab.CreatedDate:yyyy-MM-dd}</td></tr>");
                     }
                 }
                 else if (dto.Data is IEnumerable<MedicineDto> medList)
@@ -476,6 +480,13 @@ namespace NovaCare.Services
                     foreach (MedicineDto med in medList)
                     {
                         html.Append($@"<tr><td class='sn-col'>{sn++}</td><td>{med.MedicineName}</td><td>{med.MedicineQty}</td><td>${med.SellingPrice:N2}</td></tr>");
+                    }
+                }
+                else if (dto.Data is IEnumerable<VisitDto> visList)
+                {
+                    foreach (VisitDto vis in visList)
+                    {
+                        html.Append($@"<tr><td class='sn-col'>{sn++}</td><td>{vis.PatientFullName}</td><td>{vis.PatientTypeName}</td><td>{vis.VisitTypeName}</td><td>{vis.PatientStatusName}</td><td>{vis.VisitDate}</td></tr>");
                     }
                 }
                 else if (dto.Data is IEnumerable<BillItemDto> claimItems)
@@ -486,7 +497,7 @@ namespace NovaCare.Services
                         totalClaimed += item.InsuranceCoveredAmount;
                         html.Append($@"<tr>
                             <td class='sn-col'>{sn++}</td>
-                            <td><strong>{(string.IsNullOrWhiteSpace(item.InsurerItemCode) ? "-" : item.InsurerItemCode)}</strong></td>
+                            <td>{(string.IsNullOrWhiteSpace(item.InsurerItemCode) ? "-" : item.InsurerItemCode)}</td>
                             <td>{item.ItemName} <small>({item.SourceType})</small></td>
                             <td>{item.Quantity}</td>
                             <td>{item.UnitPrice:N2}</td>

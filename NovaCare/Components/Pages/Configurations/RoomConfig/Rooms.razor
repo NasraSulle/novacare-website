@@ -227,7 +227,10 @@
         var dialog = await Dialog.ShowAsync<EditRoom>("Room Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        await OnInitializedAsync();
+        if (result != null)
+        {
+            await OnInitializedAsync();
+        }
     }
 
     public async Task Back()
@@ -242,6 +245,9 @@
         var dialog = await Dialog.ShowAsync<NewRoom>("Register New Room", _maxWidth);
         var result = await dialog.Result;
 
-        await OnInitializedAsync();
+        if (result != null)
+        {
+            await OnInitializedAsync();
+        }
     }
 }

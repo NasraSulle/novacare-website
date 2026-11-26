@@ -5,29 +5,29 @@
 <MudGrid Spacing="3">
     <MudItem xs="12">
         @if (isLoading)
-        {
+                {
             <div class="d-flex justify-center align-center py-12">
                 <GlobalLoader />
             </div>
-        }
-        else if (!isLoading && (FilteredMedicines == null || !FilteredMedicines.Any()) && string.IsNullOrWhiteSpace(searchString))
-        {
+                }
+                else if (!isLoading && (FilteredMedicines == null || !FilteredMedicines.Any()) && string.IsNullOrWhiteSpace(searchString))
+                {
             <MudPaper Elevation="0" Class="pa-6 border rounded-lg text-center" Style="background-color: rgba(63,81,181,0.02);">
                 <div class="d-flex flex-column flex-sm-row justify-space-between align-center mb-4 gap-2">
                     <MudText Typo="Typo.h6">@($"{Genre} {(string.IsNullOrWhiteSpace(FilterBy) ? "" : $"- {FilterBy}")}")</MudText>
-                    @if (CurrentUser != null && CurrentUser.IsCreateNewMedicine && !isReport)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
-                            Add Medicine
-                        </MudButton>
-                    }
+@if (CurrentUser != null && CurrentUser.IsCreateNewMedicine && !isReport)
+                        {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenRegisterModal" Style="text-transform:none;">
+                    Add Medicine
+                </MudButton>
+                        }
                 </div>
                 <NoDataNotice NoDataMessage="@messageMedicine" />
             </MudPaper>
-        }
-        else if (FilteredMedicines != null)
-        {
-            @* Inventory Summary Metric Strip *@
+                }
+                else if (FilteredMedicines != null)
+                {
+@* Inventory Summary Metric Strip *@
             <MudGrid Spacing="2" Class="mb-4">
                 <MudItem xs="12" sm="4">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
@@ -68,7 +68,7 @@
                 </MudItem>
             </MudGrid>
 
-            @* Medicines Data Grid *@
+@* Medicines Data Grid *@
             <MudDataGrid Loading="@isSearchLoading"
                          Hover="true"
                          Elevation="0"
@@ -80,7 +80,7 @@
                          Bordered="false"
                          Dense="true"
                          RowStyle="cursor: pointer;"
-                         RowClick="@((args) => PreviewMedicineProfile(args.Item))">
+                         RowClick="@((args) => {if(!isReport)PreviewMedicineProfile(args.Item);})">
                 <ToolBarContent>
                     <div class="d-flex flex-column flex-md-row justify-space-between align-stretch align-md-center w-100 gap-2 py-2">
                         <div class="d-flex align-center gap-2">
@@ -195,16 +195,19 @@
                     </TemplateColumn>
 
                     @* Row Action *@
+                    @if (!isReport)
+                    {
                     <TemplateColumn Title="" CellStyle="width: 56px; text-align: right;">
                         <CellTemplate>
                             <MudTooltip Text="View / Edit Medicine">
                                 <MudIconButton Icon="@Icons.Material.Outlined.MoreVert"
                                                Size="Size.Small"
                                                Color="Color.Default"
-                                               OnClick="@(() => PreviewMedicineProfile(context.Item))" />
+                                                   OnClick="@(() => PreviewMedicineProfile(context.Item))" />
                             </MudTooltip>
                         </CellTemplate>
                     </TemplateColumn>
+                    }
                 </Columns>
 
                 <PagerContent>

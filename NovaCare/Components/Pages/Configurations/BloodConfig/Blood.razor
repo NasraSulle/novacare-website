@@ -204,7 +204,7 @@
         var dialog = await Dialog.ShowAsync<EditBlood>("Blood Details", Parameters, _maxWidth);
         var result = await dialog.Result;
 
-        if (result != null && !result.Canceled)
+        if (result != null)
         {
             await OnInitializedAsync();
         }
