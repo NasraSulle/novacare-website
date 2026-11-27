@@ -89,7 +89,7 @@ namespace NovaCare.Data
 
             builder.Entity<PaymentStatus>().HasData(
                 new PaymentStatus { Id = 1, PaymentStatusName = "Unpaid" },
-                new PaymentStatus { Id = 2, PaymentStatusName = "Partial Payment" },
+                new PaymentStatus { Id = 2, PaymentStatusName = "Partial Payment" }, // I do not want to use this for now
                 new PaymentStatus { Id = 3, PaymentStatusName = "Paid" },
                 new PaymentStatus { Id = 4, PaymentStatusName = "Insurance Review" }
             );

@@ -16,12 +16,11 @@
 @attribute [Authorize]
 <PageTitle>Reports - NovaCare</PageTitle>
 
-<MudGrid Class="pa-3" Justify="Justify.FlexStart">
+<MudGrid Class="pa-3 px-6" Justify="Justify.FlexStart">
     <SectionTitle Icon="@icon" Title="@title" />
 </MudGrid>
-<MudGrid Justify="Justify.Center" Class="pa-0">
-    @* <MudItem md="12" xs="12" Class="border-5 border-top-0 border-start-0 border-end-0 pb-6 ms-6 ps-10 pt-3 pe-3" Style="border:solid rgba(22,35,104,1);"> *@
-    <MudItem md="12" xs="12" Class="border-5 border-top-0 border-start-0 border-end-0 pb-6 ms-6 ps-10 pt-3 pe-3" Style="border:solid rgba(63,81,181,1);">
+<MudGrid Justify="Justify.Center" Class="pa-0 px-2">
+    <MudItem md="12" xs="12" Class="border-1 border-top-0 border-start-0 border-end-0 pb-6 ms-6 ps-10 pt-3 pe-3 border-secondary-subtle">
         <MudGrid>
             <MudItem md="4" Class="ps-0">
                 <MudSelect For="@(() => reportType)"
@@ -47,7 +46,6 @@
             </MudItem>
         </MudGrid>
     </MudItem>
-
     @if (IsEmpty)
     {
         <MudItem md="12" Class="ms-6 mt-3 me-3">
@@ -56,27 +54,29 @@
     }
     else
     {
-        <MudItem md="12" Class=" ms-6 mt-3 me-3">
-            @if (allStaffs.Data != null && allStaffs.Data.Any())
-            {
-                <Staffs fromDate="fromDate" toDate="toDate" isReport="true" CurrentUser="currentUser" allStaffs="allStaffs.Data" />
-            }
-            else if (allPatients.Data != null && allPatients.Data.Any())
-            {
-                <Patients allPatients="allPatients.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
-            }
-            else if (allLabTests.Data != null && allLabTests.Data.Any())
-            {
-                <LabTests allLabTests="allLabTests.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
-            }
-            else if (allMedicines.Data != null && allMedicines.Data.Any())
-            {
-                <Medicines allMedicines="allMedicines.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
-            }
-            else if (allVisits.Data != null && allVisits.Data.Any())
-            {
-                <VisitReports AllVisits="allVisits.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
-            }
+        <MudItem md="12" Class=" ms-3 me-3">
+            <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden pa-6" Style="background-color: rgba(246,246,246,1) !important;">
+                @if (allStaffs.Data != null && allStaffs.Data.Any())
+                {
+                    <Staffs fromDate="fromDate" toDate="toDate" isReport="true" CurrentUser="currentUser" allStaffs="allStaffs.Data" />
+                }
+                else if (allPatients.Data != null && allPatients.Data.Any())
+                {
+                    <Patients allPatients="allPatients.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
+                }
+                else if (allLabTests.Data != null && allLabTests.Data.Any())
+                {
+                    <LabTests allLabTests="allLabTests.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
+                }
+                else if (allMedicines.Data != null && allMedicines.Data.Any())
+                {
+                    <Medicines allMedicines="allMedicines.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
+                }
+                else if (allVisits.Data != null && allVisits.Data.Any())
+                {
+                    <VisitReports AllVisits="allVisits.Data" fromDate="fromDate" toDate="toDate" CurrentUser="currentUser" isReport="true" />
+                }
+            </MudPaper>
         </MudItem>
 
         @if (!string.IsNullOrWhiteSpace(pdfBase64))

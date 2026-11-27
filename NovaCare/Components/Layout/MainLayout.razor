@@ -12,7 +12,7 @@
             </MudDrawer>
             
             @* <MudAppBar Elevation="1" Color="@(darkMode ? Color.Default : Color.Transparent)"> rgba(246,246,246,1) || rgba(22,35,104,0.1) *@
-            <MudAppBar Elevation="1" Color="@(darkMode ? Color.Default : Color.Transparent)" Style="background-color: #E8E9F0  !important;">
+            <MudAppBar Elevation="0" Class="border-1 border-top border-start border-end border-secondary-subtle" Color="@(darkMode ? Color.Default : Color.Transparent)" Style="background-color: #ffffff  !important;">
                 <MudStaticNavDrawerToggle DrawerId="nav-drawer" @bind-Open="_drawerOpen" Icon="@Icons.Material.Filled.Menu" Color="Color.Default" Edge="Edge.Start" />
                 <MudText Typo="Typo.h5" Class="ml-3">NovaCare</MudText>
                 <MudSpacer />
@@ -20,8 +20,8 @@
                 @* <Themer /> *@
             </MudAppBar>
 
-            <MudMainContent Class="pt-16" Style="background-color:rgba(22,35,104,0.1); min-height: 100vh;">
-            @* <MudMainContent Class="pt-16"> *@
+            <MudMainContent Class="pt-16" Style="background-color:rgb(239, 241, 240); min-height: 100vh;">
+                @* <MudMainContent Class="pt-16"> rgb(239, 241, 240) || mine rgba(22,35,104,0.1)*@
                 @Body
             </MudMainContent>
         </MudLayout>

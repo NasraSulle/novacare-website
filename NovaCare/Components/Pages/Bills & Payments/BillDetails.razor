@@ -64,7 +64,6 @@
                                                         <MudText Typo="Typo.subtitle2">Billing Items & Coverage Breakdown</MudText>
                                                         <MudIcon Size="Size.Medium" Color="Color.Warning" Icon="@Icons.Material.Outlined.MonetizationOn" title="Print invoice PDF" />
                                                     </MudItem>
-
                                                     @if (billItems.Any())
                                                     {
                                                         <MudItem md="12" sm="12">
@@ -106,15 +105,20 @@
                                                                         <td>@row.Quantity</td>
                                                                         <td class="text-success">@row.InsuranceCoveredAmount.ToString("N2") (@row.InsuranceCoveragePercent.ToString("0")%)</td>
                                                                         <td class="fw-bold">@row.PatientPayableAmount.ToString("N2")</td>
-                                                                        <td></td>
+                                                                        <td>
+                                                                            @if (!((CurrentBill.PaymentStatusId == 3) && (CurrentBill.PaymentModeId == 1)))
+                                                                            {
+                                                                                <MudIconButton OnClick="@(() => RemoveItemFromBill(row))" Icon="@Icons.Material.Outlined.Delete" Color="Color.Error" />
+                                                                            }
+                                                                        </td>
                                                                     </tr>
                                                                 }
                                                             </tbody>
                                                             <tfoot class="sticky-bottom bg-white">
                                                                 <tr style="background-color: rgba(63,81,181,0.08);">
-                                                                    <th colspan="3">Totals (@billItemsToInvoice.Sum(bi => bi.SubTotal).ToString("N2"))</th>
-                                                                    <th class="text-success">@billItemsToInvoice.Sum(bi => bi.InsuranceCoveredAmount).ToString("N2")</th>
-                                                                    <th>@billItemsToInvoice.Sum(bi => bi.PatientPayableAmount).ToString("N2")</th>
+                                                                    <th class="fw-bold text-end" colspan="3">Total </th>
+                                                                    <th class="fw-bold text-success">@billItemsToInvoice.Sum(bi => bi.InsuranceCoveredAmount).ToString("N2")</th>
+                                                                    <th class="fw-bold">@billItemsToInvoice.Sum(bi => bi.PatientPayableAmount).ToString("N2")</th>
                                                                     <th></th>
                                                                 </tr>
                                                             </tfoot>
@@ -125,7 +129,7 @@
                                         </MudItem>
                                     </MudGrid>
                                 </MudItem>
-                                                                <!-- RIGHT SIDEBAR: LIVE SPLIT SUMMARY & PAYMENT PLAN -->
+                                <!-- RIGHT SIDEBAR: LIVE SPLIT SUMMARY & PAYMENT PLAN -->
                                 <MudItem md="3" xs="12">
                                     <MudGrid Spacing="1">
                                         <MudItem xs="12">
@@ -743,7 +747,6 @@
     {
         if (CurrentBill.Id > 0)
         {
-            // Load full bill with BillItems, Payments & Split Totals
             CurrentBill = await paymentService.GetBillByIdAsync(CurrentBill.Id);
             billItemsToInvoice = CurrentBill.BillItems.ToList();
             CurrentPayment.BillId = CurrentBill.Id;
@@ -761,6 +764,8 @@
                     Qty = bi.Quantity,
                     SubTotal = bi.SubTotal
                 }).ToList();
+
+            await RetrieveActiveVisitItemsForCurrentBillAsync();
         }
     }
 
@@ -875,6 +880,134 @@
                 UnitPrice = presc.UnitPrice
             });
         }
+    }
+
+    public async Task RetrieveActiveVisitItemsForCurrentBillAsync()
+    {
+        patientSearcher = CurrentBill.Visit!.Patient!.PatientCode;
+
+        if (string.IsNullOrWhiteSpace(patientSearcher))
+            return;
+
+        CurrentVisit = await patientService.GetVisitByPCodeOrFullNameAsync(patientSearcher);
+        billItems.Clear();
+
+        if (CurrentVisit == null)
+            return;
+
+        // Pull any unbilled items from this visit
+        foreach (var cons in CurrentVisit.Consultations.Where(bi => bi.BillItemId == null))
+        {
+            billItems.Add(new BillItemDto
+            {
+                ItemName = $"{cons.MedicalDepartmentName} with Dr. {cons.DoctorFullName}",
+                SourceType = "Consultation",
+                SourceItemId = cons.Id,
+                Quantity = 1,
+                UnitPrice = cons.ConsultationCost
+            });
+        }
+
+        foreach (var lab in CurrentVisit.LabTests.Where(bi => bi.BillItemId == null))
+        {
+            billItems.Add(new BillItemDto
+            {
+                ItemName = lab.DiseaseName,
+                SourceType = "LabTest",
+                SourceItemId = lab.Id,
+                Quantity = 1,
+                UnitPrice = lab.LabTestCost
+            });
+        }
+
+        foreach (var treat in CurrentVisit.Treatments.Where(bi => bi.BillItemId == null))
+        {
+            billItems.Add(new BillItemDto
+            {
+                ItemName = $"{treat.TreatmentTypeName}: {treat.SurgeryName} {treat.TherapyName} {treat.WardName}".Trim(),
+                SourceType = "Treatment",
+                SourceItemId = treat.Id,
+                Quantity = treat.TreatmentQty > 0 ? treat.TreatmentQty : 1,
+                UnitPrice = treat.TreatmentCost
+            });
+        }
+
+        foreach (var presc in CurrentVisit.Prescriptions.Where(bi => bi.BillItemId == null))
+        {
+            billItems.Add(new BillItemDto
+            {
+                ItemName = $"{presc.MedicineName} ({presc.Quantity})",
+                SourceType = "Prescription",
+                SourceItemId = presc.Id,
+                Quantity = presc.Quantity > 0 ? presc.Quantity : 1,
+                UnitPrice = presc.UnitPrice
+            });
+        }
+    }
+
+    private async Task RemoveItemFromBill(BillItemDto itemDto)
+    {
+        billItems.Add(itemDto);
+
+        if (CurrentVisit!.LabTests.Any())
+        {
+            foreach (var labTest in CurrentBill.Visit.LabTests)
+            {
+                if (labTest.BillItemId == itemDto.Id)
+                {
+                    labTest.BillItemId = null;
+                    await labTestService.UpdateLabTestAsync(labTest, labTest.Id);
+                }
+            }
+        }
+
+        if (CurrentVisit!.Consultations.Any())
+        {
+            foreach (var consultation in CurrentBill.Visit.Consultations)
+            {
+                if (consultation.BillItemId == itemDto.Id)
+                {
+                    consultation.BillItemId = null;
+                    await patientService.UpdateConsultationAsync(consultation, consultation.Id);
+                }
+            }
+        }
+
+        if (CurrentVisit!.Prescriptions.Any())
+        {
+            foreach (var prescription in CurrentBill.Visit.Prescriptions)
+            {
+                if (prescription.BillItemId == itemDto.Id)
+                {
+                    prescription.BillItemId = null;
+                    await medicineService.UpdatePrescriptionAsync(prescription, prescription.Id);
+                }
+            }
+        }
+
+        if (CurrentVisit!.Treatments.Any())
+        {
+            foreach (var treatment in CurrentBill.Visit.Treatments)
+            {
+                if (treatment.BillItemId == itemDto.Id)
+                {
+                    treatment.BillItemId = null;
+
+                    await medicineService.UpdateTreatmentAsync(treatment, treatment.Id);
+                }
+            }
+        }
+
+        foreach (var item in billItemsToInvoice)
+        {
+            if (item.Id == itemDto.Id)
+                item.BillId = 0;
+        }
+
+        billItemsToInvoice.Remove(itemDto);
+        CurrentBill.BillItems = billItemsToInvoice;
+
+        // await OnSelectedValuesChanged(billItemsToInvoice);
     }
 
     private async Task OnSelectedValuesChanged(IReadOnlyCollection<BillItemDto> selectedValues)

@@ -59,6 +59,10 @@ namespace NovaCare.Modals.StaffModals
         public bool CanChooseStaffOfTheWeek { get; set; }
 
 
+        public bool IsSuspended { get; set; }
+        public string Bio { get; set; } = "A strong profile bio introduces who you are, what you do, and who you help in a clear format tailored to your platform";
+
+
         //foreign keys
         [ForeignKey(nameof(StaffStatus))]
         public int StaffStatusId { get; set; }

@@ -38,6 +38,6 @@ namespace NovaCare.Interfaces
         Task<StaffTitleGroupDto> GetStaffTitleGroupIdByNameAsync(string groupName);
         Task<StaffTitleDto> GetStaffTitleIdByNameAsync(string titleName);
         Task<StaffTypeDto> GetStaffTypeIdByNameAsync(string deptName);
-
+        Task<bool> GetStaffSuspensionStatus(string staffEmail);
     }
 }

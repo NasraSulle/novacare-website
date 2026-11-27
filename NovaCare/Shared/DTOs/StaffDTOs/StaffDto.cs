@@ -55,6 +55,9 @@ namespace NovaCare.Shared.DTOs.StaffDTOs
         public bool IsStaffOfTTheWeek { get; set; }
         public bool CanChooseStaffOfTheWeek { get; set; }
 
+        public bool IsSuspended { get; set; }
+        public string Bio { get; set; } = "A strong profile bio introduces who you are, what you do, and who you help in a clear format tailored to your platform";
+
 
         //foreign keys
         public int StaffStatusId { get; set; }

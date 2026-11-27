@@ -15,9 +15,7 @@
     @* Page Header *@
     <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center">
         <SectionTitle Icon="@icon" Title="@title" />
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
-            Manage clinical personnel, roles, and availability status
-        </MudText>
+        <Briefer BriferNote="@briferNote" />
     </div>
 
     @* Main Elevated Card Container *@
@@ -75,6 +73,7 @@
 
     public string icon = Icons.Material.Filled.People;
     public string title = "Staff Directory";
+    string briferNote = "Manage clinical personnel, roles, and availability status";
 
     protected override async Task OnInitializedAsync()
     {

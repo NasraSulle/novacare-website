@@ -271,7 +271,7 @@
 .relative-tile {
     border: 1px solid white !important;
     color: white !important;
-    background-color: transparent !important;
+    /*background-color: transparent !important;*/
     border-radius: 8px !important;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     position: relative;
@@ -345,10 +345,10 @@
 }
 
 /* Metric & Chart Cards */
-.metric-card-wrapper {
+/*.metric-card-wrapper {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     border-radius: 5px;
-}
+}*/
 
     .metric-card-wrapper:hover {
         transform: translateY(-4px);
@@ -361,8 +361,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    /*background-color: #ffffff;*/
-    background-color:transparent !important;
+    background-color: #ffffff;
+    /*background-color:transparent !important;*/
     border: 1px solid var(--mud-palette-lines-default);
     border-radius: 5px;
     overflow: hidden;
@@ -376,7 +376,8 @@
 
     color: white !important;
     position: relative;
-    background: linear-gradient(0deg, rgba(22,35,104,1) 0%, rgba(63,81,181,1) 100%) !important;
+    background: linear-gradient(to left, rgba(22,35,104,1) 0%, rgba(63,81,181,1) 100%) !important;
+    /*background: linear-gradient(to right, rgba(63,81,181,1), rgba(0, 123, 255, 0)) !important;*/
     /* border: 1px solid var(--mud-palette-lines-default); */
     border-radius: 5px;
     overflow: hidden;
@@ -423,7 +424,7 @@
     border-radius: 5px;
     border: 1px solid var(--mud-palette-lines-default);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    background-color:transparent;
+    /*background-color:transparent;*/
 }
 
     .surface-card:hover {

@@ -15,9 +15,7 @@
     @* Page Header *@
     <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center">
         <SectionTitle Icon="@icon" Title="@title" />
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
-            Track diagnostic requests, pending lab work, and completed test reports
-        </MudText>
+        <Briefer BriferNote="@briferNote" />
     </div>
 
     @* Main Elevated Card Container *@
@@ -47,6 +45,7 @@
     StaffDto currentUser = new();
     public string icon = Icons.Material.Filled.Biotech;
     public string title = "Laboratory Tests";
+    string briferNote = "Track diagnostic requests, pending lab work, and completed test reports";
 
     protected override async Task OnInitializedAsync()
     {

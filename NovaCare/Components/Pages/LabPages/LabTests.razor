@@ -26,7 +26,7 @@
                 <MudItem xs="12" sm="4">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-primary);">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total @firstPart Tests</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Primary" Style="text-transform:uppercase; letter-spacing:0.5px;">Total @firstPart Tests</MudText>
                             <MudText Typo="Typo.h5" Style="font-weight:700;">@FilteredLabTests.Count</MudText>
                         </div>
                         <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">
@@ -37,8 +37,8 @@
                 <MudItem xs="6" sm="4">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-warning);">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Pending / New</MudText>
-                            <MudText Typo="Typo.h5" Color="Color.Warning" Style="font-weight:700;">
+                            <MudText Typo="Typo.caption" Color="Color.Warning" Style="text-transform:uppercase; letter-spacing:0.5px;">Pending / New</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">
                                 @FilteredLabTests.Count(x => string.Equals(x.LabTestStatusName, "New", StringComparison.OrdinalIgnoreCase))
                             </MudText>
                         </div>
@@ -50,8 +50,8 @@
                 <MudItem xs="6" sm="4">
                     <MudPaper Elevation="0" Outlined="true" Class="pa-3 rounded-lg d-flex align-center justify-space-between bg-transparent" Style="border-left: 4px solid var(--mud-palette-success);">
                         <div>
-                            <MudText Typo="Typo.caption" Color="Color.Secondary" Style="text-transform:uppercase; letter-spacing:0.5px;">Completed / Updated</MudText>
-                            <MudText Typo="Typo.h5" Color="Color.Success" Style="font-weight:700;">
+                            <MudText Typo="Typo.caption" Color="Color.Success" Style="text-transform:uppercase; letter-spacing:0.5px;">Completed / Updated</MudText>
+                            <MudText Typo="Typo.h5" Style="font-weight:700;">
                                 @FilteredLabTests.Count(x => !string.Equals(x.LabTestStatusName, "New", StringComparison.OrdinalIgnoreCase))
                             </MudText>
                         </div>
@@ -61,7 +61,6 @@
                     </MudPaper>
                 </MudItem>
             </MudGrid>
-
             @* Main Lab Tests Data Table *@
             <MudDataGrid Loading="@isSearchLoading"
                          Hover="true"

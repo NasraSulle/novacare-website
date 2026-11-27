@@ -14,17 +14,15 @@
     @* Page Header *@
     <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center">
         <SectionTitle Icon="@icon" Title="@title" />
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
-            Manage patient records, admissions, triage vitals, and consultations
-        </MudText>
+        <Briefer BriferNote="@briferNote" />
     </div>
 
     @* Primary Category Tabs + Sub-Filter Tabs TabPanelsClass="pa-3 pa-sm-6"*@
     <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden" Style="background-color: rgba(246,246,246,1) !important;">
         <MudTabs Elevation="0"
                  Rounded="false" Border="true"
-                 TabHeaderClass="bg-transparent"
-                 Position="Position.Start"
+                 TabHeaderClass="bg-secondary-subtle"
+                 Position="Position.Top"
                  SliderColor="Color.Primary"
                  Centered="false">
             <MudTabPanel Text="All Patients" Icon="@Icons.Material.Outlined.People" Style="text-transform: none; font-weight: 500;" OnClick="@(() => SetGenre("All Patients"))">
@@ -56,6 +54,7 @@
     public string icon = Icons.Material.Filled.AssistWalker;
     public string title = "Patients Directory";
     public string patientGenre = "All Patients";
+    string briferNote = "Manage patient records, admissions, triage vitals, and consultations";
 
     protected override async Task OnInitializedAsync()
     {
@@ -74,7 +73,7 @@
             <MudTabs Elevation="0"
                      Rounded="false"
                      ApplyEffectsToContainer="true"
-                     TabHeaderClass="bg-secondary-subtle"
+                     TabHeaderClass="bg-primary-subtle"
                      SliderColor="Color.Error"
                      TabPanelsClass="pa-3 pa-sm-6 w-100"
                      Centered="false">

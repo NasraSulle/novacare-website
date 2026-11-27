@@ -891,9 +891,11 @@ namespace NovaCare.Services
                 if (dto.BillItems != null)
                 {
                     // Add any newly added items (Id == 0) with automatic tariff/coverage calculation
-                    foreach (var biDto in dto.BillItems.Where(i => i.Id == 0))
+                    //foreach (var biDto in dto.BillItems.Where(i => i.Id == 0))
+                    extBill.BillItems.Clear();
+
+                    foreach (var biDto in dto.BillItems)
                     {
-                        //await CalculateItemInternalAsync(context, biDto, extBill.PaymentModeId, extBill.PatientInsuaranceId);
                         await CalculateItemInternalAsync(biDto, extBill.PaymentModeId, extBill.PatientInsuaranceId);
 
                         extBill.BillItems.Add(new BillItem

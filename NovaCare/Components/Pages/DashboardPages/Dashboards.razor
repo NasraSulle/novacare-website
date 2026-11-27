@@ -210,26 +210,18 @@
 
     <!-- Top Metrics Row -->
     <MudItem xs="12">
-        <MudGrid Spacing="3">
+        <MudGrid Spacing="4">
             <MudItem xs="12" sm="6" md="3">
-                <div class="metric-card-wrapper">
                     <TopSummary DataCount="@allStaffs.Count" Title="Our Staff" Icon="@Icons.Material.Filled.People" AccentColor="Color.Primary" Bg="background: linear-gradient(0deg, rgba(22,35,104,1) 0%, rgba(22,35,104,0.5) 100%) !important;" />
-                </div>
             </MudItem>
             <MudItem xs="12" sm="6" md="3">
-                <div class="metric-card-wrapper">
                     <TopSummary DataCount="@allPatients.Count" Title="Patients" Icon="@Icons.Material.Filled.AssistWalker" Bg="background: linear-gradient(0deg, rgba(242,7,7,1) 0%, rgba(242,7,7,0.5) 100%) !important;" AccentColor="Color.Info" />
-                </div>
             </MudItem>
             <MudItem xs="12" sm="6" md="3">
-                <div class="metric-card-wrapper">
                     <TopSummary DataCount="@allLabTests.Count" Title="Lab Tests" Icon="@Icons.Material.Filled.Biotech" Bg="background: linear-gradient(0deg, rgba(244,130,8,1) 0%, rgba(244,130,8,0.5) 100%) !important;" AccentColor="Color.Warning" />
-                </div>
             </MudItem>
             <MudItem xs="12" sm="6" md="3">
-                <div class="metric-card-wrapper">
                     <TopSummary DataCount="@allMedicines.Count" Title="Medicine Inventory" Icon="@Icons.Material.Filled.LocalPharmacy" Bg="background: linear-gradient(0deg, green 0%, lightgreen 100%) !important;" AccentColor="Color.Success" />
-                </div>
             </MudItem>
         </MudGrid>
     </MudItem>

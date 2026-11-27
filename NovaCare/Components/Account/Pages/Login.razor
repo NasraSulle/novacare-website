@@ -350,6 +350,18 @@
             return;
         }
 
+
+        if (!string.IsNullOrEmpty(Input.Email))
+        {
+            var isSuspended = await staffService.GetStaffSuspensionStatus(Input.Email);
+
+            if (isSuspended)
+            {
+                errorMessage = "Error: Not Authorized, contact admin!";
+                return;
+            }
+        }
+
         SignInResult result;
         if (!string.IsNullOrEmpty(Input.Passkey?.CredentialJson))
         {

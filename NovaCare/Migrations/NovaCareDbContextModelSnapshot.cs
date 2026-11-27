@@ -2773,6 +2773,10 @@ namespace NovaCare.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
+                    b.Property<string>("Bio")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("CanChooseStaffOfTheWeek")
                         .HasColumnType("bit");
 
@@ -2814,6 +2818,9 @@ namespace NovaCare.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsStaffOfTTheWeek")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSuspended")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsUpdateOrEditLabTest")

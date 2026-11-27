@@ -150,6 +150,7 @@ namespace NovaCare.Services
                     FisrtName = staff.FisrtName,
                     MiddleName = staff.MiddleName,
                     LastName = staff.LastName,
+                    IsSuspended = staff.IsSuspended,
                     StaffPhoto = staff.StaffPhoto,
                     Email = staff.Email ?? string.Empty,
                     EmployeeId = staff.EmployeeId ?? string.Empty,
@@ -180,6 +181,7 @@ namespace NovaCare.Services
                     FisrtName = staff.FisrtName,
                     MiddleName = staff.MiddleName,
                     LastName = staff.LastName,
+                    IsSuspended = staff.IsSuspended,
                     StaffPhoto = staff.StaffPhoto,
                     Email = staff.Email ?? string.Empty,
                     EmployeeId = staff.EmployeeId ?? string.Empty,
@@ -286,13 +288,35 @@ namespace NovaCare.Services
 
                     StaffStatusName = staff.StaffStatus != null ? staff.StaffStatus.StaffStatusName : string.Empty,
                     StaffStatusId = staff.StaffStatusId,
+
+                    IsSuspended = staff.IsSuspended,
+                    Bio = staff.Bio,
+
                 })
                 .FirstOrDefaultAsync( x => x.Id == staffId);
 
             return existingStaff ?? new();
         }
 
-        
+        public async Task<bool> GetStaffSuspensionStatus(string staffEmail)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var existingStaff = await context.Staffs
+                .AsNoTracking()
+                .Where(x => x.Email.ToLower() == staffEmail.ToLower())
+                .Select(staff => new StaffDto
+                {
+                    IsSuspended = staff.IsSuspended,
+
+                })
+                .FirstOrDefaultAsync();
+
+            if(existingStaff != null)
+                return existingStaff.IsSuspended;
+
+            return false;
+        }
+
         public async Task<List<StaffStatusDto>> GetStaffStatusAsync()
         {
             using var context = _contextFactory.CreateDbContext();
@@ -543,6 +567,8 @@ namespace NovaCare.Services
 
 
                     existingStaff.StaffStatusId = staff.StaffStatusId;
+                    existingStaff.IsSuspended = staff.IsSuspended;
+                    existingStaff.Bio = staff.Bio;
 
                     foreach (var extitle in existingStaff.StaffTitles ?? new())
                     {

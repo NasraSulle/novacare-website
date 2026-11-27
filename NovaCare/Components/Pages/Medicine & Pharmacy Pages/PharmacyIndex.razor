@@ -18,9 +18,7 @@
     @* Page Header *@
     <div class="d-flex flex-column flex-sm-row justify-space-between align-start align-sm-center">
         <SectionTitle Icon="@icon" Title="@title" />
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-1 mt-sm-0">
-            Dispense patient prescriptions and manage pharmacy inventory catalog
-        </MudText>
+        <Briefer BriferNote="@briferNote" />
     </div>
 
     @* Main Elevated Card Container *@
@@ -53,4 +51,5 @@
 @code {
     public string icon = Icons.Material.Filled.LocalPharmacy;
     public string title = "Pharmacy Section";
+    string briferNote = "Dispense patient prescriptions and manage pharmacy inventory catalog";
 }

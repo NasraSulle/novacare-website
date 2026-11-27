@@ -10,7 +10,7 @@
 
 <PageTitle>Edit Staff - NovaCare</PageTitle>
 
-<MudDialog Style="background-color: rgba(246,246,246,1) !important;">
+<MudDialog @bind-Visible="isDesignCorner" Style="background-color: rgba(246,246,246,1) !important;">
     <TitleContent>
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
             <MudGrid Justify="Justify.SpaceBetween">
@@ -27,113 +27,240 @@
                 <EditForm Model="CurrentStaff" method="post" OnValidSubmit="UpdateStaff" FormName="register">
                     <MudGrid Spacing="1" Class="pa-3" Style="">
                         <MudGrid Spacing="1">
-                            <MudItem md="12">
-                                <MudText Style="background: linear-gradient(to right, #4e3ee0ff, rgba(0, 123, 255, 0));" Class="p-2 text-white">
+                            @if (isEditStaff)
+                            {
+                                <MudItem md="12" Class="d-flex justify-content-between">
+                                    <MudText Style="background: linear-gradient(to right, #4e3ee0ff, rgba(0, 123, 255, 0));" Class="p-2 text-white col-11">
 
-                                    Personal Information ,Position & Permissions
-                                </MudText>
-                            </MudItem>
+                                        Personal Information ,Position & Permissions
+                                    </MudText>
+                                    <MudIconButton OnClick="@(() => isEditStaff = false)" Icon="@Icons.Material.Filled.ArrowBack" />
+                                </MudItem>
+                            }
 
-                            <MudItem md="12">
-                                <MudPaper Class="" Outlined="true">
-                                    <MudGrid Spacing="1" Class="mt-2" Justify="Justify.Center">
-                                        <MudItem md="2" Style="text-align:center" Class="pt-0">
-                                            <MudElement HtmlTag="div"
-                                                        Class="position-relative d-inline-block"
-                                                        Style="width:190px; height:190px;"
-                                                        @onmouseenter="@(() => isShowCamera = true)"
-                                                        @onmouseleave="@(() => isShowCamera = false)">
+                            <MudItem md="12" Class=" mb-1">
+                                @if(isEditStaff)
+                                {
+                                    <MudPaper Class="" Outlined="true">
+                                        <MudGrid Spacing="1" Class="mt-2" Justify="Justify.Center">
+                                            <MudItem md="2" Style="text-align:center" Class="pt-0">
+                                                <MudElement HtmlTag="div"
+                                                            Class="position-relative d-inline-block"
+                                                            Style="width:190px; height:190px;"
+                                                            @onmouseenter="@(() => isShowCamera = true)"
+                                                            @onmouseleave="@(() => isShowCamera = false)">
 
-                                                @if (CurrentStaff.StaffPhoto == null)
-                                                {
-                                                    <MudImage ObjectFit="ObjectFit.Cover" Height="190" Width="190" Src="Images/dp.png" Alt="Profile Photo" Elevation="25" Class="rounded-2" />
+                                                    @if (CurrentStaff.StaffPhoto == null)
+                                                    {
+                                                        <MudImage ObjectFit="ObjectFit.Cover" Height="190" Width="190" Src="Images/dp.png" Alt="Profile Photo" Elevation="0" Class="rounded-circle ms-2 mt-2" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <MudImage ObjectFit="ObjectFit.Cover" Height="190" Width="190" Src="@( $"data:image/jpeg;base64,{Convert.ToBase64String(CurrentStaff.StaffPhoto)}" )" Alt="Profile Photo" Elevation="0" Class="rounded-2" />
+                                                    }
+
+                                                    @if (isShowCamera)
+                                                    {
+                                                        <MudFileUpload T="IBrowserFile" FilesChanged="ChangePhoto" Class="position-absolute" Style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                                            <CustomContent Context="fileContext">
+                                                                <MudIconButton Color="Color.Dark"
+                                                                               Variant="Variant.Filled"
+                                                                               Size="Size.Large"
+                                                                               Disabled="!isEditStaff"
+                                                                               OnClick="@fileContext.OpenFilePickerAsync"
+                                                                               Icon="@Icons.Material.Filled.PhotoCamera">
+                                                                </MudIconButton>
+                                                            </CustomContent>
+                                                            <SelectedTemplate Context="selectContext" />
+                                                        </MudFileUpload>
+                                                    }
+                                                </MudElement>
+                                            </MudItem>
+                                            <MudItem md="10">
+
+                                                <MudText Typo="Typo.subtitle2">
+                                                    Personal Information
+                                                </MudText>
+                                                <MudGrid Spacing="1" Class="pa-3">
+                                                    <MudItem md="4">
+                                                        <MudStaticTextField For="@(() => CurrentStaff.FisrtName)" @bind-Value="CurrentStaff.FisrtName" Margin="Margin.Dense"
+                                                                            ReadOnly="!isEditStaff"
+                                                                            Label="First Name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="first name"
+                                                                            UserAttributes="@(new() { { "autocomplete", "fisrtname webauthn" }, { "aria-required", "true" } } )" />
+                                                    </MudItem>
+                                                    <MudItem md="4">
+                                                        <MudStaticTextField For="@(() => CurrentStaff.MiddleName)" @bind-Value="CurrentStaff.MiddleName" Margin="Margin.Dense"
+                                                                            ReadOnly="!isEditStaff" Label="Middle Name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="middle name"
+                                                                            UserAttributes="@(new() { { "autocomplete", "middlename" }, { "aria-required", "true" } } )" />
+                                                    </MudItem>
+                                                    <MudItem md="4">
+                                                        <MudStaticTextField For="@(() => CurrentStaff.LastName)" @bind-Value="CurrentStaff.LastName" Margin="Margin.Dense"
+                                                                            ReadOnly="!isEditStaff" Label="Last Name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="last name"
+                                                                            UserAttributes="@(new() { { "autocomplete", "middlename" }, { "aria-required", "true" } } )" />
+                                                    </MudItem>
+                                                    <MudItem md="2">
+                                                        <MudNumericField For="@(() => CurrentStaff.Age)" @bind-Value="CurrentStaff.Age" Margin="Margin.Dense"
+                                                                         ReadOnly="!isEditStaff" Label="Age" Variant="Variant.Outlined" Placeholder="age"
+                                                                         UserAttributes="@(new() { { "autocomplete", "age" }, { "aria-required", "true" } } )" />
+                                                    </MudItem>
+                                                    <MudItem md="2">
+                                                        <MudSelect T="Gender"
+                                                                   For="@(() => CurrentStaff.Gender)"
+                                                                   @bind-Value="CurrentStaff.Gender"
+                                                                   ReadOnly="!isEditStaff" Label="Gender" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                                   UserAttributes="@(new() { { "aria-required", "true" } } )">
+                                                            @foreach (Gender item in Enum.GetValues(typeof(Gender)))
+                                                            {
+                                                                <MudSelectItem T="Gender" Value="@item">@item.ToString()</MudSelectItem>
+                                                            }
+                                                        </MudSelect>
+                                                    </MudItem>
+                                                    <MudItem md="4">
+                                                        <MudStaticTextField For="@(() => CurrentStaff.Email)" @bind-Value="CurrentStaff.Email" Margin="Margin.Dense"
+                                                                            ReadOnly="!isEditStaff" Label="Email Address" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="email"
+                                                                            UserAttributes="@(new() { { "autocomplete", "email webauthn" }, { "aria-required", "true" } } )" />
+                                                    </MudItem>
+                                                    <MudItem md="4">
+                                                        <MudStaticTextField For="@(() => CurrentStaff.PhoneNumber)" @bind-Value="CurrentStaff.PhoneNumber" Margin="Margin.Dense"
+                                                                            ReadOnly="!isEditStaff" Label="Phone Number" Variant="Variant.Outlined" InputType="InputType.Number" Placeholder="phone number"
+                                                                            UserAttributes="@(new() { { "autocomplete", "phonenumber" }, { "aria-required", "true" } } )" />
+                                                    </MudItem>
+                                                    <MudItem md="12">
+                                                        <MudStaticTextField For="@(() => CurrentStaff.Address)" @bind-Value="CurrentStaff.Address" Margin="Margin.Dense"
+                                                                            ReadOnly="!isEditStaff" Label="Home Address" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="address"
+                                                                            UserAttributes="@(new() { { "autocomplete", "middlename" }, { "aria-required", "true" } } )" />
+                                                    </MudItem>
+                                                </MudGrid>
+                                            </MudItem>
+                                        </MudGrid>
+                                    </MudPaper>
+                                }
+                                else
+                                {
+                                <MudPaper Elevation="0" Outlined="true" Class="overflow-hidden rounded-1 border border-solid mud-border-lines-default">
+                                    @* Decorative Top Cover Banner *@
+                                        <div style="height: 95px; background: linear-gradient(to left, #4e3ee0ff, rgba(78, 62, 224, 0.5)); position: relative;">
+                                        @if (CurrentUser.IsUpdateOrEditStaff)
+                                        {
+                                            <MudTooltip Text="Edit Staff Profile">
+                                                <MudIconButton Icon="@Icons.Material.Rounded.Edit"
+                                                               Color="Color.Surface"
+                                                               Variant="Variant.Filled"
+                                                               Size="Size.Small"
+                                                               Class="position-absolute shadow-sm"
+                                                               Style="top: 16px; right: 16px;"
+                                                               OnClick="@(() => isEditStaff = true)" />
+                                            </MudTooltip>
+                                        }
+                                    </div>
+
+                                    @* Main Profile Content *@
+                                    <div class="px-6 pb-6">
+                                        <MudGrid Spacing="3" Justify="Justify.FlexEnd">
+
+                                            @* Overlapping Avatar with Frosted Hover Upload *@
+                                            <MudItem xs="12" sm="12" Class="d-flex justify-center justify-sm-start" Style="margin-top: -65px;">
+                                                <MudElement HtmlTag="div"
+                                                            Class="position-relative rounded-circle overflow-hidden shadow-lg"
+                                                            Style="width: 145px; height: 145px; border: 4px solid var(--mud-palette-surface); background-color: var(--mud-palette-background-grey);"
+                                                            @onmouseenter="@(() => isShowCamera = true)"
+                                                            @onmouseleave="@(() => isShowCamera = false)">
+
+                                                    <MudImage ObjectFit="ObjectFit.Cover"
+                                                              Height="145"
+                                                              Width="145"
+                                                              Src="@(CurrentStaff.StaffPhoto == null ? "Images/dp.png" : $"data:image/jpeg;base64,{Convert.ToBase64String(CurrentStaff.StaffPhoto)}")"
+                                                              Alt="Profile Photo" />
+
+                                                    @* Smooth Hover Overlay *@
+                                                    @if (isShowCamera)
+                                                    {
+                                                        <div class="position-absolute d-flex align-center justify-center"
+                                                             style="inset: 0; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(2px); transition: all 0.2s ease;">
+                                                            <MudFileUpload T="IBrowserFile" FilesChanged="ChangePhoto">
+                                                                <CustomContent Context="fileContext">
+                                                                    <MudTooltip Text="@(isEditStaff ? "Change Photo" : "Enable edit mode to change photo")">
+                                                                        <MudIconButton Color="Color.Surface"
+                                                                                       Variant="Variant.Filled"
+                                                                                       Size="Size.Medium"
+                                                                                       Disabled="!isEditStaff"
+                                                                                       OnClick="@fileContext.OpenFilePickerAsync"
+                                                                                       Icon="@Icons.Material.Rounded.PhotoCamera" />
+                                                                    </MudTooltip>
+                                                                </CustomContent>
+                                                                <SelectedTemplate Context="selectContext" />
+                                                            </MudFileUpload>
+                                                        </div>
+                                                    }
+                                                </MudElement>
+                                            </MudItem>
+
+                                            @* Staff Name, Badges & Metadata *@
+                                            <MudItem xs="12" sm="12" Class="text-center text-sm-start pt-2 pt-sm-4">
+                                                @{
+                                                    bool isAvailable = string.Equals(CurrentStaff.StaffStatusName, "Available", StringComparison.OrdinalIgnoreCase);
+                                                    bool isSus = CurrentStaff.IsSuspended;
                                                 }
-                                                else
-                                                {
-                                                    <MudImage ObjectFit="ObjectFit.Cover" Height="190" Width="190" Src="@( $"data:image/jpeg;base64,{Convert.ToBase64String(CurrentStaff.StaffPhoto)}" )" Alt="Profile Photo" Elevation="25" Class="rounded-2" />
-                                                }
 
-                                                @if (isShowCamera)
-                                                {
-                                                    <MudFileUpload T="IBrowserFile" FilesChanged="ChangePhoto" Class="position-absolute" Style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                                                        <CustomContent Context="fileContext">
-                                                            <MudIconButton Color="Color.Dark"
-                                                                           Variant="Variant.Filled"
-                                                                           Size="Size.Large"
-                                                                           Disabled="!isEditStaff"
-                                                                           OnClick="@fileContext.OpenFilePickerAsync"
-                                                                           Icon="@Icons.Material.Filled.PhotoCamera">
-                                                            </MudIconButton>
-                                                        </CustomContent>
-                                                        <SelectedTemplate Context="selectContext" />
-                                                    </MudFileUpload>
-                                                }
-                                            </MudElement>
-                                        </MudItem>
-                                        <MudItem md="10">
+                                                @* Name & Status Pills Row *@
+                                                <div class="d-flex flex-wrap align-center justify-center justify-sm-start gap-2 mb-1">
+                                                    <MudText Typo="Typo.h5" Style="font-weight: 700; letter-spacing: -0.3px;">
+                                                        @($"{CurrentStaff.FisrtName} {CurrentStaff.MiddleName} {CurrentStaff.LastName}".Replace("  ", " "))
+                                                    </MudText>
 
-                                            <MudText Typo="Typo.subtitle2">
-                                                Personal Information
-                                            </MudText>
-                                            <MudGrid Spacing="1" Class="pa-3">
-                                                <MudItem md="4">
-                                                    <MudStaticTextField For="@(() => CurrentStaff.FisrtName)" @bind-Value="CurrentStaff.FisrtName" Margin="Margin.Dense"
-                                                                        ReadOnly="!isEditStaff"
-                                                                        Label="First Name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="first name"
-                                                                        UserAttributes="@(new() { { "autocomplete", "fisrtname webauthn" }, { "aria-required", "true" } } )" />
-                                                </MudItem>
-                                                <MudItem md="4">
-                                                    <MudStaticTextField For="@(() => CurrentStaff.MiddleName)" @bind-Value="CurrentStaff.MiddleName" Margin="Margin.Dense"
-                                                                        ReadOnly="!isEditStaff" Label="Middle Name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="middle name"
-                                                                        UserAttributes="@(new() { { "autocomplete", "middlename" }, { "aria-required", "true" } } )" />
-                                                </MudItem>
-                                                <MudItem md="4">
-                                                    <MudStaticTextField For="@(() => CurrentStaff.LastName)" @bind-Value="CurrentStaff.LastName" Margin="Margin.Dense"
-                                                                        ReadOnly="!isEditStaff" Label="Last Name" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="last name"
-                                                                        UserAttributes="@(new() { { "autocomplete", "middlename" }, { "aria-required", "true" } } )" />
-                                                </MudItem>
-                                                <MudItem md="2">
-                                                    <MudNumericField For="@(() => CurrentStaff.Age)" @bind-Value="CurrentStaff.Age" Margin="Margin.Dense"
-                                                                     ReadOnly="!isEditStaff" Label="Age" Variant="Variant.Outlined" Placeholder="age"
-                                                                     UserAttributes="@(new() { { "autocomplete", "age" }, { "aria-required", "true" } } )" />
-                                                </MudItem>
-                                                <MudItem md="2">
-                                                    <MudSelect T="Gender"
-                                                               For="@(() => CurrentStaff.Gender)"
-                                                               @bind-Value="CurrentStaff.Gender"
-                                                               ReadOnly="!isEditStaff" Label="Gender" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                                               UserAttributes="@(new() { { "aria-required", "true" } } )">
-                                                        @foreach (Gender item in Enum.GetValues(typeof(Gender)))
-                                                        {
-                                                            <MudSelectItem T="Gender" Value="@item">@item.ToString()</MudSelectItem>
-                                                        }
-                                                    </MudSelect>
-                                                </MudItem>
-                                                <MudItem md="4">
-                                                    <MudStaticTextField For="@(() => CurrentStaff.Email)" @bind-Value="CurrentStaff.Email" Margin="Margin.Dense"
-                                                                        ReadOnly="!isEditStaff" Label="Email Address" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="email"
-                                                                        UserAttributes="@(new() { { "autocomplete", "email webauthn" }, { "aria-required", "true" } } )" />
-                                                </MudItem>
-                                                <MudItem md="4">
-                                                    <MudStaticTextField For="@(() => CurrentStaff.PhoneNumber)" @bind-Value="CurrentStaff.PhoneNumber" Margin="Margin.Dense"
-                                                                        ReadOnly="!isEditStaff" Label="Phone Number" Variant="Variant.Outlined" InputType="InputType.Number" Placeholder="phone number"
-                                                                        UserAttributes="@(new() { { "autocomplete", "phonenumber" }, { "aria-required", "true" } } )" />
-                                                </MudItem>
-                                                <MudItem md="12">
-                                                    <MudStaticTextField For="@(() => CurrentStaff.Address)" @bind-Value="CurrentStaff.Address" Margin="Margin.Dense"
-                                                                        ReadOnly="!isEditStaff" Label="Home Address" Variant="Variant.Outlined" InputType="InputType.Text" Placeholder="address"
-                                                                        UserAttributes="@(new() { { "autocomplete", "middlename" }, { "aria-required", "true" } } )" />
-                                                </MudItem>
-                                            </MudGrid>
-                                        </MudItem>
-                                    </MudGrid>
+                                                    <MudChip T="string"
+                                                             Color="@(isAvailable ? Color.Success : Color.Error)"
+                                                             Variant="Variant.Text"
+                                                             Size="Size.Small"
+                                                             Icon="@(isAvailable ? Icons.Material.Rounded.CheckCircle : Icons.Material.Rounded.Cancel)"
+                                                             Class="px-2"
+                                                             Style="font-weight: 600; background-color: rgba(var(--mud-palette-success-rgb), 0.1);">
+                                                        @(string.IsNullOrWhiteSpace(CurrentStaff.StaffStatusName) ? "Unknown" : CurrentStaff.StaffStatusName)
+                                                    </MudChip>
+
+                                                    <MudChip T="string"
+                                                             Color="@(isSus ? Color.Warning : Color.Info)"
+                                                             Variant="Variant.Outlined"
+                                                             Size="Size.Small"
+                                                             Icon="@(isSus ? Icons.Material.Rounded.PauseCircle : Icons.Material.Rounded.VerifiedUser)"
+                                                             Style="font-weight: 600;">
+                                                        @(isSus ? "Suspended" : "Active")
+                                                    </MudChip>
+                                                </div>
+
+                                                @* Metadata Row with Subtle Icons *@
+                                                <div class="d-flex flex-wrap align-center justify-center justify-sm-start gap-4 mt-2 mud-text-secondary">
+                                                    <div class="d-flex align-center gap-1">
+                                                        <MudIcon Icon="@Icons.Material.Rounded.Badge" Size="Size.Small" Color="Color.Primary" />
+                                                        <MudText Typo="Typo.body2" Style="font-weight: 600;">
+                                                            ID: @CurrentStaff.EmployeeId
+                                                        </MudText>
+                                                    </div>
+
+                                                    <MudDivider Vertical="true" FlexItem="true" Class="my-1 d-none d-sm-block" />
+
+                                                    <div class="d-flex align-center gap-1">
+                                                        <MudIcon Icon="@Icons.Material.Rounded.PersonOutline" Size="Size.Small" />
+                                                        <MudText Typo="Typo.body2">
+                                                            @($"{CurrentStaff.Age} yrs • {CurrentStaff.Gender}")
+                                                        </MudText>
+                                                    </div>
+                                                </div>
+                                            </MudItem>
+
+                                        </MudGrid>
+                                    </div>
                                 </MudPaper>
+                                }
                             </MudItem>
                         </MudGrid>
 
                         <MudGrid Spacing="1" Justify="Justify.Center">
                             <MudItem md="6">
-                                <MudPaper Class="pa-3" Outlined="true">
+                                <MudPaper Elevation="0" Outlined="true" Class="pa-4 rounded-1">
+                                    @if(isEditStaff)
+                                    {
+                                        
                                     <MudText Typo="Typo.subtitle2">
                                         Staff Position
                                     </MudText>
@@ -239,11 +366,102 @@
                                                                  UserAttributes="@(new() { { "autocomplete", "doctorconsultatioFee" }, { "aria-required", "true" } } )" />
                                             </MudItem>
                                         }
+                                    </MudGrid>                                        
+                                    }
+                                    else
+                                    {
+                                    <MudText Typo="Typo.subtitle2" Style="font-weight: 600;" Class="mb-2">
+                                        Staff Position & Contact
+                                    </MudText>
+
+                                    <MudGrid Spacing="2">
+                                        <MudItem xs="12" sm="6">
+                                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">Administrative Title</MudText>
+                                            <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                @(string.IsNullOrWhiteSpace(CurrentStaff.AdministrativeTitleName) ? "—" : CurrentStaff.AdministrativeTitleName)
+                                            </MudText>
+                                        </MudItem>
+
+                                        <MudItem xs="12" sm="6">
+                                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">Clinical Title</MudText>
+                                            <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                @(string.IsNullOrWhiteSpace(CurrentStaff.ClinicalTitleName) ? "—" : CurrentStaff.ClinicalTitleName)
+                                            </MudText>
+                                        </MudItem>
+
+                                        <MudItem xs="12" sm="6">
+                                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">Email Address</MudText>
+                                            <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                @(string.IsNullOrWhiteSpace(CurrentStaff.Email) ? "—" : CurrentStaff.Email)
+                                            </MudText>
+                                        </MudItem>
+
+                                        <MudItem xs="12" sm="6">
+                                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">Phone Number</MudText>
+                                            <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                @(string.IsNullOrWhiteSpace(CurrentStaff.PhoneNumber) ? "—" : CurrentStaff.PhoneNumber)
+                                            </MudText>
+                                        </MudItem>
+
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">Home Address</MudText>
+                                            <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                @(string.IsNullOrWhiteSpace(CurrentStaff.Address) ? "—" : CurrentStaff.Address)
+                                            </MudText>
+                                        </MudItem>
                                     </MudGrid>
+
+                                    @if (string.Equals(CurrentStaff.ClinicalTitleName, "doctor", StringComparison.OrdinalIgnoreCase) && CurrentDoctor != null)
+                                    {
+                                        <MudDivider Class="my-3" />
+
+                                        <MudText Typo="Typo.subtitle2" Style="font-weight: 600;" Class="mb-2">
+                                            Medical Credentials
+                                        </MudText>
+
+                                        <MudGrid Spacing="2">
+                                            <MudItem xs="12" sm="6">
+                                                <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">Specialization</MudText>
+                                                <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                    @(CurrentDoctor.DoctorType?.DoctorTypeName ?? "—")
+                                                </MudText>
+                                            </MudItem>
+
+                                            <MudItem xs="12" sm="6">
+                                                <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">Doctor Code</MudText>
+                                                <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                    @CurrentDoctor.DoctorCode
+                                                </MudText>
+                                            </MudItem>
+
+                                            <MudItem xs="12" sm="6">
+                                                <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">License ID</MudText>
+                                                <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                    @CurrentDoctor.MedicalLicenseNumber
+                                                </MudText>
+                                            </MudItem>
+
+                                            <MudItem xs="12" sm="6">
+                                                <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">License Expiration</MudText>
+                                                <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                    @CurrentDoctor.LicenceExpDate
+                                                </MudText>
+                                            </MudItem>
+
+                                            <MudItem xs="12" sm="6">
+                                                <MudText Typo="Typo.caption" Class="mud-text-secondary d-block" Style="line-height: 1.2;">Consultation Fee</MudText>
+                                                <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                                    @CurrentDoctor.DoctorConsultationFee
+                                                </MudText>
+                                            </MudItem>
+                                        </MudGrid>
+                                    }
+                                    }
                                 </MudPaper>
+
                             </MudItem>
                             <MudItem md="6">
-                                <MudPaper Class="pa-3" Outlined="true">
+                                <MudPaper Elevation="0" Class="pa-3" Outlined="true">
                                     <MudText Typo="Typo.subtitle2">
                                         @(isEditStaff ? "Granted Permissions" : "Other Information")
                                     </MudText>
@@ -328,7 +546,7 @@
                                                         <MudGrid Spacing="1" Class="overflow-auto" Style="height:255px;">
                                                             <!-- Left Column: Patient Metrics -->
                                                             <MudItem xs="12" md="6">
-                                                                <MudPaper Outlined="true" Class="pa-3 rounded-lg">
+                                                                <MudPaper Outlined="true" Class="pa-3 rounded-lg bg-secondary-subtle">
                                                                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary" Class="mb-2">PATIENT SUMMARY</MudText>
 
                                                                     <div class="d-flex justify-space-between align-center">
@@ -377,7 +595,7 @@
 
                                                             <!-- Right Column: Shift & Availability Cards -->
                                                             <MudItem xs="12" md="6" Class="d-flex flex-column">
-                                                                <MudPaper Outlined="true" Class="pa-4 rounded-lg d-flex align-center justify-space-between" Style="background-color: var(--mud-palette-background-grey);">
+                                                                <MudPaper Outlined="true" Class="pa-4 rounded-lg d-flex align-center justify-space-between mb-3 bg-secondary-subtle" Style="background-color: var(--mud-palette-background-grey);">
                                                                     <div>
                                                                         <MudText Typo="Typo.caption" Color="Color.Secondary">TODAY WORKING HOURS</MudText>
                                                                         <MudText Typo="Typo.h5" Color="Color.Primary" Class="font-weight-bold">8 Hrs</MudText>
@@ -385,7 +603,7 @@
                                                                     <MudIcon Icon="@Icons.Material.Filled.AccessTime" />
                                                                 </MudPaper>
 
-                                                                <MudPaper Outlined="true" Class="pa-4 rounded-lg d-flex align-center justify-space-between" Style="background-color: var(--mud-palette-background-grey);">
+                                                                <MudPaper Outlined="true" Class="pa-4 rounded-lg d-flex align-center justify-space-between bg-secondary-subtle" Style="background-color: var(--mud-palette-background-grey);">
                                                                     <div>
                                                                         <MudText Typo="Typo.caption" Color="Color.Secondary">AVAILABILITY</MudText>
                                                                         <MudText Typo="Typo.subtitle2" Class="font-weight-bold">8:00 AM – 4:00 PM</MudText>
@@ -397,17 +615,17 @@
                                                     </MudTabPanel>
                                                     <MudTabPanel Text="Weekly Schedule" Style="display:flex; flex-wrap: wrap; justify-content:space-evenly;">
                                                         <MudGrid Spacing="1" Justify="Justify.Center" Class="overflow-auto" Style="height:255px;">
-                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-3 rounded-2 mb-2"><MudText>Monday</MudText><MudText>8:00 AM – 4:00 PM</MudText></MudItem>
-                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-3 rounded-2 mb-2"><MudText>Tuesday</MudText><MudText>8:00 AM – 4:00 PM</MudText></MudItem>
-                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-3 rounded-2 mb-2"><MudText>Wednesday</MudText><MudText>8:00 AM – 4:00 PM</MudText></MudItem>
-                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-3 rounded-2 mb-2"><MudText>Thursday</MudText><MudText>8:00 AM – 4:00 PM</MudText></MudItem>
-                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-3 rounded-2 mb-2"><MudText>Friday</MudText><MudText>8:00 AM – 4:00 PM</MudText></MudItem>
-                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-3 rounded-2 mb-2"><MudText>Saturday</MudText><MudText>8:00 AM – 4:00 PM</MudText></MudItem>
-                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-3 rounded-2 mb-2"><MudText>Sunday</MudText><MudText>8:00 AM – 4:00 PM</MudText></MudItem>
+                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-2 rounded-2 mb-2"><MudText Typo="Typo.subtitle2">Monday</MudText><MudText Typo="Typo.caption">8:00 AM – 4:00 PM</MudText></MudItem>
+                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-2 rounded-2 mb-2"><MudText Typo="Typo.subtitle2">Tuesday</MudText><MudText Typo="Typo.caption">8:00 AM – 4:00 PM</MudText></MudItem>
+                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-2 rounded-2 mb-2"><MudText Typo="Typo.subtitle2">Wednesday</MudText><MudText Typo="Typo.caption">8:00 AM – 4:00 PM</MudText></MudItem>
+                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-2 rounded-2 mb-2"><MudText Typo="Typo.subtitle2">Thursday</MudText><MudText Typo="Typo.caption">8:00 AM – 4:00 PM</MudText></MudItem>
+                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-2 rounded-2 mb-2"><MudText Typo="Typo.subtitle2">Friday</MudText><MudText Typo="Typo.caption">8:00 AM – 4:00 PM</MudText></MudItem>
+                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-2 rounded-2 mb-2"><MudText Typo="Typo.subtitle2">Saturday</MudText><MudText Typo="Typo.caption">8:00 AM – 4:00 PM</MudText></MudItem>
+                                                            <MudItem md="12" Style="display:flex; justify-content:space-between; background-color:rgba(0,0,0,0.09)" Class="pa-2 rounded-2 mb-2"><MudText Typo="Typo.subtitle2">Sunday</MudText><MudText Typo="Typo.caption">8:00 AM – 4:00 PM</MudText></MudItem>
                                                         </MudGrid>
                                                     </MudTabPanel>
                                                     <MudTabPanel Text="Archivements" Style="">
-                                                        <MudCard Class="overflow-auto" Style="height:255px;">
+                                                        <MudCard Elevation="0" Outlined="true" Class="overflow-auto bg-secondary-subtle" Style="height:255px;">
                                                             <MudCardContent>
                                                                 <MudText>General Achivement</MudText>
                                                                 <MudText Typo="Typo.body2">Dr. @CurrentStaff.LastName specializes in interventional cardiology with a focus on minimally invasive procedures. She completed her fellowship at Johns Hopkins and has published 24 peer-reviewed papers.</MudText>
@@ -434,15 +652,21 @@
                                     }
                                 </MudItem>
                                 <MudItem md="5" Style="align-content:center; text-align:end">
+                                    @* @if (isEditStaff && CurrentUser.Email.Equals(CurrentStaff.Email, StringComparison.OrdinalIgnoreCase)) *@
                                     @if (isEditStaff)
                                     {
+                                        @if (CurrentStaff.IsSuspended)
+                                        {
+                                            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="@(() => CurrentStaff.IsSuspended = false)" Class="me-1">Activate</MudButton>
+                                        }
+                                        else
+                                        {
+                                            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="@(() => CurrentStaff.IsSuspended = true)" Class="me-1">Suspend</MudButton>
+                                        }
                                         <MudStaticButton Class="" Variant="Variant.Filled" Color="Color.Success" FormAction="FormAction.Submit" Disabled="(string.IsNullOrWhiteSpace(CurrentStaff.FisrtName) || string.IsNullOrWhiteSpace(CurrentStaff.MiddleName) || string.IsNullOrWhiteSpace(CurrentStaff.LastName) || string.IsNullOrWhiteSpace(CurrentStaff.Email))">Save  Staff Details</MudStaticButton>
                                         <MudButton Variant="Variant.Filled" Color="Color.Dark" OnClick="ResetPage" Class="me-1">Reset Page</MudButton>
                                     }
-                                    else if (CurrentUser.IsUpdateOrEditStaff)
-                                    {
-                                        <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => isEditStaff = true)" Class="me-1">Edit Staff Details</MudButton>
-                                    }
+                                    
                                     @if (CurrentUser.CanChooseStaffOfTheWeek)
                                     {
                                         <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="ConfirmAsync" Class="me-1">Award Staff Of The Week</MudButton>
@@ -485,6 +709,7 @@
     bool isShowCamera;
     bool isEditStaff;
     bool isTrue;
+    bool isDesignCorner = true;
 
     protected override async Task OnInitializedAsync()
     {
